@@ -1,23 +1,37 @@
 @echo off & setlocal enableDelayedExpansion
 
-set /a "gravity=1", "hei=wid=100", "objects=4", "tooManyObjects=objects+1"
-set /a "frameRate=9 - (objects - (objects/2) - (objects/4))", "distanceSensitivity=6"
+set /a "gravity=1", "hei=wid=100", "objects=10", "frameRate=1", "distanceSensitivity=6"
+rem generate objects
 for /l %%o in (1,1,%objects%) do (
-	set /a "x[%%o]=!random! %% wid", "y[%%o]=!random! %% hei", "mass[%%o]=1"
+	set /a "x[%%o]=!random! %% wid", "y[%%o]=!random! %% 10", "mass[%%o]=1", "j[%%o]=1", "i[%%o]=1"
 )
 call :init
+rem loop forever, and capture frame count
 for /l %%# in () do ( set /a "frames+=1"
+	rem for all objects
 	for /l %%a in (1,1,%objects%) do (
+		rem every %frameRate% frames do everything within ()
 		2>nul set /a "%every:n=frameRate%" && (
-			2>nul set /a "%every:n=2%" && set /a "!gravityY:#=%%a!"
+			rem gravityY constantly effecting all objects
+			set /a "!gravityY:#=%%a!"
+			rem floating, bouncing off walls or each Other
+			set /a "x[%%a]+=i[%%a]", "y[%%a]+=j[%%a]"
+			rem detect edges
 			2>nul set /a "!HorzEdgeDetection:x=x[%%a]!" && set /a "i[%%a]*=-1", "v_x[%%a]*=-1"
 			2>nul set /a "!VertEdgeDetection:x=y[%%a]!" && set /a "j[%%a]*=-1", "v_y[%%a]*=-1"
-			2>nul set /a "current=%%a", "next=current+1", "!if_Too_Many_Objects!" && set "next=1"
-			set /a "x1=x[!current!]", "x2=x[!next!]", "y1=y[!current!]", "y2=y[!next!]", "distance[%%a]=%getDistance%"
-			2>nul set /a "!ifObjectsAreTouching:x=distance[%%a]!" && set /a "i[!current!]*=-1", "i[!next!]*=-1", "j[!current!]*=-1", "j[!next!]*=-1"
+			rem detect all objects, and if too close, collide and bounce.
+			for /l %%b in (1,1,%objects%) do if %%a neq %%b (
+				2>nul set /a "current=%%a", "next=%%b", "!if_Too_Many_Objects:x=next!" && set "next=1"
+				set /a "x1=x[!current!]", "x2=x[!next!]", "y1=y[!current!]", "y2=y[!next!]", "distNext[%%a][%%b]=%getDistance%"
+				2>nul set /a "!ifObjectsAreTouching:x=distNext[%%a][%%b]!" && set /a "i[!current!]*=-1", "i[!next!]*=-1", "j[!current!]*=-1", "j[!next!]*=-1", "v_y[!current!]*=-1", "v_y[!next!]*=-1", "v_x[!current!]*=-1", "v_x[!next!]*=-1"
+			)
 		)
+		rem draw screen
 		set "screen=!screen!%esc%[!y[%%a]!;!x[%%a]!H!ball:CL=%%a!"
 	)
+	rem every 100 frames, cause disruption to objects. (force them upward)
+	2>nul set /a "%every:n=100%" && for /l %%a in (1,1,%objects%) do set /a "v_y[%%a]=5"
+	rem display everything
 	<nul set /p "=%esc%[?25l%esc%[2J!screen!" & set "screen="
 )
 
@@ -26,7 +40,7 @@ mode %wid%,%hei%
 for /F %%a in ('echo prompt $E^| cmd') do set "ESC=%%a"
 set "getDistance=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 set "ifObjectsAreTouching=1/((~(distanceSensitivity-x)>>31)&1)"
-set "if_Too_Many_Objects=1/(((~(tooManyObjects-next)>>31)&1)&((~(next-tooManyObjects)>>31)&1))"
+set "if_Too_Many_Objects=1/(((~((objects+1)-x)>>31)&1)&((~(x-(objects+1))>>31)&1))"
 set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
 set "HorzEdgeDetection=1/((((x-(wid-3))>>31)&1)^(((3-x)>>31)&1))"
 set "VertEdgeDetection=1/((((x-(hei-3))>>31)&1)^(((3-x)>>31)&1))"
