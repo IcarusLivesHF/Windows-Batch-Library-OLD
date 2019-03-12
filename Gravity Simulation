@@ -1,5 +1,58 @@
 @echo off & setlocal enableDelayedExpansion
 
+set /a "gravity=1", "hei=wid=100", "objects=5", "frameRate=15", "distanceSensitivity=3"
+rem generate objects
+for /l %%o in (1,1,%objects%) do (
+	set /a "x[%%o]=!random! %% wid", "y[%%o]=!random! %% 10", "mass[%%o]=1", "j[%%o]=1", "i[%%o]=1"
+)
+timeout /t 7
+call :init
+rem loop forever, and capture frame count
+for /l %%# in () do ( set /a "frames+=1"
+	rem for all objects
+	for /l %%a in (1,1,%objects%) do (
+		rem every %frameRate% frames do everything within ()
+		2>nul set /a "%every:n=frameRate%" && (
+			rem gravityY constantly effecting all objects
+			set /a "!gravityY:#=%%a!"
+			rem apply forces to X if any are made
+			set /a "!forceX:#=%%a!"
+			rem detect all objects, and if too close, collide and bounce.
+			(for /l %%b in (1,1,%objects%) do if %%a neq %%b (
+				2>nul set /a "next=%%b", "!if_Too_Many_Objects:x=next!" && set "next=1"
+				set /a "x1=x[%%a]", "x2=x[!next!]", "y1=y[%%a]", "y2=y[!next!]", "dist[%%a][%%b]=%getDistance%"
+				2>nul set /a "!ifObjectsAreTouching:x=dist[%%a][%%b]!" && (
+					if !x[%%a]! lss !x2! ( set /a "v_x[%%a]+=1", "v_x[%%b]-=1" ) else ( set /a "v_x[%%a]-=1", "v_x[%%b]+=1" )
+					set /a "v_x[%%a]*=-1", "v_x[!next!]*=-1", "v_y[%%a]*=-1", "v_y[!next!]*=-1"
+				)
+			))
+		)
+		rem detect edges
+		2>nul set /a "!HorzEdgeDetection:x=x[%%a]!" && set /a "i[%%a]*=-1", "v_x[%%a]*=-1"
+		2>nul set /a "!VertEdgeDetection:x=y[%%a]!" && set /a "j[%%a]*=-1", "v_y[%%a]*=-1"
+		if !y[%%a]! geq %hei% set /a "y[%%a]=hei - 3"
+		rem draw screen
+		set "screen=!screen!%esc%[!y[%%a]!;!x[%%a]!H!ball:CL=%%a!"
+	)
+	rem display everything
+	<nul set /p "=%esc%[?25l%esc%[2J!screen!" & set "screen="
+)
+
+:init
+mode %wid%,%hei%
+for /F %%a in ('echo prompt $E^| cmd') do set "ESC=%%a"
+set "getDistance=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
+set "ifObjectsAreTouching=1/((~(distanceSensitivity-x)>>31)&1)"
+set "if_Too_Many_Objects=1/(((~((objects+1)-x)>>31)&1)&((~(x-(objects+1))>>31)&1))"
+set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
+set "HorzEdgeDetection=1/((((x-(wid-3))>>31)&1)^(((3-x)>>31)&1))"
+set "VertEdgeDetection=1/((((x-(hei-3))>>31)&1)^(((3-x)>>31)&1))"
+set "odds=1/((((^!random^!%%100)-x)>>31)&1)"
+set "forceX=v_x[#]+=a_x[#], a_x[#]*=0, x[#]+=v_x[#]"
+set "gravityY=a_y[#]+=(gravity * mass[#]), v_y[#]+=a_y[#], a_y[#]*=0, y[#]+=v_y[#]"
+set "ball=%esc%[38;5;CLm Û%ESC%[1B%ESC%[2DÛ Û%ESC%[1B%ESC%[2DÛ"
+goto :eof@echo off & setlocal enableDelayedExpansion
+
 set /a "gravity=1", "hei=wid=100", "objects=10", "frameRate=1", "distanceSensitivity=6"
 rem generate objects
 for /l %%o in (1,1,%objects%) do (
