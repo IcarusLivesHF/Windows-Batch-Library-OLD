@@ -1,5 +1,5 @@
 :math
-set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, PIx2=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
+set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
 set "sin=(a=(x * 31416 / 180)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
 set "cos=(a=(15708 - x * 31416 / 180)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
@@ -8,7 +8,7 @@ set "cosr=(a=(15708 - x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1
 set "Sqrt(N)=( x=(N)/(11*1024)+40, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2 )"
 set "Sign=1 / (x & 1)"
 set "Abs(x)=(((x)>>31|1)*(x))"
-set "getDistance(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
+set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 set "percentOf(p)=p=x*y/100"
 set "avg=(x&y)+(x^y)/2"
 goto :eof
@@ -19,7 +19,7 @@ set "swap(x,y)=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
 set "inScr=((wid-x-1)>>31)|((hei-y-2)>>31)"
 set "map=m=x2+(y2-x2)*(v-x1)/(y1-x1)"
-set "lerp=?=(a+c*(b-a^)*10^)/1000+a"
+set "lerp=?=(a+c*(b-a)*10)/1000+a"
 set "odds=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
 set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
@@ -29,8 +29,7 @@ set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
 set "infiniteLoop=for /l %%# in () do "
 set "throttle=for /l %%# in (1,?,1000000) do rem"
 set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
-set "withinX=^!random^! %% (wid - (x * 2)) + x"
-set "withinY=^!random^! %% (hei - (x * 2)) + x"
+set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 goto :eof
 :shapes
 set "SQ(x)=x*x"
@@ -71,13 +70,14 @@ goto :eof
 set /a "wid=%~1, hei=%~2"
 mode !wid!,!hei!
 rem "pixel"
-set "pixel=?"
+set "pixel=Û"
 rem newLine
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
 rem ESC
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) & <nul set /p "=!esc![?25l"
+set "batchBook=True"
 goto :eof
 
 :ExtLib
@@ -113,7 +113,7 @@ set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 )) else set args=
 
 rem %RGBplot% x y 0-255 0-255 0-255 CHAR
-set RBGplot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
+set rgbplot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m?!esc![0m"%\n%
 )) else set args=
 
@@ -122,9 +122,26 @@ set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!arg
 	set /a "%%~1+=%%~2, %%3+=%%~4"%\n%
 )) else set args=
 
-rem %lerpRBG% rgb1 rgb2 1-100 <rtn>$r $g $b
-set lerpRBG=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
-	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, %lerp:?=$r%, a=g[%%~1], b=g[%%~2], c=%%~3, %lerp:?=$g%, a=b[%%~1], b=b[%%~2], c=%%~3, %lerp:?=$b%"%\n%
+rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
+set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1,2" %%1 in ("^!args^!") do (%\n%
+		   set /a "%%~1.x=^!random^! %% wid + 1"%\n%
+		   set /a "%%~1.y=^!random^! %% hei + 1"%\n%
+	if /i "%%~2" neq "RAD" (%\n%
+		   set /a "%%~1.t=^!random^! %% 360"%\n%
+	) else set /a "%%~1.t=^!random^! %% TWO_PI"%\n%
+		   set /a "%%~1.m=^!random^! %% 4 + 1"%\n%
+		   set /a "%%~1.i=^!random^! %% 3 + 1"%\n%
+		   set /a "%%~1.j=^!random^! %% 3 + 1"%\n%
+		   set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
+		   set "%%~1.rgb=^!bvr^!;^!bvg^!;^!bvb^!"%\n%
+		   for %%a in (bvr bvg bvb) do set "%%a="%\n%
+)) else set args=
+
+rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
+set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
+	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!"%\n%
+	set /a "a=g[%%~1], b=g[%%~2], c=%%~3, $g=^!lerp^!"%\n%
+	set /a "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
 
 rem %getDistance% x2 x1 y2 y1 <rtnVar>
@@ -154,7 +171,6 @@ set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5 delims=" %%1 in 
     for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "$_low=^!$_low:%%i=%%i^!"%\n%
 )) else set args=
 
-
 rem %memset% var "replacement" "length"
 set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!") do ( for /f "tokens=1,2 delims=+" %%3 in ("%%~0") do (%\n%
 	set /a "$l=%%~4, $k=%%~2", "ep=%%~4+$k" ^& set "$tr=^!%%~3^!" ^& set "$b="%\n%
@@ -165,7 +181,7 @@ set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!
 ))))) else set args=
 
 rem %pow% num pow <rtnVar>
-for /l %%a in (1,1,4095) do set "pb=!pb!x*"
+for /l %%a in (1,1,1095) do set "pb=!pb!x*"
 set pow=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "x=%%~1","$p=%%~2*2-1"%\n%
 	for %%a in (^^!$p^^!) do set /a "%%~3=^!pb:~0,%%a^!"%\n%
@@ -276,7 +292,7 @@ set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m" ))))))%\n%
 	)%\n%
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!RBGplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
+	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
 rem plot_HSV_RGB x y 0-360 0-10000 0-10000
@@ -299,7 +315,7 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m"))))))%\n%
 	)%\n%
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!RBGplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
+	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
 rem %ifAnd% value LO HI RETURNVAR
