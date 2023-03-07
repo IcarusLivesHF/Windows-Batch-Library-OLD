@@ -30,6 +30,7 @@ set "infiniteLoop=for /l %%# in () do "
 set "throttle=for /l %%# in (1,?,1000000) do rem"
 set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
 set "rndBetween=(^!random^! %% (x*2+1) + -x)"
+set "fib=?=c=a+b, a=b, b=c"
 goto :eof
 :shapes
 set "SQ(x)=x*x"
@@ -66,7 +67,15 @@ set "home=DFX=0, DFY=0, DFA=0"
 set "cent=DFX=wid/2, DFY=hei/2"
 set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H?""
 goto :eof
+:mouseMacros
+set "allowMouseClicks=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
+set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
+goto :eof
 :StdLib
+for /f "tokens=4-5 delims=. " %%i in ('ver') do set "VERSION=%%i.%%j"
+if "%version%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
+call :init_setfont
+%setFont% 8 Terminal
 set /a "wid=%~1, hei=%~2"
 mode !wid!,!hei!
 rem "pixel"
@@ -99,6 +108,10 @@ for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc
 for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;255;%%am"
 for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;%%a;255m"
 for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;%%a;0;255m"
+goto :eof
+
+:loadArray
+	set "i=1" & set "array[!i!]=%load:.=" & set /a i+=1 & set "array[!i!]=%"
 goto :eof
 
 :macros
@@ -180,9 +193,9 @@ set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!
 			set "%%~3=^!$tr:~0,%%~e^!^!$b^!^!$tr:~%%~f^!"%\n%
 ))))) else set args=
 
-rem %pow% num pow <rtnVar>
+rem %exp% num pow <rtnVar>
 for /l %%a in (1,1,1095) do set "pb=!pb!x*"
-set pow=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
+set exp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "x=%%~1","$p=%%~2*2-1"%\n%
 	for %%a in (^^!$p^^!) do set /a "%%~3=^!pb:~0,%%a^!"%\n%
 )) else set args=
@@ -399,4 +412,88 @@ set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^
 		)%\n%
 	)%\n%
 )) else set args=
+
 goto :eof
+
+:mouse
+    if exist "%temp%\mouse.exe" call :mouseMacros & goto :eof
+    for %%a in (
+		"TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "AAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5v"
+        "dCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAECAAAAAAAAAAAA"
+        "AAAAAOAADwMLAQYAAAAAAAAAAAAAAAAAQBEAAAAQAAAAIAAAAABAAAAQAAAAAgAA"
+        "BAAAAAAAAAAEAAAAAAAAAFAhAAAAAgAAAAAAAAMAAAAAABAAABAAAAAAEAAAEAAA"
+        "AAAAABAAAAAAAAAAAAAAACAgAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "AAAAAAAAAABcIAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC50ZXh0AAAA"
+        "ABAAAAAQAAAAAgAAAAIAAAAAAAAAAAAAAAAAACAAAGAuZGF0YQAAAFABAAAAIAAA"
+        "UgEAAAAEAAAAAAAAAAAAAAAAAABAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVieWB7AgAAACQjUX6UOgs"
+        "AAAAg8QED79F/lAPv0X8UA+2RfpQuAAgQABQ6IgBAACDxBC4AAAAAOkAAAAAycNV"
+        "ieWB7CQAAACQuPb///9Q6GwBAACJRfy4AAAAAIlF3I1F+FCLRfxQ6FwBAACLRfiD"
+        "yBCD4L+D4N9Qi0X8UOhOAQAAi0XchcAPhAUAAADpnAAAAI1F9FC4AQAAAFCNReBQ"
+        "i0X8UOgvAQAAD7dF4IP4Ag+FcwAAAItF6IP4AbgAAAAAD5TAiUXchcAPhA8AAACL"
+        "RQi5AQAAAIgI6SMAAACLReiD+AK4AAAAAA+UwIlF3IXAD4QKAAAAi0UIuQIAAACI"
+        "CItF3IXAD4QdAAAAi0UIg8ACD79N5GaJCItFCIPAAoPAAg+/TeZmiQjpVP///4tF"
+        "+FCLRfxQ6JUAAADJwwAAAFWJ5YHsFAAAAJC4AAAAAIlF7LgAAAMAULgAAAEAUOh9"
+        "AAAAg8QIuAEAAABQ6HcAAACDxASNRexQuAAAAABQjUX0UI1F+FCNRfxQ6GEAAACD"
+        "xBSLRfRQi0X4UItF/FDoXf7//4PEDIlF8ItF8FDoRgAAAIPEBMnDAP8lXCBAAAAA"
+        "/yV0IEAAAAD/JXggQAAAAP8lfCBAAAAA/yWAIEAAAAD/JWAgQAAAAP8lZCBAAAAA"
+        "/yVoIEAAAAD/JWwgQAAAACVkICVkICVkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "iCAAAAAAAAAAAAAAtCAAAFwgAACgIAAAAAAAAAAAAAD9IAAAdCAAAAAAAAAAAAAA"
+        "AAAAAAAAAAAAAAAAvyAAAMggAADVIAAA5iAAAPYgAAAAAAAACiEAABkhAAAqIQAA"
+        "OyEAAAAAAAC/IAAAyCAAANUgAADmIAAA9iAAAAAAAAAKIQAAGSEAACohAAA7IQAA"
+        "AAAAAG1zdmNydC5kbGwAAABwcmludGYAAABfY29udHJvbGZwAAAAX19zZXRfYXBw"
+        "X3R5cGUAAABfX2dldG1haW5hcmdzAAAAZXhpdABrZXJuZWwzMi5kbGwAAABHZXRT"
+        "dGRIYW5kbGUAAABHZXRDb25zb2xlTW9kZQAAAFNldENvbnNvbGVNb2RlAAAAUmVh"
+        "ZENvbnNvbGVJbnB1dEEAAAAA"
+) do echo %%~a>>cMouse.txt
+certutil -decode cMouse.txt %temp%\mouse.exe
+del /f /q cmouse.txt
+call :mouseMacros
+goto :eof
+
+:init_setfont
+:: - BRIEF -
+::  Get or set the console font size and font name.
+:: - SYNTAX -
+::  %setfont% [fontSize [fontName]]
+::    fontSize   Size of the font. (Can be 0 to preserve the size.)
+::    fontName   Name of the font. (Can be omitted to preserve the name.)
+:: - EXAMPLES -
+::  Output the current console font size and font name:
+::    %setfont%
+::  Set the console font size to 14 and the font name to Lucida Console:
+::    %setfont% 14 Lucida Console
+setlocal DisableDelayedExpansion
+set setfont=for /l %%# in (1 1 2) do if %%#==2 (^
+%=% for /f "tokens=1,2*" %%- in ("? ^^!arg^^!") do endlocal^&powershell.exe -nop -ep Bypass -c ^"Add-Type '^
+%===% using System;^
+%===% using System.Runtime.InteropServices;^
+%===% [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)] public struct FontInfo{^
+%=====% public int objSize;^
+%=====% public int nFont;^
+%=====% public short fontSizeX;^
+%=====% public short fontSizeY;^
+%=====% public int fontFamily;^
+%=====% public int fontWeight;^
+%=====% [MarshalAs(UnmanagedType.ByValTStr,SizeConst=32)] public string faceName;}^
+%===% public class WApi{^
+%=====% [DllImport(\"kernel32.dll\")] public static extern IntPtr CreateFile(string name,int acc,int share,IntPtr sec,int how,int flags,IntPtr tmplt);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void GetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void SetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void CloseHandle(IntPtr handle);}';^
+%=% $hOut=[WApi]::CreateFile('CONOUT$',-1073741824,2,[IntPtr]::Zero,3,0,[IntPtr]::Zero);^
+%=% $fInf=New-Object FontInfo;^
+%=% $fInf.objSize=84;^
+%=% [WApi]::GetCurrentConsoleFontEx($hOut,0,[ref]$fInf);^
+%=% If('%%~.'){^
+%===% $fInf.nFont=0; $fInf.fontSizeX=0; $fInf.fontFamily=0; $fInf.fontWeight=0;^
+%===% If([Int16]'%%~.' -gt 0){$fInf.fontSizeY=[Int16]'%%~.'}^
+%===% If('%%~/'){$fInf.faceName='%%~/'}^
+%===% [WApi]::SetCurrentConsoleFontEx($hOut,0,[ref]$fInf);}^
+%=% Else{(''+$fInf.fontSizeY+' '+$fInf.faceName)}^
+%=% [WApi]::CloseHandle($hOut);^") else setlocal EnableDelayedExpansion^&set arg=
+endlocal &set "setfont=%setfont%"
+if !!# neq # set "setfont=%setfont:^^!=!%"
+exit /b
