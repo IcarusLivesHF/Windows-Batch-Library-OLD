@@ -1,3 +1,4 @@
+(call :buildSketch) & exit
 :math
 set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
@@ -413,6 +414,21 @@ set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^
 	)%\n%
 )) else set args=
 
+goto :eof
+
+:buildSketch
+if exist Sketch.bat goto :eof
+for %%i in (
+	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbg0KDQpz"
+	"ZXQgICJvcGVuTGliPSggc2V0ICJfYz0/IiAmIHJlbiAiJX5ueDAiIF9vLmJhdCAm"
+	"IHJlbiAiPy5iYXQiICIlfm54MCIiDQpzZXQgImNsb3NlTGliPXJlbiAiJX5ueDAi"
+	"ICJeXiFfY15eIS5iYXQiICYgcmVuIF9vLmJhdCAiJX5ueDAiICkiDQolb3Blbkxp"
+	"Yjo/PUxpYnJhcnklDQoJY2FsbCA6U3RkTGliIDIzNSA5NQ0KJWNsb3NlTGliJSAg"
+	"JiYgKCBjbHMgJiBnb3RvIDpzZXR1cCkgfHwgKCBFY2hvIFNvbWV0aGluZyB3ZW50"
+	"IHdyb25nLi4gJiBwYXVzZSAmIGV4aXQgKQ0KOnNldHVwDQpwYXVzZQ=="
+) do echo %%~i>>"encodedSketch.txt"
+certutil -decode "encodedSketch.txt" "Sketch.bat"
+del /q /f "encodedSketch.txt"
 goto :eof
 
 :mouse
