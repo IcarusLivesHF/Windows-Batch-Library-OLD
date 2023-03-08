@@ -1,4 +1,41 @@
 (call :buildSketch) & exit
+:StdLib
+for /f "tokens=4-5 delims=. " %%i in ('ver') do set "VERSION=%%i.%%j"
+if "%version%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
+call :setfont 8 Terminal
+call :size %~1 %~2
+rem "pixel"
+set "pixel=Û"
+rem newLine
+(set \n=^^^
+%= This creates an escaped Line Feed - DO NOT ALTER =%
+)
+rem ESC
+(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) & <nul set /p "=!esc![?25l"
+if "%~3" neq "" if /i "%~3" equ "extlib" (
+	rem Backspace
+	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
+	rem BEL (sound)
+	for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x07"') do set "BEL=%%i"
+	rem Carriage Return  0x0D  decimal 13
+	for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
+	rem Tab 0x09
+	for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
+)
+goto :eof
+
+:size
+if "%~2" equ "" goto :eof
+set /a "wid=%~1, hei=%~2"
+mode !wid!,!hei!
+goto :eof
+
+:setFont
+if "%~2" equ "" goto :eof
+call :init_setfont
+%setFont% %~1 %~2
+goto :eof
+
 :math
 set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
@@ -65,10 +102,10 @@ set "turnLeft=DFA-=?"
 set "turnRight=DFA+=?"
 set "push=sX=DFX, sY=DFY, sA=DFA"
 set "pop=DFX=sX, DFY=sY, DFA=sA"
-set "draw=?=^!?^!%esc%[^!DFY^!;^!DFX^!H?"
+set "draw=?=^!?^!%esc%[^!DFY^!;^!DFX^!H%pixel%"
 set "home=DFX=0, DFY=0, DFA=0"
 set "cent=DFX=wid/2, DFY=hei/2"
-set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H?""
+set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 goto :eof
 :mouseMacros
 set "allowMouseClicks=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
@@ -79,34 +116,6 @@ set "ZIP=tar -cf _ZIP_.zip _ZIP_"
 set "unZIP=tar -xf _UNZIP_.zip
 set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('_unzip_', '.');"
 goto :eof
-:StdLib
-for /f "tokens=4-5 delims=. " %%i in ('ver') do set "VERSION=%%i.%%j"
-if "%version%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
-call :init_setfont
-%setFont% 8 Terminal
-set /a "wid=%~1, hei=%~2"
-mode !wid!,!hei!
-rem "pixel"
-set "pixel=Û"
-rem newLine
-(set \n=^^^
-%= This creates an escaped Line Feed - DO NOT ALTER =%
-)
-rem ESC
-(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) & <nul set /p "=!esc![?25l"
-set "batchBook=True"
-goto :eof
-
-:ExtLib
-rem Backspace
-for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
-rem BEL (sound)
-for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x07"') do set "BEL=%%i"
-rem Carriage Return  0x0D  decimal 13
-for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
-rem Tab 0x09
-for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
-goto :eof
 
 :colorRange
 REM 1, 3, 5, 15, 17, 51, 85, 255
@@ -116,6 +125,7 @@ for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc
 for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;255;%%am"
 for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;%%a;255m"
 for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;%%a;0;255m"
+for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;255;0;%%am"
 goto :eof
 
 :loadArray
@@ -125,7 +135,7 @@ goto :eof
 :macros
 rem %point% x y <rtn> _$_
 set .=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	set "_$_=^!_$_^!!esc![%%2;%%1H?!esc![0m"%\n%
+	set "_$_=^!_$_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
 )) else set args=
   
 rem %print% x y 0-255 CHAR <rtn> _$_
@@ -135,11 +145,11 @@ set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 
 rem %RGBplot% x y 0-255 0-255 0-255 CHAR
 set rgbplot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m?!esc![0m"%\n%
+	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
 )) else set args=
 
 rem %translate% x Xoffset y Yoffset
-set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
+set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~1+=%%~2, %%3+=%%~4"%\n%
 )) else set args=
 
@@ -182,8 +192,8 @@ set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!
     if "%%~z" neq "" set "%%~z=^!$padding^!"%\n%
 )) else set args=
 
-rem general string functions, can return $_len, $_rev $_upp $_low
-set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5 delims=" %%1 in ("^!args^!") do (%\n%
+rem %string_ "string" <rtn> $_len, $_rev $_upp $_low
+set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
     set "$_str=%%~1" ^& set "$_strC=%%~1" ^& set "$_upp=^!$_strC:~1^!" ^& set "$_low=^!$_strC:~1^!"%\n%
     for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$_len+=%%P" ^& set "$_str=^!$_str:~%%P^!"%\n%
     set "$_str=^!$_strC:~1^!"%\n%
@@ -213,7 +223,7 @@ set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!
 	set "$circle="%\n%
 	for /l %%a in (0,3,360) do (%\n%
 		set /a "xa=%%~3 * ^!cos:x=%%a^! + %%~1", "ya=%%~4 * ^!sin:x=%%a^! + %%~2"%\n%
-		set "$circle=^!$circle^!%esc%[^!ya^!;^!xa^!H?"%\n%
+		set "$circle=^!$circle^!%esc%[^!ya^!;^!xa^!H%pixel%"%\n%
 	)%\n%
 	set "$circle=^!$circle^!%esc%[0m"%\n%
 )) else set args=
@@ -223,16 +233,16 @@ set sqr=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") 
 	set "$sqr="%\n%
 	set /a "$x=%%~1", "$y=%%~2", "sqrw=%%~3", "sqrh=%%~4"%\n%
 	for /l %%b in (1,1,^^!sqrw^^!) do ( set /a "$x+=2 * ^!cos:x=0^!", "$y+=2 * ^!sin:x=0^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H?"%\n%
+		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
 	for /l %%b in (1,1,^^!sqrh^^!) do ( set /a "$x+=2 * ^!cos:x=90^!", "$y+=2 * ^!sin:x=90^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H?"%\n%
+		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
 	for /l %%b in (1,1,^^!sqrw^^!) do ( set /a "$x+=2 * ^!cos:x=180^!", "$y+=2 * ^!sin:x=180^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H?"%\n%
+		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
 	for /l %%b in (1,1,^^!sqrh^^!) do ( set /a "$x+=2 * ^!cos:x=270^!", "$y+=2 * ^!sin:x=270^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H?"%\n%
+		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
 	set "$sqr=^!$sqr^!%esc%[0m"%\n%
 )) else set args=
@@ -249,36 +259,36 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 		for /l %%x in (^^!xa^^!,^^!stepx^^!,^^!xb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "ya+=stepy", "fraction-=dx"%\n%
 			set /a "fraction+=dy"%\n%
-			set "$line=^!$line^!%esc%[^!ya^!;%%xH?"%\n%
+			set "$line=^!$line^!%esc%[^!ya^!;%%xH%pixel%"%\n%
 		)%\n%
 	) else (%\n%
 		set /a "fraction=dx - (dy >> 1)"%\n%
 		for /l %%y in (^^!ya^^!,^^!stepy^^!,^^!yb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "xa+=stepx", "fraction-=dy"%\n%
 			set /a "fraction+=dx"%\n%
-			set "$line=^!$line^!%esc%[%%y;^!xa^!H?"%\n%
+			set "$line=^!$line^!%esc%[%%y;^!xa^!H%pixel%"%\n%
 		)%\n%
 	)%\n%
 	set "$line=^!$line^!%esc%[0m"%\n%
 )) else set args=
 
-rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $bezier
+rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
-	set "$bezier="%\n%
-	set /a "px[0]=~8"%\n%
+	set "$bezier=" ^& set "c=0"%\n%
+	set /a "px[0]=%%~1","py[0]=%%~2", "px[1]=%%~3","py[1]=%%~4", "px[2]=%%~5","py[2]=%%~6", "px[3]=%%~7","py[3]=%%~8"%\n%
 	for /l %%# in (1,1,%%~9) do (%\n%
-		set /a "vx[1]=(px[0]+%%#*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+%%#*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+%%#*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+%%#*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+%%#*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+%%#*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+%%#*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+%%#*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+%%#*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+%%#*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+%%#*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+%%#*(vy[5]-vy[4])*10)/1000+vy[4]"%\n%
-		set "$bezier=^!$bezier^!%esc%[^!vy[6]^!;^!vx[6]^!H?"%\n%
+		set /a "vx[1]=(px[0]+c*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+c*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+c*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+c*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+c*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+c*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+c*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+c*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+c*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+c*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+c*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+c*(vy[5]-vy[4])*10)/1000+vy[4]","c+=1"%\n%
+		set "$bezier=^!$bezier^!%esc%[^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
 	)%\n%
 )) else set args=
 
-rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $bezier
-set RBbezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
-	set "$bezier="%\n%
+rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
+set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
+	set "$bezier=" ^& set "c=0"%\n%
 	set /a "px[0]=%%~1","py[0]=%%~2", "px[1]=%%~3","py[1]=%%~4", "px[2]=%%~5","py[2]=%%~6", "px[3]=%%~7","py[3]=%%~8"%\n%
 	for /l %%m in (1,1,%%~9) do (%\n%
-		set /a "vx[1]=(px[0]+%%#*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+%%#*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+%%#*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+%%#*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+%%#*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+%%#*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+%%#*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+%%#*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+%%#*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+%%#*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+%%#*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+%%#*(vy[5]-vy[4])*10)/1000+vy[4]"%\n%
-		set "$bezier=^!$bezier^!^!color[%%m]^!%esc%[^!vy[6]^!;^!vx[6]^!H?"%\n%
+		set /a "vx[1]=(px[0]+c*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+c*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+c*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+c*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+c*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+c*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+c*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+c*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+c*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+c*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+c*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+c*(vy[5]-vy[4])*10)/1000+vy[4]","c+=1"%\n%
+		set "$bezier=^!$bezier^!^!color[%%m]^!%esc%[^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
 	)%\n%
 )) else set args=
 
@@ -287,7 +297,7 @@ set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") 
 	if "%%~7" equ "" ( set "hue=30" ) else ( set "hue=%%~7")%\n%
     for /l %%e in (%%~4,%%~6,%%~5) do (%\n%
 		set /a "_x=%%~3 * ^!cos:x=%%~e^! + %%~1", "_y=%%~3 * ^!sin:x=%%~e^! + %%~2"%\n%
-		^!plot^! ^^!_x^^! ^^!_y^^! ^^!hue^^! ?%\n%
+		^!plot^! ^^!_x^^! ^^!_y^^! ^^!hue^^! %pixel%%\n%
 	)%\n%
 )) else set args=
 
