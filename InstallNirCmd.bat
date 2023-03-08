@@ -26,6 +26,3 @@ echo.
 echo %temp%
 timeout /t 5
 exit
-
-
-pause
