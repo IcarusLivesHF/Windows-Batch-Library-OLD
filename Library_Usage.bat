@@ -1,10 +1,9 @@
 @echo off & setlocal enableDelayedExpansion
 
-set  "openLib=( set "_c=?" & ren "%~nx0" _o.bat & ren "?.bat" "%~nx0""
-set "closeLib=ren "%~nx0" "^^!_c^^!.bat" & ren _o.bat "%~nx0" )"
-
-rem PLEASE NOTE: You do NOT have to use ALL of the 'call' commands listed below, you may use whichever one you find necessary.
-%openLib:?=Library%
+set "revisionRequired=3.26"
+set  "openLib=(ren "%~nx0" temp.bat & ren "Library.bat" "%~nx0""
+set "closeLib=ren "%~nx0" "Library.bat" & ren temp.bat "%~nx0")"
+(2>nul %openLib% && ( call :revision ) || ( ren temp.bat "%~nx0" & echo Library.bat Required & timeout /t 3 & exit))
 	call :StdLib 100 100
 	call :ExtLib
 	call :math
@@ -14,7 +13,9 @@ rem PLEASE NOTE: You do NOT have to use ALL of the 'call' commands listed below,
 	call :turtleFunctions
 	call :colorRange
 	call :macros
-%closeLib%  && ( cls & goto :setup) || ( Echo Something went wrong.. & pause & exit )
+%closeLib%  && ( cls & goto :setup)
 :setup
+rem PLEASE NOTE: You do NOT have to call all of the functions above, you can call whichever ones you need to keep the variable environment low
+rem YOUR CODE GOES HERE
 
-rem you can begin writing ALL of your code HERE.
+pause 
