@@ -10,16 +10,17 @@ set "Sqrt(N)=( x=(N)/(11*1024)+40, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, 
 set "Sign=1 / (x & 1)"
 set "Abs=(((x)>>31|1)*(x))"
 set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
-set "percentOf=p=x*y/100"
 set "avg=(x&y)+(x^y)/2"
+set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
+set "lerp=?=(a+c*(b-a)*10)/1000+a"
 goto :eof
 :misc
 set "rndsign=$o=(^!random^!%%3+-1),out=(((((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))*($o+def))|((~(((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))&1)*($o*num)))"
 set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
 set "swap(x,y)=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
-set "map=m=x2+(y2-x2)*(v-x1)/(y1-x1)"
-set "lerp=?=(a+c*(b-a)*10)/1000+a"
+set "map=x2+(y2-x2)*(v-x1)/(y1-x1)"
+set "percentOf=p=x*y/100"
 set "odds=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
 set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
@@ -72,6 +73,11 @@ goto :eof
 :mouseMacros
 set "allowMouseClicks=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
+goto :eof
+:zip
+set "ZIP=tar -cf _ZIP_.zip _ZIP_"
+set "unZIP=tar -xf _UNZIP_.zip
+set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('_unzip_', '.');"
 goto :eof
 :StdLib
 for /f "tokens=4-5 delims=. " %%i in ('ver') do set "VERSION=%%i.%%j"
@@ -352,7 +358,7 @@ set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!"
 
 rem MAP using smoothStep algorithm
 rem map min max X RETURNVAR
-set map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
+set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	%= Scale, bias and saturate x to 0..100 range =%%\n%
 	set /a "clamped=((%%3) - %%1) * 100 ^/ (%%2 - %%1) + 1"%\n%
 	for /f "tokens=1" %%c in ("^!clamped^!") do ^!clamp^! %%c 0 100 CLAMPED_x %\n%
