@@ -8,9 +8,9 @@ set "sinr=(a=(x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)
 set "cosr=(a=(15708 - x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
 set "Sqrt(N)=( x=(N)/(11*1024)+40, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2 )"
 set "Sign=1 / (x & 1)"
-set "Abs(x)=(((x)>>31|1)*(x))"
+set "Abs=(((x)>>31|1)*(x))"
 set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
-set "percentOf(p)=p=x*y/100"
+set "percentOf=p=x*y/100"
 set "avg=(x&y)+(x^y)/2"
 goto :eof
 :misc
@@ -18,21 +18,22 @@ set "rndsign=$o=(^!random^!%%3+-1),out=(((((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))*(
 set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
 set "swap(x,y)=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
-set "inScr=((wid-x-1)>>31)|((hei-y-2)>>31)"
 set "map=m=x2+(y2-x2)*(v-x1)/(y1-x1)"
 set "lerp=?=(a+c*(b-a)*10)/1000+a"
 set "odds=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
-set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
-set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
 set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
 set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
 set "infiniteLoop=for /l %%# in () do "
 set "throttle=for /l %%# in (1,?,1000000) do rem"
+set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
+set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
+set "inScr=((wid-x-1)>>31)|((hei-y-2)>>31)"
 set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
 set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 set "fib=?=c=a+b, a=b, b=c"
-goto :eof
+set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
+set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"goto :eof
 :shapes
 set "SQ(x)=x*x"
 set "CUBE(x)=x*x*x"
@@ -163,8 +164,8 @@ set getDistance=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!a
 	set /a "%%5=( ?=((((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))>>31)+1, ?*(2*((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))) + ^^^!?*(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))*2)) )"%\n%
 )) else set args=
 
-rem %getlen% "string" <rtn> len
-set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "len="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "len+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "len-=2")) else set args=
+rem %getlen% "string" <rtn> $length
+set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "$length="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$length+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "$length-=2")) else set args=
 
 rem %pad% "string".int <rtn> $padding
 set "$paddingBuffer=                                                                                "
@@ -420,12 +421,16 @@ goto :eof
 if exist Sketch.bat goto :eof
 for %%i in (
 	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbg0KDQpz"
-	"ZXQgICJvcGVuTGliPSggc2V0ICJfYz0/IiAmIHJlbiAiJX5ueDAiIF9vLmJhdCAm"
-	"IHJlbiAiPy5iYXQiICIlfm54MCIiDQpzZXQgImNsb3NlTGliPXJlbiAiJX5ueDAi"
-	"ICJeXiFfY15eIS5iYXQiICYgcmVuIF9vLmJhdCAiJX5ueDAiICkiDQolb3Blbkxp"
-	"Yjo/PUxpYnJhcnklDQoJY2FsbCA6U3RkTGliIDIzNSA5NQ0KJWNsb3NlTGliJSAg"
-	"JiYgKCBjbHMgJiBnb3RvIDpzZXR1cCkgfHwgKCBFY2hvIFNvbWV0aGluZyB3ZW50"
-	"IHdyb25nLi4gJiBwYXVzZSAmIGV4aXQgKQ0KOnNldHVwDQpwYXVzZQ=="
+	"ZXQgICJvcGVuTGliPShyZW4gIiV+bngwIiB0ZW1wLmJhdCAmIHJlbiAiQmF0Y2hf"
+	"TGlicmFyeS5iYXQiICIlfm54MCIiDQpzZXQgImNsb3NlTGliPXJlbiAiJX5ueDAi"
+	"ICJCYXRjaF9MaWJyYXJ5LmJhdCIgJiByZW4gdGVtcC5iYXQgIiV+bngwIikiDQoy"
+	"Pm51bCAlb3BlbkxpYiUgfHwgKCByZW4gdGVtcC5iYXQgIiV+bngwIiAmIGVjaG8g"
+	"QmF0Y2hfTGlicmFyeS5iYXQgUmVxdWlyZWQgJiB0aW1lb3V0IC90IDMgJiBleGl0"
+	"KQ0KCXJlbSAjIyMjIyMjIyMjIyMjIyMjIyMjIyBDQUxMIGZ1bmN0aW9ucyBmcm9t"
+	"IExpYnJhcnkgSEVSRSAjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj"
+	"IyMNCgljYWxsIDpTdGRMaWIgMTQ0IDg5DQolY2xvc2VMaWIlICAmJiAoIGNscyAm"
+	"IGdvdG8gOnNldHVwKQ0KOnNldHVwDQpyZW0gTGlicmFyeSBoYXMgYmVlbiBsb2Fk"
+	"ZWQuIFlvdSBjb2RlIGdvZXMgYmVsb3cgaGVyZS4="
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
