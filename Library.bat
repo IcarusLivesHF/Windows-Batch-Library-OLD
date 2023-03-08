@@ -1,6 +1,14 @@
 (call :buildSketch) & exit
+:revision
+	set "revision=3.26"
+	if %revision:.=% lss %revisionRequired:.=% (
+		ren "%~nx0" "Library.bat"
+		ren "temp.bat" "%self%"
+		del /f /q "temp.bat"
+		echo Updated Library.bat Required & timeout /t 3 & exit
+	)
+goto :eof
 :StdLib
-set "revision=3.26"
 for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 if "%winversion%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
 call :setfont 8 Terminal
