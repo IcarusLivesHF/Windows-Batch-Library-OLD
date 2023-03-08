@@ -1,5 +1,6 @@
 (call :buildSketch) & exit
 :StdLib
+set "revision=3.26"
 for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 if "%winversion%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
 call :setfont 8 Terminal
@@ -111,10 +112,10 @@ goto :eof
 set "allowMouseClicks=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
 goto :eof
-:zip
-set "ZIP=tar -cf _ZIP_.zip _ZIP_"
-set "unZIP=tar -xf _UNZIP_.zip
-set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('_unzip_', '.');"
+:quikzip
+set "ZIP=tar -cf ?.zip ?"
+set "unZIP=tar -xf ?.zip"
+set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('?', '.');"
 goto :eof
 
 :colorRange
@@ -133,26 +134,84 @@ goto :eof
 goto :eof
 
 :macros
+:_point
 rem %point% x y <rtn> _$_
 set .=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
 )) else set args=
-  
-rem %print% x y 0-255 CHAR <rtn> _$_
+
+:_plot
+rem %plot% x y 0-255 CHAR <rtn> _$_
 set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;5;%%3m%%~4!esc![0m"%\n%
 )) else set args=
 
-rem %RGBplot% x y 0-255 0-255 0-255 CHAR
-set rgbplot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
+:_RGBpoint
+rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
+set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
 )) else set args=
 
+:_download
+rem %download% url file
+set download=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%%~1','%%~2')"%\n%
+)) else set args=
+
+:_ZIP
+rem %zip% file.ext zipFileName
+set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	tar -cf %%~2.zip %%~1%\n%
+)) else set args=
+
+:_UNZIP
+rem %unzip% zipFileName
+set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
+	tar -xf %%~1.zip%\n%
+)) else set args=
+
+:_getLen
+rem %getlen% "string" <rtn> $length
+set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "$length="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$length+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "$length-=2")) else set args=
+
+:_pad
+rem %pad% "string".int <rtn> $padding
+set "$paddingBuffer=                                                                                "
+set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!args^!") do (%\n%
+    set "$padding="^&set "$_str=%%~x"^&set "len="%\n%
+    (for %%P in (32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "len+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "len-=2"%\n%
+    set /a "s=%%~y-len"^&for %%a in (^^!s^^!) do set "$padding=^!$paddingBuffer:~0,%%a^!"%\n%
+    if "%%~z" neq "" set "%%~z=^!$padding^!"%\n%
+)) else set args=
+
+:_$string_
+rem %string_ "string" <rtn> $_len, $_rev $_upp $_low
+set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
+    set "$_str=%%~1" ^& set "$_strC=%%~1" ^& set "$_upp=^!$_strC:~1^!" ^& set "$_low=^!$_strC:~1^!"%\n%
+    for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$_len+=%%P" ^& set "$_str=^!$_str:~%%P^!"%\n%
+    set "$_str=^!$_strC:~1^!"%\n%
+    for /l %%a in (^^!$_len^^!,-1,0) do set "$_rev=^!$_rev^!^!$_str:~%%~a,1^!"%\n%
+    for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do set "$_upp=^!$_upp:%%i=%%i^!"%\n%
+    for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "$_low=^!$_low:%%i=%%i^!"%\n%
+)) else set args=
+
+:_memset
+rem %memset% var "replacement" "length"
+set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!") do ( for /f "tokens=1,2 delims=+" %%3 in ("%%~0") do (%\n%
+	set /a "$l=%%~4, $k=%%~2", "ep=%%~4+$k" ^& set "$tr=^!%%~3^!" ^& set "$b="%\n%
+	for %%j in (^^!$k^^!) do ( for /l %%a in (1,1,%%~j) do set "$b=^!$b^!%%~1"%\n%
+		if "%%~4" equ "" ( set "%%~3=^!$b^!^!$tr:~%%~j^!"%\n%
+		) else for /f "tokens=1,2" %%e in ("^!$l^! ^!ep^!") do (%\n%
+			set "%%~3=^!$tr:~0,%%~e^!^!$b^!^!$tr:~%%~f^!"%\n%
+))))) else set args=
+
+:_translate
 rem %translate% x Xoffset y Yoffset
 set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~1+=%%~2, %%3+=%%~4"%\n%
 )) else set args=
 
+:_BVector
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1,2" %%1 in ("^!args^!") do (%\n%
 		   set /a "%%~1.x=^!random^! %% wid + 1"%\n%
@@ -168,6 +227,7 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1,2" %%1 in ("^!args^
 		   for %%a in (bvr bvg bvb) do set "%%a="%\n%
 )) else set args=
 
+:_lerpRGB
 rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
 set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!"%\n%
@@ -175,42 +235,13 @@ set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 	set /a "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
 
+:_getDistance
 rem %getDistance% x2 x1 y2 y1 <rtnVar>
 set getDistance=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "%%5=( ?=((((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))>>31)+1, ?*(2*((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))) + ^^^!?*(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))*2)) )"%\n%
 )) else set args=
 
-rem %getlen% "string" <rtn> $length
-set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "$length="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$length+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "$length-=2")) else set args=
-
-rem %pad% "string".int <rtn> $padding
-set "$paddingBuffer=                                                                                "
-set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!args^!") do (%\n%
-    set "$padding="^&set "$_str=%%~x"^&set "len="%\n%
-    (for %%P in (32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "len+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "len-=2"%\n%
-    set /a "s=%%~y-len"^&for %%a in (^^!s^^!) do set "$padding=^!$paddingBuffer:~0,%%a^!"%\n%
-    if "%%~z" neq "" set "%%~z=^!$padding^!"%\n%
-)) else set args=
-
-rem %string_ "string" <rtn> $_len, $_rev $_upp $_low
-set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
-    set "$_str=%%~1" ^& set "$_strC=%%~1" ^& set "$_upp=^!$_strC:~1^!" ^& set "$_low=^!$_strC:~1^!"%\n%
-    for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$_len+=%%P" ^& set "$_str=^!$_str:~%%P^!"%\n%
-    set "$_str=^!$_strC:~1^!"%\n%
-    for /l %%a in (^^!$_len^^!,-1,0) do set "$_rev=^!$_rev^!^!$_str:~%%~a,1^!"%\n%
-    for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do set "$_upp=^!$_upp:%%i=%%i^!"%\n%
-    for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "$_low=^!$_low:%%i=%%i^!"%\n%
-)) else set args=
-
-rem %memset% var "replacement" "length"
-set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!") do ( for /f "tokens=1,2 delims=+" %%3 in ("%%~0") do (%\n%
-	set /a "$l=%%~4, $k=%%~2", "ep=%%~4+$k" ^& set "$tr=^!%%~3^!" ^& set "$b="%\n%
-	for %%j in (^^!$k^^!) do ( for /l %%a in (1,1,%%~j) do set "$b=^!$b^!%%~1"%\n%
-		if "%%~4" equ "" ( set "%%~3=^!$b^!^!$tr:~%%~j^!"%\n%
-		) else for /f "tokens=1,2" %%e in ("^!$l^! ^!ep^!") do (%\n%
-			set "%%~3=^!$tr:~0,%%~e^!^!$b^!^!$tr:~%%~f^!"%\n%
-))))) else set args=
-
+:_exp
 rem %exp% num pow <rtnVar>
 for /l %%a in (1,1,1095) do set "pb=!pb!x*"
 set exp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
@@ -218,6 +249,7 @@ set exp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") 
 	for %%a in (^^!$p^^!) do set /a "%%~3=^!pb:~0,%%a^!"%\n%
 )) else set args=
 
+:_circle
 rem %circle% x y ch cw <rtn> $circle
 set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "$circle="%\n%
@@ -228,25 +260,27 @@ set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!
 	set "$circle=^!$circle^!%esc%[0m"%\n%
 )) else set args=
 
-rem %sqr% x r length <rtn> $sqr
-set sqr=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "$sqr="%\n%
-	set /a "$x=%%~1", "$y=%%~2", "sqrw=%%~3", "sqrh=%%~4"%\n%
-	for /l %%b in (1,1,^^!sqrw^^!) do ( set /a "$x+=2 * ^!cos:x=0^!", "$y+=2 * ^!sin:x=0^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
+:_rect
+rem %rect% x r length <rtn> $rect
+set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
+	set "$rect="%\n%
+	set /a "$x=%%~1", "$y=%%~2", "rectw=%%~3", "recth=%%~4"%\n%
+	for /l %%b in (1,1,^^!rectw^^!) do ( set /a "$x+=2 * ^!cos:x=0^!", "$y+=2 * ^!sin:x=0^!"%\n%
+		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
-	for /l %%b in (1,1,^^!sqrh^^!) do ( set /a "$x+=2 * ^!cos:x=90^!", "$y+=2 * ^!sin:x=90^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
+	for /l %%b in (1,1,^^!recth^^!) do ( set /a "$x+=2 * ^!cos:x=90^!", "$y+=2 * ^!sin:x=90^!"%\n%
+		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
-	for /l %%b in (1,1,^^!sqrw^^!) do ( set /a "$x+=2 * ^!cos:x=180^!", "$y+=2 * ^!sin:x=180^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
+	for /l %%b in (1,1,^^!rectw^^!) do ( set /a "$x+=2 * ^!cos:x=180^!", "$y+=2 * ^!sin:x=180^!"%\n%
+		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
-	for /l %%b in (1,1,^^!sqrh^^!) do ( set /a "$x+=2 * ^!cos:x=270^!", "$y+=2 * ^!sin:x=270^!"%\n%
-		set "$sqr=^!$sqr^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
+	for /l %%b in (1,1,^^!recth^^!) do ( set /a "$x+=2 * ^!cos:x=270^!", "$y+=2 * ^!sin:x=270^!"%\n%
+		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
 	)%\n%
-	set "$sqr=^!$sqr^!%esc%[0m"%\n%
+	set "$rect=^!$rect^!%esc%[0m"%\n%
 )) else set args=
 
+:_line
 rem line x0 y0 x1 y1 <rtn> $line
 set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "$line="%\n%
@@ -272,6 +306,7 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	set "$line=^!$line^!%esc%[0m"%\n%
 )) else set args=
 
+:_$bezier
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
 	set "$bezier=" ^& set "c=0"%\n%
@@ -282,6 +317,7 @@ set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!
 	)%\n%
 )) else set args=
 
+:_RGBezier
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
 	set "$bezier=" ^& set "c=0"%\n%
@@ -292,6 +328,7 @@ set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args
 	)%\n%
 )) else set args=
 
+:_arc
 rem arc x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color
 set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
 	if "%%~7" equ "" ( set "hue=30" ) else ( set "hue=%%~7")%\n%
@@ -301,6 +338,7 @@ set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") 
 	)%\n%
 )) else set args=
 
+:_plot_HSL_RGB
 rem plot_HSL_RGB x y 0-360 0-10000 0-10000
 set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "H=%%3", "S=%%4", "L=%%5"%\n%
@@ -326,6 +364,7 @@ set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
+:_plot_HSV_RGB
 rem plot_HSV_RGB x y 0-360 0-10000 0-10000
 set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "H=%%3", "S=%%4", "V=%%5"%\n%
@@ -349,11 +388,13 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
+:_ifand
 rem %ifAnd% value LO HI RETURNVAR
 set ifAnd=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "aux=(%%~2-%%~1)*(%%~1-%%~3), %%~4=(aux-1)/aux"%\n%
 )) else set args=
 
+:_clamp
 rem clamp x min max RETURNVAR
 set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "xx=%%~1", "yy=%%2", "zz=%%3"%\n%
@@ -366,8 +407,8 @@ set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!"
 	)%\n%
 )) else set args=
 
-rem MAP using smoothStep algorithm
-rem map min max X RETURNVAR
+:__map
+rem _map min max X RETURNVAR
 set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	%= Scale, bias and saturate x to 0..100 range =%%\n%
 	set /a "clamped=((%%3) - %%1) * 100 ^/ (%%2 - %%1) + 1"%\n%
@@ -379,11 +420,13 @@ set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	)%\n%
 )) else set args=
 
+:_FNCross
 rem FNcross x1 y1 x2 y2 RETURNVAR
 set FNcross=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~5=%%~1*%%~4 - %%~2*%%~3"%\n%
 )) else set args=
 
+:_intersect
 rem CROSS VECTOR PRODUCT algorithm
 rem intersect x1 y1 x2 y2 x3 y3 x4 y4 RETURNVAR RETURNVAR
 set intersect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-10" %%a in ("^!args^!") do (%\n%
@@ -400,7 +443,8 @@ set intersect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-10" %%a in ("^!ar
 	)%\n%
 )) else set args=
 
-rem RGBline x1 y1 x2 y2 0-360 0-10000 0-10000
+:_HSLline
+rem HSLline x1 y1 x2 y2 0-360 0-10000 0-10000
 set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
 	set /a "xa=%%~1", "ya=%%~2", "xb=%%~3", "yb=%%~4", "dx=%%~3 - %%~1", "dy=%%~4 - %%~2"%\n%
 	for /f "tokens=1-2" %%j in ("^!dx^! ^!dy^!") do (%\n%
