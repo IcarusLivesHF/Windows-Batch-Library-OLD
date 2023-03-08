@@ -1,7 +1,7 @@
 (call :buildSketch) & exit
 :StdLib
-for /f "tokens=4-5 delims=. " %%i in ('ver') do set "VERSION=%%i.%%j"
-if "%version%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
+for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
+if "%winversion%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
 call :setfont 8 Terminal
 call :size %~1 %~2
 rem "pixel"
