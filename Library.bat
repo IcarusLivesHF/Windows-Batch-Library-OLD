@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.28.1"
+	set "revision=3.28.2"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -19,13 +19,17 @@
 	)
 goto :eof
 :StdLib
-if "%~3" neq "/debug" (
+set "debugC1=%~1" & set "debugC2=%~3" & set "debug=False"
+for %%d in (1 2) do if "!debugC%%d!" equ "/debug" (
+	set "debug=True"
+)
+if "%debug%" equ "True" (
+	@echo on
+	call :setfont 16 Consolas
+	call :size 180 100
+) else (
 	call :setfont 8 Terminal
 	call :size %~1 %~2
-) else (
-	@echo on
-	call :setfont 14 Consolas
-	call :size 150 100
 )
 rem "pixel"
 set "pixel=Û"
