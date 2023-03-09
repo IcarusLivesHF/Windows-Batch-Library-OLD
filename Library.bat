@@ -196,7 +196,7 @@ set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^
 	if "^!x^!" neq "^!g^!" start /b "" cmd /c del "%~f0" ^& exit%\n%
 )) else set args=
 
-:_injectLineIntoFIle
+:_injectLineIntoFile
 rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
 set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=:" %%1 in ("?:^!args^!") do (%\n%
 	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
@@ -517,17 +517,16 @@ goto :eof
 :buildSketch
 if exist Sketch.bat goto :eof
 for %%i in (
-	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbg0KDQpz"
-	"ZXQgICJvcGVuTGliPShyZW4gIiV+bngwIiB0ZW1wLmJhdCAmIHJlbiAiTGlicmFy"
-	"eS5iYXQiICIlfm54MCIiDQpzZXQgImNsb3NlTGliPXJlbiAiJX5ueDAiICJMaWJy"
-	"YXJ5LmJhdCIgJiByZW4gdGVtcC5iYXQgIiV+bngwIikiDQoyPm51bCAlb3Blbkxp"
-	"YiUgfHwgKCByZW4gdGVtcC5iYXQgIiV+bngwIiAmIGVjaG8gTGlicmFyeS5iYXQg"
-	"UmVxdWlyZWQgJiB0aW1lb3V0IC90IDMgJiBleGl0KQ0KCXJlbSAjIyMjIyMjIyMj"
-	"IyMjIyMjIyMjIyBDQUxMIGZ1bmN0aW9ucyBmcm9tIExpYnJhcnkgSEVSRSAjIyMj"
-	"IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCgljYWxsIDpTdGRMaWIg"
-	"MTQ0IDg5DQolY2xvc2VMaWIlICAmJiAoIGNscyAmIGdvdG8gOnNldHVwKQ0KOnNl"
-	"dHVwDQpyZW0gTGlicmFyeSBoYXMgYmVlbiBsb2FkZWQuIFlvdSBjb2RlIGdvZXMg"
-	"YmVsb3cgaGVyZS4="
+"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbg0KDQpz"
+"ZXQgInJldmlzaW9uUmVxdWlyZWQ9My4yOCINCnNldCAgIm9wZW5MaWI9KHJlbiAi"
+"JX5ueDAiIHRlbXAuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiINCnNl"
+"dCAiY2xvc2VMaWI9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiB0ZW1w"
+"LmJhdCAiJX5ueDAiKSIgJiBzZXQgInNlbGY9JX5ueDAiDQooMj5udWwgJW9wZW5M"
+"aWIlICYmICggY2FsbCA6cmV2aXNpb24gKSB8fCAoIHJlbiB0ZW1wLmJhdCAiJX5u"
+"eDAiICYgZWNobyBMaWJyYXJ5LmJhdCBSZXF1aXJlZCAmIHRpbWVvdXQgL3QgMyAm"
+"IGV4aXQpKQ0KCWNhbGwgOnN0ZGxpYiAxMDAgMTAwDQolY2xvc2VMaWIlICAmJiAo"
+"IGNscyAmIGdvdG8gOnNldHVwKQ0KOnNldHVwDQoNCnBhdXNlID4gbnVsICYgZXhp"
+"dCAvYg=="
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
