@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.27"
+	set "revision=3.28"
 	if %revision:.=% lss %revisionRequired:.=% (
 		ren "%~nx0" "Library.bat"
 		ren "temp.bat" "%self%"
@@ -182,6 +182,18 @@ set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") 
 rem %unzip% zipFileName
 set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
 	tar -xf %%~1.zip%\n%
+)) else set args=
+
+:_License DO NOT use unless you are DONE editing your code.
+rem %license% "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
+set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
+	for /f "tokens=*" %%x in ("^!self^!") do set /a "x=%%~zx"%\n%
+	for /f "tokens=1,2 delims=:" %%a in ('findstr /n ":::" "%~F0"') do (%\n%
+        if "%%b" equ %%1 set /a "i+=1", "x+=i+%%a"%\n%
+	)%\n%
+	if not exist "^!temp^!\%~n0_cP.txt" echo ^^!x^^!^>"^!temp^!\%~n0_cP.txt"%\n%
+	if exist "^!temp^!\%~n0_cP.txt" ^<"^!temp^!\%~n0_cP.txt" set /p "g="%\n%
+	if "^!x^!" neq "^!g^!" start /b "" cmd /c del "%~f0" ^& exit%\n%
 )) else set args=
 
 :_injectLineIntoFIle
