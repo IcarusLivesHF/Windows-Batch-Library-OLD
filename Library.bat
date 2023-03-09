@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.28"
+	set "revision=3.28.1"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
