@@ -1,16 +1,24 @@
 (call :buildSketch) & exit
 :revision
 	set "revision=3.28"
+	set "libraryError=False"
+	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
+		echo Updated Library.bat Required
+		set "libraryError=True"
+	)
+	if "%winversion%" neq "10.0" (
+		echo %~n0 is not supported on this version of Windows: %winVERSION%"
+		set "libraryError=True"
+	)
+	if "%libraryError%" equ "True" (
 		ren "%~nx0" "Library.bat"
 		ren "temp.bat" "%self%"
 		del /f /q "temp.bat"
-		echo Updated Library.bat Required & timeout /t 3 & exit
+		timeout /t 3 & exit
 	)
 goto :eof
 :StdLib
-for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
-if "%winversion%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
 if "%~3" neq "/debug" (
 	call :setfont 8 Terminal
 	call :size %~1 %~2
@@ -27,7 +35,7 @@ rem newLine
 )
 rem ESC
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) & <nul set /p "=!esc![?25l"
-if "%~3" neq "" if /i "%~3" equ "extlib" (
+if /i "%~3" equ "/extlib" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
 	rem BEL (sound)
@@ -425,7 +433,7 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
-:_ifand
+:_ifAnd
 rem %ifAnd% value LO HI RETURNVAR
 set ifAnd=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "aux=(%%~2-%%~1)*(%%~1-%%~3), %%~4=(aux-1)/aux"%\n%
