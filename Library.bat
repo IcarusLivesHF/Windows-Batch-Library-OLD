@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.26"
+	set "revision=3.27"
 	if %revision:.=% lss %revisionRequired:.=% (
 		ren "%~nx0" "Library.bat"
 		ren "temp.bat" "%self%"
@@ -11,8 +11,14 @@ goto :eof
 :StdLib
 for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 if "%winversion%" neq "10.0" set "libraryWarning=Version of windows may not work with this Library"
-call :setfont 8 Terminal
-call :size %~1 %~2
+if "%~3" neq "/debug" (
+	call :setfont 8 Terminal
+	call :size %~1 %~2
+) else (
+	@echo on
+	call :setfont 14 Consolas
+	call :size 150 100
+)
 rem "pixel"
 set "pixel=Û"
 rem newLine
@@ -176,6 +182,17 @@ set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") 
 rem %unzip% zipFileName
 set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
 	tar -xf %%~1.zip%\n%
+)) else set args=
+
+:_injectLineIntoFIle
+rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
+set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=:" %%1 in ("?:^!args^!") do (%\n%
+	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
+		set /a "linesInFile+=1"%\n%
+		if ^^!linesInFile^^! equ %%~3 echo %%~2^>^>-temp-.txt%\n%
+		echo %%i^>^>-temp-.txt%\n%
+	)%\n%
+	ren "%%~1" "deltmp.txt" ^& ren "-temp-.txt" "%%~1" ^& del /f /q "deltmp.txt"%\n%
 )) else set args=
 
 :_getLen
