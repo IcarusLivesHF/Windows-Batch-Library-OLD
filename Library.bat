@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.28.3"
+	set "revision=3.28.4"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -33,12 +33,14 @@ if "%debug%" equ "True" (
 )
 rem "pixel"
 set "pixel=Û"
+rem ESC
+set "esc="
+REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
+<nul set /p "=!esc![?25l"
 rem newLine
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
-rem ESC
-(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) & <nul set /p "=!esc![?25l"
 if /i "%~3" equ "/extlib" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
@@ -99,6 +101,7 @@ set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 set "fib=?=c=a+b, a=b, b=c"
 set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
 set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"goto :eof
+goto :eof
 :shapes
 set "SQ(x)=x*x"
 set "CUBE(x)=x*x*x"
@@ -468,11 +471,15 @@ set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") 
 
 :_injectLineIntoFile
 rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
-set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=:" %%1 in ("?:^!args^!") do (%\n%
+set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
 	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
 		set /a "linesInFile+=1"%\n%
-		if ^^!linesInFile^^! equ %%~3 echo %%~2^>^>-temp-.txt%\n%
-		echo %%i^>^>-temp-.txt%\n%
+		if /i "%%~4" neq "s" (%\n%
+			if ^^!linesInFile^^! equ %%~3 echo=%%~2^>^>-temp-.txt%\n%
+			echo %%i^>^>-temp-.txt%\n%
+		) else (%\n%
+			if ^^!linesInFile^^! equ %%~3 ( echo=%%~2^>^>-temp-.txt ) else echo %%i^>^>-temp-.txt%\n%
+		)%\n%
 	)%\n%
 	ren "%%~1" "deltmp.txt" ^& ren "-temp-.txt" "%%~1" ^& del /f /q "deltmp.txt"%\n%
 )) else set args=
@@ -490,6 +497,14 @@ set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!
     set /a "s=%%~y-len"^&for %%a in (^^!s^^!) do set "$padding=^!$paddingBuffer:~0,%%a^!"%\n%
     if "%%~z" neq "" set "%%~z=^!$padding^!"%\n%
 )) else set args=
+
+:_encodeB64
+rem %encode:?STRING% <rtn> base64
+set encode=(echo ?^>inFile.txt) ^& (certutil -encode "inFile.txt" "outFile.txt"^>nul) ^& for /f "tokens=* skip=1" %%a in (outFile.txt) do if "%%~a" neq "-----END CERTIFICATE-----" set "base64=%%a" ^& del /f /q outFile.txt 2^>nul ^& del /f /q inFile.txt 2^>nul
+
+:_decodeB64
+rem %decode:?!base64!%
+set decode=(echo ?^>inFile.txt) ^& (certutil -decode "inFile.txt" "outFile.txt"^>nul) ^& for /f "tokens=*" %%a in (outFile.txt) do set "plainText=%%a" ^& del /f /q outFile.txt 2^>nul ^& del /f /q inFile.txt 2^>nul
 
 :_$string_
 rem %string_ "string" <rtn> $_len, $_rev $_upp $_low
