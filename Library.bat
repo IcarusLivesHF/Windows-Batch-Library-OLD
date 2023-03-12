@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.28.4"
+	set "revision=3.28.5"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -23,12 +23,17 @@ set "debugC1=%~1" & set "debugC2=%~3" & set "debug=False"
 for %%d in (1 2) do if "!debugC%%d!" equ "/debug" (
 	set "debug=True"
 )
+if "%~3" neq "" (
+	set "defaultFontSize=%~3"
+) else (
+	set "defaultFontSize=12"
+)
 if "%debug%" equ "True" (
 	@echo on
 	call :setfont 16 Consolas
 	call :size 180 100
 ) else (
-	call :setfont 8 Terminal
+	call :setfont %defaultFontSize% "Raster Fonts"
 	call :size %~1 %~2
 )
 rem "pixel"
@@ -37,10 +42,7 @@ rem ESC
 set "esc="
 REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 <nul set /p "=!esc![?25l"
-rem newLine
-(set \n=^^^
-%= This creates an escaped Line Feed - DO NOT ALTER =%
-)
+set "-rgb=^!r^!;^!g^!;^!b^!"
 if /i "%~3" equ "/extlib" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
@@ -163,6 +165,10 @@ goto :eof
 goto :eof
 
 :macros
+rem newLine
+(set \n=^^^
+%= This creates an escaped Line Feed - DO NOT ALTER =%
+)
 :_point
 rem %point% x y <rtn> _$_
 set .=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
@@ -179,6 +185,12 @@ set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
 set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
+)) else set args=
+
+:_hexToRGB
+rem %hexToRGB% 00a2ed
+set hexToRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args:~1,2^! ^!args:~3,2^! ^!args:~5,2^!") do (%\n%
+	set /a "R=0x%%~1", "G=0x%%~2", "B=0x%%~3"%\n%
 )) else set args=
 
 :_translate
@@ -472,6 +484,7 @@ set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") 
 :_injectLineIntoFile
 rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
 set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
+	set "linesInFile=0"%\n%
 	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
 		set /a "linesInFile+=1"%\n%
 		if /i "%%~4" neq "s" (%\n%
