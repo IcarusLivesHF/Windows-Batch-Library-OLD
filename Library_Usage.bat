@@ -1,6 +1,6 @@
 @echo off & setlocal enableDelayedExpansion
 
-set "revisionRequired=3.28.5"
+set "revisionRequired=3.29.1"
 set  "openLib=(ren "%~nx0" temp.bat & ren "Library.bat" "%~nx0""
 set "closeLib=ren "%~nx0" "Library.bat" & ren temp.bat "%~nx0")" & set "self=%~nx0"
 (2>nul %openLib% && ( call :revision ) || ( ren temp.bat "%~nx0" & echo Library.bat Required & timeout /t 3 & exit))
