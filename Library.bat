@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.28.5"
+	set "revision=3.29.1"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -36,13 +36,17 @@ if "%debug%" equ "True" (
 	call :setfont %defaultFontSize% "Raster Fonts"
 	call :size %~1 %~2
 )
-rem "pixel"
+REM "pixel"
 set "pixel=Û"
-rem ESC
+REM ESC
 set "esc="
 REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 <nul set /p "=!esc![?25l"
+REM VT100 ready -rgb
 set "-rgb=^!r^!;^!g^!;^!b^!"
+REM new clear screen variable execute with echo %cls% or <nul set /p "=%cls%"
+set "cls=%esc%[2J"
+
 if /i "%~3" equ "/extlib" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
@@ -67,6 +71,20 @@ call :init_setfont
 %setFont% %~1 %~2
 goto :eof
 
+:cursor
+set "push=<nul set /p "=%esc%7""
+set "pop=<nul set /p "=%esc%8""
+set "cursor[U]=<nul set /p "=%esc%[?A""
+set "cursor[D]=<nul set /p "=%esc%[?B""
+set "cursor[L]=<nul set /p "=%esc%[?C""
+set "cursor[R]=<nul set /p "=%esc%[?D""
+set "cac=%esc%[1J"
+set "cbc=%esc%[0J"
+set "underLine=%esc%[4m"
+set "capIt=%esc%[0m"
+set "\nl=%esc%E"
+set "moveXY=set /a "cursorX=x", "cursorY=y" ^& <nul set /p "=%esc%[^^!y^^!;^^!x^^!H""
+goto :eof
 :math
 set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
@@ -132,15 +150,15 @@ set /a "DFX=%~1", "DFY=%~2", "DFA=%~3"
 set "forward=DFX+=(?+1)*^!cos:x=DFA^!, DFY+=(?+1)*^!sin:x=DFA^!"
 set "turnLeft=DFA-=?"
 set "turnRight=DFA+=?"
-set "push=sX=DFX, sY=DFY, sA=DFA"
-set "pop=DFX=sX, DFY=sY, DFA=sA"
+set "TF_push=sX=DFX, sY=DFY, sA=DFA"
+set "TF_pop=DFX=sX, DFY=sY, DFA=sA"
 set "draw=?=^!?^!%esc%[^!DFY^!;^!DFX^!H%pixel%"
 set "home=DFX=0, DFY=0, DFA=0"
 set "cent=DFX=wid/2, DFY=hei/2"
 set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 goto :eof
 :mouseMacros
-set "allowMouseClicks=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
+set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
 goto :eof
 :quikzip
