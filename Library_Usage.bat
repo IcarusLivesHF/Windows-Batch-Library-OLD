@@ -5,7 +5,7 @@ set  "import(=(set "\i=?" & ren "%~nx0" -t.bat & ren "?.bat" "%~nx0""
 set ")=ren "%~nx0" "^^!\i^^!.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0"
 set "failedLibrary=ren -t.bat "%~nx0" ^&echo  Missing Library. Required Revision:%revisionRequired% ^& timeout /t 3 ^& exit"
 (2>nul %import(:?=Library% && ( call :revision ) || ( %failedLibrary% ))
-	call :stdlib WID HEI /title "My Title" /color /rgb "0;255;0" "255;255;255"
+	call :stdlib WID HEI fontSize /title "My Title" /color /rgb "0;255;0" "255;255;255"
 	call :ExtLib
 	call :math
 	call :misc
