@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.2"
+	set "revision=3.29.3"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -19,21 +19,30 @@
 	)
 goto :eof
 :StdLib %~1=wid %~2=hei %~3=fontSize %~3=/debug
-title Windows Batch Library - Revision: %Revision%
-REM ESC
-set "esc="
-set "\e="
-
-set "debugC1=%~1" & set "debugC2=%~3" & set "debug=False"
-for %%d in (1 2) do if "!debugC%%d!" equ "/debug" (
+title Powered by: Windows Batch Library - Revision: %Revision%
+set "debugC1=%~1" & set "debugC2=%~3" & set "debugC3=%~6" & set "debug=False"
+for %%d in (1 2 3) do if /i "!debugC%%d!" equ "/debug" (
 	set "debug=True"
 )
+for /l %%a in (1,1,3) do set "debugC%%a="
+
+set "esc="
+if /i "%~4" equ "/title" (
+	title %~5
+)
+if /i "%~6" equ "/color" (
+	if /i "%~7" equ "/bitcolor" (
+		<nul set /p "=%esc%[48;5;%~8m%esc%[38;5;%~9m"
+	) else if /i "%~7" equ "/rgb" (
+		<nul set /p "=%esc%[48;2;%~8m%esc%[38;2;%~9m"
+	)
+)
+
 if "%~3" neq "" (
 	set "defaultFontSize=%~3"
 ) else (
 	set "defaultFontSize=12"
 )
-
 if "%debug%" equ "True" (
 	@echo on
 	call :setfont 16 Consolas
@@ -42,16 +51,18 @@ if "%debug%" equ "True" (
 	call :setfont %defaultFontSize% "Terminal"
 	call :size %~1 %~2
 )
+
 REM "pixel"
 set "pixel=Û"
+REM ESC
+set "\e="
 REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
-<nul set /p "=!esc![?25l"
+<nul set /p "=%esc%[?25l"
 REM VT100 ready -rgb
 set "-rgb=^!r^!;^!g^!;^!b^!"
 REM new clear screen variable execute with echo %cls% or <nul set /p "=%cls%"
 set "cls=%esc%[2J"
 set "\c=%esc%[2J"
-
 if /i "%~3" equ "/extlib" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
