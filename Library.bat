@@ -1,6 +1,7 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.1"
+	echo Checking Revision...
+	set "revision=3.29.2"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -18,7 +19,13 @@
 		timeout /t 3 & exit
 	)
 goto :eof
-:StdLib
+:StdLib %~1=wid %~2=hei %~3=fontSize %~3=/debug
+title Windows Batch Library - Revision: %Revision%
+REM ESC
+set "esc="
+set "\e="
+	 echo.&
+echo %\e%E%\e%EGetting things started...
 set "debugC1=%~1" & set "debugC2=%~3" & set "debug=False"
 for %%d in (1 2) do if "!debugC%%d!" equ "/debug" (
 	set "debug=True"
@@ -28,24 +35,24 @@ if "%~3" neq "" (
 ) else (
 	set "defaultFontSize=12"
 )
+
 if "%debug%" equ "True" (
 	@echo on
 	call :setfont 16 Consolas
 	call :size 180 100
 ) else (
-	call :setfont %defaultFontSize% "Raster Fonts"
+	call :setfont %defaultFontSize% "Terminal"
 	call :size %~1 %~2
 )
 REM "pixel"
 set "pixel=Û"
-REM ESC
-set "esc="
 REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 <nul set /p "=!esc![?25l"
 REM VT100 ready -rgb
 set "-rgb=^!r^!;^!g^!;^!b^!"
 REM new clear screen variable execute with echo %cls% or <nul set /p "=%cls%"
 set "cls=%esc%[2J"
+set "\c=%esc%[2J"
 
 if /i "%~3" equ "/extlib" (
 	rem Backspace
@@ -72,6 +79,7 @@ call :init_setfont
 goto :eof
 
 :cursor
+echo Loading Cursor macros...
 set "push=<nul set /p "=%esc%7""
 set "pop=<nul set /p "=%esc%8""
 set "cursor[U]=<nul set /p "=%esc%[?A""
@@ -86,6 +94,7 @@ set "\nl=%esc%E"
 set "moveXY=set /a "cursorX=x", "cursorY=y" ^& <nul set /p "=%esc%[^^!y^^!;^^!x^^!H""
 goto :eof
 :math
+echo Loading Math macros...
 set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
 set "sin=(a=(x * 31416 / 180)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
@@ -99,6 +108,7 @@ set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1
 set "avg=(x&y)+(x^y)/2"
 goto :eof
 :misc
+echo Loading Misc. macros...
 set "rndsign=$o=(^!random^!%%3+-1),out=(((((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))*($o+def))|((~(((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))&1)*($o*num)))"
 set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
 set "swap(x,y)=t=x, x=y, y=t"
@@ -123,6 +133,7 @@ set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
 set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"goto :eof
 goto :eof
 :shapes
+echo Loading shape macros...
 set "SQ(x)=x*x"
 set "CUBE(x)=x*x*x"
 set "pmSQ(x)=x+x+x+x"
@@ -134,6 +145,7 @@ set "areaTRA(b1,b2,h)=(b1*b2)*h/2"
 set "volBOX(l,w,h)=l*w*h"
 goto :eof
 :algorithicConditions
+echo Loading algorithic conditions...
 set "LSS(x,y)=(((x-y)>>31)&1)"                     &REM <
 set "LEQ(x,y)=((~(y-x)>>31)&1)"                    &REM <=
 set "GTR(x,y)=(((y-x)>>31)&1)"                     &REM >
@@ -146,6 +158,7 @@ set "XOR(b1,b2)=(b1^b2)"                           &REM ^
 set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
 goto :eof
 :turtleFunctions
+echo Loading Turtle Graphics...
 set /a "DFX=%~1", "DFY=%~2", "DFA=%~3"
 set "forward=DFX+=(?+1)*^!cos:x=DFA^!, DFY+=(?+1)*^!sin:x=DFA^!"
 set "turnLeft=DFA-=?"
@@ -158,24 +171,29 @@ set "cent=DFX=wid/2, DFY=hei/2"
 set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 goto :eof
 :mouseMacros
+echo Loading Mouse macros...
 set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
 goto :eof
 :quikzip
+echo Loading .ZIP macros...
 set "ZIP=tar -cf ?.zip ?"
 set "unZIP=tar -xf ?.zip"
 set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('?', '.');"
 goto :eof
 
 :colorRange
+echo Loading color range...
 REM 1, 3, 5, 15, 17, 51, 85, 255
 set "range=%~1"
-for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;255;%%a;0m"
-for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;%%a;255;0m"
-for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;255;%%am"
-for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;0;%%a;255m"
-for /l %%a in (0,%range%,255) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;%%a;0;255m"
-for /l %%a in (255,-%range%,0) do set /a "colors+=1" & set "color[!colors!]=%esc%[38;2;255;0;%%am"
+set "totalColorsInRange=0"
+for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;%%a;0m"
+for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;255;0m"
+for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;255;%%am"
+for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;%%a;255m"
+for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;0;255m"
+for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;0;%%am"
+REM set "totalColorsInRange="
 goto :eof
 
 :loadArray
@@ -183,6 +201,7 @@ goto :eof
 goto :eof
 
 :macros
+echo Loading other macros...
 rem newLine
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
