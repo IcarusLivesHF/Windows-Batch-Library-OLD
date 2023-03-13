@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.3"
+	set "revision=3.29.4"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -20,55 +20,90 @@
 goto :eof
 :StdLib %~1=wid %~2=hei %~3=fontSize %~3=/debug
 title Powered by: Windows Batch Library - Revision: %Revision%
-set "debugC1=%~1" & set "debugC2=%~3" & set "debugC3=%~6" & set "debug=False"
-for %%d in (1 2 3) do if /i "!debugC%%d!" equ "/debug" (
-	set "debug=True"
-)
-for /l %%a in (1,1,3) do set "debugC%%a="
-
+set "preserve=ComSpec Path PATHEXT TEMP TMP ^)"
+set "defaultFontSize=12"
+set "debug=False"
+set "clearEnvironment=False"
+set "providedColorArguments=False"
+set "extendedLibrary=False"
+set "quikLibrary=False"
+set "pixel=Û"
 set "esc="
-if /i "%~4" equ "/title" (
-	title %~5
+set "\e=%esc%"
+REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
+set "\rgb=^!r^!;^!g^!;^!b^!"
+set "cls=%esc%[2J"
+set "\c=%esc%[2J"
+<nul set /p "=%esc%[?25l"
+
+for %%a in (%*) do (
+	set /a "totalArguemnts+=1"
+	set "fullArgument=%%a"
+	for /f "tokens=1-3 delims=:" %%i in ("!fullArgument:~1!") do (
+		set "argumentCommand[!totalArguemnts!]=%%~i"
+		set "argumentArgument[!totalArguemnts!][1]=%%~j"
+		set "argumentArgument[!totalArguemnts!][2]=%%~k"
+	)
 )
-if /i "%~6" equ "/color" (
-	if /i "%~7" equ "/bitcolor" (
-		<nul set /p "=%esc%[48;5;%~8m%esc%[38;5;%~9m"
-	) else if /i "%~7" equ "/rgb" (
-		<nul set /p "=%esc%[48;2;%~8m%esc%[38;2;%~9m"
+for /l %%i in (1,1,%totalArguemnts%) do (
+
+		   if /i "!argumentCommand[%%i]!" equ "w" (
+			set /a "wid=width=!argumentArgument[%%i][1]!"
+	) else if /i "!argumentCommand[%%i]!" equ "h" (
+			set /a "hei=height=!argumentArgument[%%i][1]!"
+	) else if /i "!argumentCommand[%%i]!" equ "fs" (
+			set /a "defaultFontSize=!argumentArgument[%%i][1]!"
+	) else if /i "!argumentCommand[%%i]!" equ "title" (
+			title !argumentArgument[%%i][1]!
+	) else if /i "!argumentCommand[%%i]!" equ "rgb" (
+			set "providedColorArguments=True"
+			set "backgroundColor=!argumentArgument[%%i][1]!"
+			set "textColor=!argumentArgument[%%i][2]!"
+	) else if /i "!argumentCommand[%%i]!" equ "debug" (
+			set "debug=True"
+	) else if /i "!argumentCommand[%%i]!" equ "clrEnv" (
+			set "clearEnvironment=True"
+	) else if /i "!argumentCommand[%%i]!" equ "extLib" (
+			set "extendedLibrary=True"
+	)
+	set "argumentCommand[%%i]="
+	set "argumentCommand[%%i][1]="
+	set "argumentCommand[%%i][2]="
+)
+
+if "!clearEnvironment!" neq "False" (
+	REM clear environment
+	(
+	for /f "delims==" %%v in ('set') do set "%%v="
+	for %%p in (%preserve%) do set "%%p=%%p"
 	)
 )
 
-if "%~3" neq "" (
-	set "defaultFontSize=%~3"
-) else (
-	set "defaultFontSize=12"
-)
-if "%debug%" equ "True" (
+if "%debug%" neq "False" (
 	@echo on
 	call :setfont 16 Consolas
 	call :size 180 100
 ) else (
+	if not defined wid set /a "wid=width=hei=height"
+	if not defined hei set /a "hei=height=wid=width"
 	call :setfont %defaultFontSize% "Terminal"
-	call :size %~1 %~2
+	call :size !wid! !hei!
 )
 
-REM "pixel"
-set "pixel=Û"
-REM ESC
-set "\e="
-REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
-<nul set /p "=%esc%[?25l"
-REM VT100 ready -rgb
-set "-rgb=^!r^!;^!g^!;^!b^!"
-REM new clear screen variable execute with echo %cls% or <nul set /p "=%cls%"
-set "cls=%esc%[2J"
-set "\c=%esc%[2J"
-if /i "%~3" equ "/extlib" (
+if "!providedColorArguments!" neq "False" (
+	if "!backgroundColor:~4,1!" neq "" if "!textColor:~4,1!" neq "" (
+		<nul set /p "=%esc%[48;2;%backgroundColor%m%esc%[38;2;%textColor%m"
+	) else (
+		<nul set /p "=%esc%[48;5;%backgroundColor%m%esc%[38;5;%textColor%m"
+	)
+)
+
+if "!extendedLibrary!" neq "False" (
 	rem Backspace
 	for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
 	rem BEL (sound)
 	for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x07"') do set "BEL=%%i"
-	rem Carriage Return  0x0D  decimal 13
+	rem Carriage Return
 	for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
 	rem Tab 0x09
 	for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
