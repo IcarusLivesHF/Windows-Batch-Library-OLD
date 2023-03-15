@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.4"
+	set "revision=3.29.5"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -20,14 +20,14 @@
 goto :eof
 :StdLib %~1=wid %~2=hei %~3=fontSize %~3=/debug
 title Powered by: Windows Batch Library - Revision: %Revision%
-set "preserve=ComSpec Path PATHEXT TEMP TMP ^)"
 set "defaultFontSize=12"
 set "debug=False"
 set "clearEnvironment=False"
 set "providedColorArguments=False"
 set "extendedLibrary=False"
-set "quikLibrary=False"
+set "getThirdParty=False"
 set "pixel=Û"
+set ".=Û"
 set "esc="
 set "\e=%esc%"
 REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
@@ -61,23 +61,16 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "textColor=!argumentArgument[%%i][2]!"
 	) else if /i "!argumentCommand[%%i]!" equ "debug" (
 			set "debug=True"
-	) else if /i "!argumentCommand[%%i]!" equ "clrEnv" (
-			set "clearEnvironment=True"
 	) else if /i "!argumentCommand[%%i]!" equ "extLib" (
 			set "extendedLibrary=True"
+	) else if /i "!argumentCommand[%%i]!" equ "3rdparty" (
+			set "getThirdParty=True"
 	)
 	set "argumentCommand[%%i]="
 	set "argumentCommand[%%i][1]="
 	set "argumentCommand[%%i][2]="
 )
 
-if "!clearEnvironment!" neq "False" (
-	REM clear environment
-	(
-	for /f "delims==" %%v in ('set') do set "%%v="
-	for %%p in (%preserve%) do set "%%p=%%p"
-	)
-)
 
 if "%debug%" neq "False" (
 	@echo on
@@ -108,6 +101,10 @@ if "!extendedLibrary!" neq "False" (
 	rem Tab 0x09
 	for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
 )
+
+if "!getThirdParty!" neq "False" (
+	call :get_Batch_3rdParty_Tools
+)
 goto :eof
 
 :size
@@ -121,6 +118,7 @@ if "%~2" equ "" goto :eof
 call :init_setfont
 %setFont% %~1 %~2
 goto :eof
+
 
 :cursor
 set "push=<nul set /p "=%esc%7""
@@ -534,40 +532,6 @@ set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^
 	)%\n%
 )) else set args=
 
-:_download
-rem %download% url file
-set download=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%%~1','%%~2')"%\n%
-)) else set args=
-
-:_ZIP
-rem %zip% file.ext zipFileName
-set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	tar -cf %%~2.zip %%~1%\n%
-)) else set args=
-
-:_UNZIP
-rem %unzip% zipFileName
-set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
-	tar -xf %%~1.zip%\n%
-)) else set args=
-
-:_injectLineIntoFile
-rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
-set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
-	set "linesInFile=0"%\n%
-	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
-		set /a "linesInFile+=1"%\n%
-		if /i "%%~4" neq "s" (%\n%
-			if ^^!linesInFile^^! equ %%~3 echo=%%~2^>^>-temp-.txt%\n%
-			echo %%i^>^>-temp-.txt%\n%
-		) else (%\n%
-			if ^^!linesInFile^^! equ %%~3 ( echo=%%~2^>^>-temp-.txt ) else echo %%i^>^>-temp-.txt%\n%
-		)%\n%
-	)%\n%
-	ren "%%~1" "deltmp.txt" ^& ren "-temp-.txt" "%%~1" ^& del /f /q "deltmp.txt"%\n%
-)) else set args=
-
 :_getLen
 rem %getlen% "string" <rtn> $length
 set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "$length="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$length+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "$length-=2")) else set args=
@@ -611,6 +575,44 @@ set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!
 			set "%%~3=^!$tr:~0,%%~e^!^!$b^!^!$tr:~%%~f^!"%\n%
 ))))) else set args=
 
+:_injectLineIntoFile
+rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
+set injectLineIntoFile=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
+	set "linesInFile=0"%\n%
+	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
+		set /a "linesInFile+=1"%\n%
+		if /i "%%~4" neq "s" (%\n%
+			if ^^!linesInFile^^! equ %%~3 echo=%%~2^>^>-temp-.txt%\n%
+			echo %%i^>^>-temp-.txt%\n%
+		) else (%\n%
+			if ^^!linesInFile^^! equ %%~3 ( echo=%%~2^>^>-temp-.txt ) else echo %%i^>^>-temp-.txt%\n%
+		)%\n%
+	)%\n%
+	ren "%%~1" "deltmp.txt" ^& ren "-temp-.txt" "%%~1" ^& del /f /q "deltmp.txt"%\n%
+)) else set args=
+
+:_getLatency
+rem %getLatency% <rtn> %latency%
+set "getLatency=for /f "tokens=2 delims==" %%l in ('ping -n 1 google.com ^| findstr /L "time="') do set "latency=%%l""
+
+:_download
+rem %download% url file
+set download=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%%~1','%%~2')"%\n%
+)) else set args=
+
+:_ZIP
+rem %zip% file.ext zipFileName
+set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	tar -cf %%~2.zip %%~1%\n%
+)) else set args=
+
+:_UNZIP
+rem %unzip% zipFileName
+set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
+	tar -xf %%~1.zip%\n%
+)) else set args=
+
 :_License DO NOT use unless you are DONE editing your code.
 rem %license% "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
 set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
@@ -625,19 +627,37 @@ set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^
 
 goto :eof
 
+:get_Batch_3rdParty_Tools
+	if not exist "%temp%/batch" (
+		pushd "%temp%"
+		Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('https://download1073.mediafire.com/mk7we8d8vwqgolrRQ9Z032y-LSZhQ_c9s-sSXWyBrIvX82p_w4-WiDu-ogKXlDLgEmhPPYYFSKOg-GCNsx0j1xP2nlA/etz48ptpp0l2lkp/batch.zip','batch.zip')" && (
+			move /y batch.zip "%temp%"
+			tar -xf batch.zip
+			popd
+		) || ( goto :eof )
+		goto :eof
+	)
+rem returns (mouseXpos mouseYpos CONSTANTLY no keypress needed) click keysPressed
+set "import_getInput.dll="%temp%/batch/inject" "%temp%/batch/getInput.dll""
+set "NirCmd="%temp%/batch/NirCmd""
+set "curl="%temp%/batch/curl""
+goto :eof
+
 :buildSketch
 if exist Sketch.bat goto :eof
 for %%i in (
 "QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbg0KDQpz"
-"ZXQgInJldmlzaW9uUmVxdWlyZWQ9My4yOS4xIg0Kc2V0ICAib3BlbkxpYj0ocmVu"
-"ICIlfm54MCIgdGVtcC5iYXQgJiByZW4gIkxpYnJhcnkuYmF0IiAiJX5ueDAiIg0K"
-"c2V0ICJjbG9zZUxpYj1yZW4gIiV+bngwIiAiTGlicmFyeS5iYXQiICYgcmVuIHRl"
-"bXAuYmF0ICIlfm54MCIpIiAmIHNldCAic2VsZj0lfm54MCINCigyPm51bCAlb3Bl"
-"bkxpYiUgJiYgKCBjYWxsIDpyZXZpc2lvbiApIHx8ICggcmVuIHRlbXAuYmF0ICIl"
-"fm54MCIgJiBlY2hvIExpYnJhcnkuYmF0IFJlcXVpcmVkICYgdGltZW91dCAvdCAz"
-"ICYgZXhpdCkpDQoJY2FsbCA6c3RkbGliIDUwIDUwIDEwDQoJY2FsbCA6Y3Vyc29y"
-"DQolY2xvc2VMaWIlICAmJiAoIGNscyAmIGdvdG8gOnNldHVwKQ0KOnNldHVwDQoN"
-"Cg0KcGF1c2U="
+"ZXQgInJldmlzaW9uUmVxdWlyZWQ9My4yOS41Ig0Kc2V0ICAiKD0oc2V0ICJcPT8i"
+"ICYgcmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICI/LmJhdCIgIiV+bngwIiINCnNl"
+"dCAiKT1yZW4gIiV+bngwIiAiXl4hXF5eIS5iYXQiICYgcmVuIC10LmJhdCAiJX5u"
+"eDAiKSIgJiBzZXQgInNlbGY9JX5ueDAiDQpzZXQgImZhaWxlZExpYnJhcnk9cmVu"
+"IC10LmJhdCAiJX5ueDAiICZlY2hvICBNaXNzaW5nIExpYnJhcnkuYmF0IFJlcXVp"
+"cmVkIFJldmlzaW9uOiVyZXZpc2lvblJlcXVpcmVkJSAmIHRpbWVvdXQgL3QgMyAm"
+"IGV4aXQiDQooJSg6Pz1MaWJyYXJ5JSAmJiAoY2FsbCA6cmV2aXNpb24pfHwoJWZh"
+"aWxlZExpYnJhcnklKSkyPm51bA0KCWNhbGwgOnN0ZGxpYiAvdzoxNTAgL2g6MjAg"
+"L3RpdGxlOiJNeSB0aXRsZSIgL2ZzOjE4IC9yZ2I6IjA7MDswIjoiMjU1OzI1NTsy"
+"NTUiIC8zcmRwYXJ0eQ0KCSVnZXRsZW4lDQolKSUgICYmIChjbHMmZ290byA6c2V0"
+"dXApDQo6c2V0dXANClJFTSBZb3VyIGNvZGUgaGVyZQ0KcGF1c2UgJiBleGl0"
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
