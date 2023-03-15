@@ -1,11 +1,11 @@
 @echo off & setlocal enableDelayedExpansion
 
-set "revisionRequired=3.29.2"
-set  "import(=(set "\i=?" & ren "%~nx0" -t.bat & ren "?.bat" "%~nx0""
-set ")=ren "%~nx0" "^^!\i^^!.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0"
-set "failedLibrary=ren -t.bat "%~nx0" ^&echo  Missing Library. Required Revision:%revisionRequired% ^& timeout /t 3 ^& exit"
-(2>nul %import(:?=Library% && ( call :revision ) || ( %failedLibrary% ))
-	call :stdlib /w:50 /h:20 /fs:12 /title:"My Title" /rgb:"255;255;255":"255;0;0" /c
+set "revisionRequired=3.29.5"
+set  "(=(set "\=?" & ren "%~nx0" -t.bat & ren "?.bat" "%~nx0""
+set ")=ren "%~nx0" "^^!\^^!.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0"
+set "failedLibrary=ren -t.bat "%~nx0" &echo  Missing Library.bat Required Revision:%revisionRequired% & timeout /t 3 & exit"
+(%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
+	call :stdlib /w:150 /h:20 /title:"My title" /fs:18 /rgb:"0;0;0":"255;255;255" /3rdparty
 	call :math
 	call :misc
 	call :shapes
