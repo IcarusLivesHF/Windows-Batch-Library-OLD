@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.5"
+	set "revision=3.29.6"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -79,7 +79,7 @@ if "%debug%" neq "False" (
 ) else (
 	if not defined wid set /a "wid=width=hei=height"
 	if not defined hei set /a "hei=height=wid=width"
-	call :setfont %defaultFontSize% "Terminal"
+	call :setfont %defaultFontSize% Terminal
 	call :size !wid! !hei!
 )
 
@@ -238,9 +238,10 @@ rem newLine
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
+
 :_point
 rem %point% x y <rtn> _$_
-set .=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+set point=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	set "_$_=^!_$_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
 )) else set args=
 
@@ -534,7 +535,16 @@ set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^
 
 :_getLen
 rem %getlen% "string" <rtn> $length
-set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (set "$_str=%%~1" ^& set "$length="^&(for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$length+=%%P" ^& set "$_str=^!$_str:~%%P^!") ^& set /a "$length-=2")) else set args=
+set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
+	set "$_str=%%~1#"%\n%
+	set "$length=0"%\n%
+	for %%P in (1024 512 256 128 64 32 16 8 4 2 1) do (%\n%
+		if "^!$_str:~%%P,1^!" NEQ "" (%\n%
+			set /a "$length+=%%P"%\n%
+			set "$_str=^!$_str:~%%P^!"%\n%
+		)%\n%
+	)%\n%
+)) else set args=
 
 :_pad
 rem %pad% "string".int <rtn> $padding
@@ -547,16 +557,35 @@ set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!
 )) else set args=
 
 :_encodeB64
-rem %encode:?STRING% <rtn> base64
-set encode=(echo ?^>inFile.txt) ^& (certutil -encode "inFile.txt" "outFile.txt"^>nul) ^& for /f "tokens=* skip=1" %%a in (outFile.txt) do if "%%~a" neq "-----END CERTIFICATE-----" set "base64=%%a" ^& del /f /q outFile.txt 2^>nul ^& del /f /q inFile.txt 2^>nul
+rem %encode% "string" <rtn> base64
+set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
+	echo=%%~1^>inFile.txt%\n%
+	certutil -encode "inFile.txt" "outFile.txt"^>nul%\n%
+	for /f "tokens=* skip=1" %%a in (outFile.txt) do (%\n%
+		if "%%~a" neq "-----END CERTIFICATE-----" (%\n%
+			set "base64=%%a"%\n%
+		)%\n%
+	)%\n%
+	del /f /q "outFile.txt"%\n%
+	del /f /q "inFile.txt"%\n%
+)) else set args=
 
 :_decodeB64
 rem %decode:?!base64!%
-set decode=(echo ?^>inFile.txt) ^& (certutil -decode "inFile.txt" "outFile.txt"^>nul) ^& for /f "tokens=*" %%a in (outFile.txt) do set "plainText=%%a" ^& del /f /q outFile.txt 2^>nul ^& del /f /q inFile.txt 2^>nul
+set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
+	echo %%~1^>inFile.txt%\n%
+	certutil -decode "inFile.txt" "outFile.txt"^>nul%\n%
+	for /f "tokens=*" %%a in (outFile.txt) do (%\n%
+		set "plainText=%%a"%\n%
+	)%\n%
+	del /f /q outFile.txt%\n%
+	del /f /q inFile.txt%\n%
+)) else set args=
 
 :_$string_
 rem %string_ "string" <rtn> $_len, $_rev $_upp $_low
 set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
+	for %%i in ($_len $_rev $_upp $_low) do set "%%i="%\n%
     set "$_str=%%~1" ^& set "$_strC=%%~1" ^& set "$_upp=^!$_strC:~1^!" ^& set "$_low=^!$_strC:~1^!"%\n%
     for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$_len+=%%P" ^& set "$_str=^!$_str:~%%P^!"%\n%
     set "$_str=^!$_strC:~1^!"%\n%
@@ -638,9 +667,9 @@ goto :eof
 		goto :eof
 	)
 rem returns (mouseXpos mouseYpos CONSTANTLY no keypress needed) click keysPressed
-set "import_getInput.dll="%temp%/batch/inject" "%temp%/batch/getInput.dll""
-set "NirCmd="%temp%/batch/NirCmd""
-set "curl="%temp%/batch/curl""
+set "import_getInput.dll="%temp%/batch/inject.exe" "%temp%/batch/getInput.dll""
+set "NirCmd="%temp%/batch/NirCmd.exe""
+set "curl="%temp%/batch/curl.exe""
 goto :eof
 
 :buildSketch
