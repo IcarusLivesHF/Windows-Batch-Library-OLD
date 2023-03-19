@@ -683,6 +683,7 @@ goto :eof
 		goto :eof
 	)
 rem returns (mouseXpos mouseYpos CONSTANTLY no keypress needed) click keysPressed
+set "curl=%temp%/batch/curl.exe"
 set "import_getInput.dll="%temp%/batch/inject.exe" "%temp%/batch/getInput.dll""
 set "NirCmd="%temp%/batch/NirCmd.exe""
 set "curl="%temp%/batch/curl.exe""
