@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.6"
+	set "revision=3.29.7"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -34,7 +34,12 @@ REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 set "\rgb=^!r^!;^!g^!;^!b^!"
 set "cls=%esc%[2J"
 set "\c=%esc%[2J"
+set "libraryImported=True"
 <nul set /p "=%esc%[?25l"
+rem newLine
+(set \n=^^^
+%= This creates an escaped Line Feed - DO NOT ALTER =%
+)
 
 for %%a in (%*) do (
 	set /a "totalArguemnts+=1"
@@ -84,11 +89,12 @@ if "%debug%" neq "False" (
 )
 
 if "!providedColorArguments!" neq "False" (
-	if "!backgroundColor:~4,1!" neq "" if "!textColor:~4,1!" neq "" (
-		<nul set /p "=%esc%[48;2;%backgroundColor%m%esc%[38;2;%textColor%m"
+	if "!textColor:;=!" neq "!textColor!" (
+		set "defaultStyle=2" 
 	) else (
-		<nul set /p "=%esc%[48;5;%backgroundColor%m%esc%[38;5;%textColor%m"
+		set "defaultStyle=5"
 	)
+	<nul set /p "=%esc%[48;!defaultStyle!;%backgroundColor%m%esc%[38;!defaultStyle!;%textColor%m"
 )
 
 if "!extendedLibrary!" neq "False" (
@@ -121,18 +127,32 @@ goto :eof
 
 
 :cursor
-set "push=<nul set /p "=%esc%7""
-set "pop=<nul set /p "=%esc%8""
-set "cursor[U]=<nul set /p "=%esc%[?A""
-set "cursor[D]=<nul set /p "=%esc%[?B""
-set "cursor[L]=<nul set /p "=%esc%[?C""
-set "cursor[R]=<nul set /p "=%esc%[?D""
+set ">=<nul set /p ="
+set "push=%esc%7"
+set "pop=%esc%8"
+set "cursor[U]=%esc%[?A"
+set "cursor[D]=%esc%[?B"
+set "cursor[L]=%esc%[?D"
+set "cursor[R]=%esc%[?C"
+set "colorText=%esc%[38;^!style^!;?m"
+set "colorBack=%esc%[48;^!style^!;?m"
 set "cac=%esc%[1J"
 set "cbc=%esc%[0J"
 set "underLine=%esc%[4m"
 set "capIt=%esc%[0m"
-set "\nl=%esc%E"
-set "moveXY=set /a "cursorX=x", "cursorY=y" ^& <nul set /p "=%esc%[^^!y^^!;^^!x^^!H""
+set "moveXY=%esc%[^!y^!;^!x^!H"
+set "home=%esc%[H"
+set "setDefaultColor=<nul set /p "=%esc%[48;%defaultStyle%;%backgroundColor%m%esc%[38;%defaultStyle%;%textColor%m""
+set setStyle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
+	if /i "%%~1" equ "rgb" (%\n%
+		set "style=2"%\n%
+	) else if /i "%%~1" equ "bit" (%\n%
+		set "style=5"%\n%
+	)%\n%
+)) else set args=
+if defined defaultStyle (
+	set "setDefaultColor=<nul set /p "=%esc%[48;%defaultStyle%;%backgroundColor%m%esc%[38;%defaultStyle%;%textColor%m""
+)
 goto :eof
 :math
 set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
@@ -146,30 +166,30 @@ set "Sign=1 / (x & 1)"
 set "Abs=(((x)>>31|1)*(x))"
 set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 set "avg=(x&y)+(x^y)/2"
+set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
+set "lerp=?=(a+c*(b-a)*10)/1000+a"
+set "swap(x,y)=t=x, x=y, y=t"
+set "getState=a*8+b*4+c*2+d*1"
 goto :eof
 :misc
 set "rndsign=$o=(^!random^!%%3+-1),out=(((((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))*($o+def))|((~(((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))&1)*($o*num)))"
 set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
-set "swap(x,y)=t=x, x=y, y=t"
-set "getState=a*8+b*4+c*2+d*1"
-set "map=x2+(y2-x2)*(v-x1)/(y1-x1)"
-set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
-set "lerp=?=(a+c*(b-a)*10)/1000+a"
 set "percentOf=p=x*y/100"
-set "odds=1/((((^!random^!%%100)-x)>>31)&1)"
+set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
 set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
 set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
 set "infiniteLoop=for /l %%# in () do "
 set "throttle=for /l %%# in (1,?,1000000) do rem"
+set "ifOdd=1/(x&1)"
+set "ifEven=1/(1+x&1)"
 set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
 set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
-set "inScr=((wid-x-1)>>31)|((hei-y-2)>>31)"
 set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
 set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 set "fib=?=c=a+b, a=b, b=c"
 set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
-set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"goto :eof
+set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"
 goto :eof
 :shapes
 set "SQ(x)=x*x"
@@ -216,9 +236,9 @@ set "unZIP=tar -xf ?.zip"
 set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('?', '.');"
 goto :eof
 
-:colorRange
+:colorRange <rtn> color[] range totalColorsInRange
 REM 1, 3, 5, 15, 17, 51, 85, 255
-set "range=%~1"
+set /a "range=%~1"
 set "totalColorsInRange=0"
 for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;%%a;0m"
 for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;255;0m"
@@ -226,7 +246,7 @@ for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!to
 for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;%%a;255m"
 for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;0;255m"
 for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;0;%%am"
-REM set "totalColorsInRange="
+set /a "range=255 / %~1"
 goto :eof
 
 :loadArray
@@ -234,10 +254,6 @@ goto :eof
 goto :eof
 
 :macros
-rem newLine
-(set \n=^^^
-%= This creates an escaped Line Feed - DO NOT ALTER =%
-)
 
 :_point
 rem %point% x y <rtn> _$_
@@ -338,10 +354,10 @@ set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	set "$rect=^!$rect^!%esc%[0m"%\n%
 )) else set args=
 
-:_line
-rem line x0 y0 x1 y1 <rtn> $line
-set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "$line="%\n%
+rem line x0 y0 x1 y1 color
+set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
+	if "%%~5" equ "" ( set "hue=15" ) else ( set "hue=%%~5")%\n%
+	set "$line=%esc%[38;5;^!hue^!m"%\n%
 	set /a "xa=%%~1", "ya=%%~2", "xb=%%~3", "yb=%%~4", "dx=%%~3 - %%~1", "dy=%%~4 - %%~2"%\n%
 	if ^^!dy^^! lss 0 ( set /a "dy=-dy", "stepy=-1" ) else ( set "stepy=1" )%\n%
 	if ^^!dx^^! lss 0 ( set /a "dx=-dx", "stepx=-1" ) else ( set "stepx=1" )%\n%
@@ -351,18 +367,18 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 		for /l %%x in (^^!xa^^!,^^!stepx^^!,^^!xb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "ya+=stepy", "fraction-=dx"%\n%
 			set /a "fraction+=dy"%\n%
-			set "$line=^!$line^!%esc%[^!ya^!;%%xH%pixel%"%\n%
+			set "$line=^!$line^!%esc%[^!ya^!;%%xHÛ"%\n%
 		)%\n%
 	) else (%\n%
 		set /a "fraction=dx - (dy >> 1)"%\n%
 		for /l %%y in (^^!ya^^!,^^!stepy^^!,^^!yb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "xa+=stepx", "fraction-=dy"%\n%
 			set /a "fraction+=dx"%\n%
-			set "$line=^!$line^!%esc%[%%y;^!xa^!H%pixel%"%\n%
+			set "$line=^!$line^!%esc%[%%y;^!xa^!HÛ"%\n%
 		)%\n%
 	)%\n%
-	set "$line=^!$line^!%esc%[0m"%\n%
 )) else set args=
+goto :eof
 
 :_$bezier
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
