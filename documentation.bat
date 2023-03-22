@@ -24,7 +24,6 @@ rem it will CALL :FUNCTIONS from INSIDE the "Library.bat."
 	call :loadArray
 	call :macros
 %)%  && (cls&goto :setup)
-
 :setup
 
 pause & exit
@@ -71,8 +70,8 @@ rem 	I find this argument useful when debugging new macros for the library.
 rem
 rem STDLIB provides the following variables for you to use.
 rem 
-rem %pixel% - Û character
-rem %.% 	- Û character
+rem %pixel% - Ã› character
+rem %.% 	- Ã› character
 rem %esc%   - esc character
 rem %\e%    - esc character
 rem %cls%   - echo or <nul set /p "=" to clear screen
