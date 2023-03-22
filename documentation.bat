@@ -1,14 +1,14 @@
     The Window Batch Library is a collection of pre-written batch scripts that can be used 
-	to simplify and speed up the process of creating command-line interfaces (CLIs) and other 
-	types of text-based user interfaces (TUIs). The library includes a wide range of functions 
-	and macros, including standard console manipulations, mathematical calculations, color and 
-	text formatting, and mouse input.
-	
-	Overall, the Window Batch Library is a powerful tool for anyone looking to create 
-	command-line interfaces or other types of text-based user interfaces using Windows Batch 
-	scripting. By providing a range of pre-written functions and macros, the library can help 
-	streamline the development process and make it easier to create complex and powerful 
-	applications using the command line.
+    to simplify and speed up the process of creating command-line interfaces (CLIs) and other 
+    types of text-based user interfaces (TUIs). The library includes a wide range of functions 
+    and macros, including standard console manipulations, mathematical calculations, color and 
+    text formatting, and mouse input.
+
+    Overall, the Window Batch Library is a powerful tool for anyone looking to create 
+    command-line interfaces or other types of text-based user interfaces using Windows Batch 
+    scripting. By providing a range of pre-written functions and macros, the library can help 
+    streamline the development process and make it easier to create complex and powerful 
+    applications using the command line.
 
 
     Open the library by substituting '?' with the name of the library in the variable %(%
@@ -74,7 +74,6 @@ pause & exit
         I find this argument useful when debugging new macros for the library.
 
     STDLIB provides the following variables for you to use.
-    
     %pixel% - Û character
     %.%     - Û character
     %esc%   - esc character
@@ -85,12 +84,9 @@ pause & exit
     %\n%     - new line
     Hides cursor
 
-    CALL :CURSOR <no arguments>
-    
-    Provides the following as macros.
+    CALL :CURSOR <no arguments> - Provides the following as macros.
     
     %>%               - <nul set /p "=" but less to type.
-
     All of these here must be echo'd or %>%
     %push%            - save current x y postion
     %pop%             - return to saved x y postion
@@ -109,9 +105,7 @@ pause & exit
     %setStyle% - 1 arguement. RGB or BIT. RGB(2) will expect "r;g;b" as a color code where as BIT(5)
         will expect 0-255 as a color code.
 
-    CALL :MATH <no arguments>
-    
-    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+    CALL :MATH <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %PI%                -  31416 CONSTANT
     %HALF_PI%           -  15708 CONSTANT
@@ -134,9 +128,7 @@ pause & exit
     %swap%              - provided x and y are defined, swap them
     %getState%          - provide a, b, c, d, returns 0-15
 
-    CALL :MISC <no arguments>
-    
-    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+    CALL :MISC <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %gravity%           - accerlation increases by 1 per frame,
                             velocity increases by accerlation per frame,
@@ -160,9 +152,7 @@ pause & exit
     %fib%               - returns fibonacci sequence
     %mouseBound%        - provide ma, mb, mc, md as edge cases to mouse clicks.
 
-    CALL :SHAPES <no arguments>
-    
-    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+    CALL :SHAPES <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %SQ(x)%             - provide x         - returns x^2 or area of square.
     %CUBE(x)%           - provide x         - returns x^3 or area of cube
@@ -174,9 +164,7 @@ pause & exit
     %areaTRA(b1,b2,h)%  - provide b1, b2, h - returns b1 * b2 * h / 2
     %volBOX(l,w,h)%     - provide l, w, h   - returns l * w * h
 
-    CALL :algorithicConditions <no arguments>
-    
-    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+    CALL :algorithicConditions <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
     
     %LSS(x,y)%             - provide x, y         - <
     %LEQ(x,y)%             - provide x, y         - <=
@@ -189,9 +177,7 @@ pause & exit
     %XOR(b1,b2)%           - provide b1, b2       - ^
     %TERN(bool,v1,v2)%     - provide bool, v1, v2 - ?:
 	
-	CALL :turtleFunctions X Y THETA/ANGLE
-    
-    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+	CALL :turtleFunctions X Y THETA/ANGLE- Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 	
 	Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
 	
@@ -207,24 +193,17 @@ pause & exit
 	
 	Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
 	
-	CALL :quikzip <no arguements>  - NOT MATH
-	
-	Provides the following tools
+	CALL :quikzip <no arguements>  - NOT MATH - Provides the following tools
 	
 	%ZIP%           - %zip:?=File.ext%
 	%unZIP%         - %unZIP:?=NAME_OF_ZIP%   DO NOT EXTENTION
 	
-	CALL :colorRange 1-255
-	
-	Provides array of colors sorted in RGB in color[]
+	CALL :colorRange <1-255> - Provides array of colors sorted in RGB in color[]
 	
 	Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
-	
 	Also provides %range% (CONSTANT) which is 255 / %~1
 	
-	CALL :macros
-	
-	Provides list of larger functions
+	CALL :macros <no arguments> Provides list of larger functions
 	
 	%point%               - x y                                                                     <rtn> _scrn_
 	%plot%                - x y 0-255 CHAR <rtn> _scrn__
