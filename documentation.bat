@@ -1,8 +1,18 @@
-    this script is not intended to be ran.-----v
+    The Window Batch Library is a collection of pre-written batch scripts that can be used 
+	to simplify and speed up the process of creating command-line interfaces (CLIs) and other 
+	types of text-based user interfaces (TUIs). The library includes a wide range of functions 
+	and macros, including standard console manipulations, mathematical calculations, color and 
+	text formatting, and mouse input.
+	
+	Overall, the Window Batch Library is a powerful tool for anyone looking to create 
+	command-line interfaces or other types of text-based user interfaces using Windows Batch 
+	scripting. By providing a range of pre-written functions and macros, the library can help 
+	streamline the development process and make it easier to create complex and powerful 
+	applications using the command line.
 
 
     Open the library by substituting '?' with the name of the library in the variable %(%
-     and check if the required revision OR LESS is being used. If everything checks out,
+    and check if the required revision OR LESS is being used. If everything checks out,
     it will CALL :FUNCTIONS from INSIDE the "Library.bat."
 
 (%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
@@ -44,7 +54,7 @@ pause & exit
         /3rdparty also provides the current variables as macros for however you want to use them
             
                 USE AS COMMANDS
-rem
+
             a. %curl% <CURL SYNTAX>
             b. %nircmd% <NIRCMD SYNTAX>
             c. %wget% <WGET SYNTAX>
@@ -62,7 +72,7 @@ rem
     /debug - turns on debug mode, echo is ON, font is larger, font set to consolas
         for readability, and a larger console size to see all the code in one spot. 
         I find this argument useful when debugging new macros for the library.
-rem
+
     STDLIB provides the following variables for you to use.
     
     %pixel% - Û character
@@ -80,7 +90,7 @@ rem
     Provides the following as macros.
     
     %>%               - <nul set /p "=" but less to type.
-rem
+
     All of these here must be echo'd or %>%
     %push%            - save current x y postion
     %pop%             - return to saved x y postion
@@ -102,20 +112,20 @@ rem
     CALL :MATH <no arguments>
     
     Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-rem
-    %PI%                -  31416
-    %HALF_PI%           -  15708
-    %TWO_PI%            -  62832
-    %PI32%              -  47124
-    %NEG_PI%            - -31416
-    %NEG_HALF_PI%       - -15708
+
+    %PI%                -  31416 CONSTANT
+    %HALF_PI%           -  15708 CONSTANT
+    %TWO_PI%            -  62832 CONSTANT
+    %PI32%              -  47124 CONSTANT
+    %NEG_PI%            - -31416 CONSTANT
+    %NEG_HALF_PI%       - -15708 CONSTANT
     %SIN%               - provide x as  theta/angle as 0-360
     %COS%               - provide x as theta/angle as 0-360
     %SINR%              - provide x as theta/angle as 0-TWO_PI
     %COSR%              - provide x as theta/angle as 0-TWO_PI
-    %sqrt(N)%           - provide N
-    %sign%              - provide x
-    %abs%               - provide x
+    %sqrt(N)%           - provide N get square root of N
+    %sign%              - provide x get sign of x
+    %abs%               - provide x get absolute value of x
     %dist(x2,x1,y2,y1)% - get distance from one point to another.
     %avg%               - return average or x and y 
     %map%               - v = value to change, a = v-FROM, b = v-TO, c = v-DESIRED-FROM, d = v-DESIRED-TO
@@ -127,7 +137,7 @@ rem
     CALL :MISC <no arguments>
     
     Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-rem
+
     %gravity%           - accerlation increases by 1 per frame,
                             velocity increases by accerlation per frame,
                             Y position is increased by velocity per frame
@@ -153,7 +163,7 @@ rem
     CALL :SHAPES <no arguments>
     
     Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-rem
+
     %SQ(x)%             - provide x         - returns x^2 or area of square.
     %CUBE(x)%           - provide x         - returns x^3 or area of cube
     %pmSQ(x)%           - provide x         - returns x * 4
@@ -171,10 +181,82 @@ rem
     %LSS(x,y)%             - provide x, y         - <
     %LEQ(x,y)%             - provide x, y         - <=
     %GTR(x,y)%             - provide x, y         - >
-    %GEQ(x,y)              - provide x, y         - >=
+    %GEQ(x,y)%             - provide x, y         - >=
     %EQU(x,y)%             - provide x, y         - ==
     %NEQ(x,y)%             - provide x, y         - !=
     %AND(b1,b2)%           - provide b1, b2       - &&
     %OR(b1,b2)%            - provide b1, b2       - ||
     %XOR(b1,b2)%           - provide b1, b2       - ^
     %TERN(bool,v1,v2)%     - provide bool, v1, v2 - ?:
+	
+	CALL :turtleFunctions X Y THETA/ANGLE
+    
+    Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+	
+	Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
+	
+	%forward%       - upon execution, sub ? for 1-n    EX: %forward:?=1%
+	%turnLeft%      - upon execution, sub ? for 0-360  EX: %turnLeft:?=1%
+	%turnRight%     - upon execution, sub ? for 0-360  EX: %turnRight:?=1%
+	%TF_push%       - save turtle position
+	%TF_pop%        - return to saved turtle position
+	%draw%          - %draw:?=VARIABLE% will write dfx dfy dfa to VARIABLE - NOT MATH
+	%home%          - sends turtle home
+	%cent%          - sends turtle to middle screen
+	%penDown%       - draw while the turtle moves  EX: %pendown:#=1%  - NOT MATH
+	
+	Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
+	
+	CALL :quikzip <no arguements>  - NOT MATH
+	
+	Provides the following tools
+	
+	%ZIP%           - %zip:?=File.ext%
+	%unZIP%         - %unZIP:?=NAME_OF_ZIP%   DO NOT EXTENTION
+	
+	CALL :colorRange 1-255
+	
+	Provides array of colors sorted in RGB in color[]
+	
+	Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
+	
+	Also provides %range% (CONSTANT) which is 255 / %~1
+	
+	CALL :macros
+	
+	Provides list of larger functions
+	
+	%point%               - x y                                                                     <rtn> _scrn_
+	%plot%                - x y 0-255 CHAR <rtn> _scrn__
+	%RGBpoint%            - x y 0-255 0-255 0-255 CHAR <rtn> _scrn_
+	%hexToRGB%            - '00a2ed' no quotes <rtn> R G B
+	%translate%           - x Xoffset y Yoffset
+	%Bvector%             - x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
+	%lerpRGB%             - %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
+	%getDistance%         - x2 x1 y2 y1 <rtnVar>
+	%exp%                 - num pow <rtnVar>
+	%circle%              - x y ch cw <rtn> $circle
+	%rect%                - x r length <rtn> $rect
+	%line%                - x0 y0 x1 y1 color <rtn> $line
+	%bezier%              - x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $bezier
+	%RGBezier%            - x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $RGBezier
+	%arc%                 - x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color
+	%plot_HSL_RGB%        - x y 0-360 0-10000 0-10000
+	%plot_HSV_RGB%        - x y 0-360 0-10000 0-10000
+	%clamp%               - x min max RETURNVAR
+	%map%                 - min max X RETURNVAR
+	%fncross%             - x1 y1 x2 y2 RETURNVAR
+	%intersect%           - x1 y1 x2 y2 x3 y3 x4 y4 RETURNVAR RETURNVAR - CROSS VECTOR PRODUCT algorithm
+	%HSL_line%            - x1 y1 x2 y2 0-360 0-10000 0-10000
+	%getLen%              - "string" <rtn> $length
+	%pad%                 - "string".int <rtn> $padding
+	%encode%              - "string" <rtn> base64
+	%decode%              - %decode:?=!base64!%
+	%$string_%            - "string" <rtn> $_len, $_rev $_upp $_low
+	%memset%              - var "replacement" "length" - May be removed
+	%injectLineIntoFile%  - %injectLineIntoFile:?=FILE NAME.EXT% "String":LineNumber
+	%getLatency%          - <rtn> %latency%
+	%download%            - %url% %file%
+	%zip%                 - file.ext zipFileName
+	%unzip%               - zipFileName
+	%license%             - "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
