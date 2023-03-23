@@ -220,7 +220,7 @@ pause & exit
     %translate%           - x Xoffset y Yoffset
 		shift x and y by their offset
 
-    %Bvector%             - ID                                                                      <rtn> %~1.x %~1.y %~1.td %~1.tr %~1.m %~1.i %~1.j %~1.rgb 
+    %Bvector%             - name[ID]                                                                <rtn> %~1.x %~1.y %~1.td %~1.tr %~1.m %~1.i %~1.j %~1.rgb 
 		creates vector[ID] with the following attributes
 			x  - x position
 			y  - y position
