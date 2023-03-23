@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.7"
+	set "revision=3.29.8"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -29,12 +29,11 @@ set "getThirdParty=False"
 set "pixel=Û"
 set ".=Û"
 set "esc="
+(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 set "\e=%esc%"
-REM (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 set "\rgb=^!r^!;^!g^!;^!b^!"
 set "cls=%esc%[2J"
 set "\c=%esc%[2J"
-set "libraryImported=True"
 <nul set /p "=%esc%[?25l"
 rem newLine
 (set \n=^^^
@@ -155,7 +154,7 @@ if defined defaultStyle (
 )
 goto :eof
 :math
-set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+PI_div_2, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
+set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+HALF_PI, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
 set "sin=(a=(x * 31416 / 180)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
 set "cos=(a=(15708 - x * 31416 / 180)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), %_SIN%) / 10000"
@@ -168,19 +167,18 @@ set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1
 set "avg=(x&y)+(x^y)/2"
 set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
 set "lerp=?=(a+c*(b-a)*10)/1000+a"
-set "swap(x,y)=t=x, x=y, y=t"
+set "swap=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
 goto :eof
 :misc
-set "rndsign=$o=(^!random^!%%3+-1),out=(((((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))*($o+def))|((~(((~(0-$o)>>31)&1)&((~($o-0)>>31)&1))&1)*($o*num)))"
 set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
 set "percentOf=p=x*y/100"
 set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
-set "every=1/(((~(0-(frames%%n))>>31)&1)&((~((frames%%n)-0)>>31)&1))"
+set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
 set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
-set "infiniteLoop=for /l %%# in () do "
-set "throttle=for /l %%# in (1,?,1000000) do rem"
+set "loop=for /l %%# in () do "
+set "throttle=for /l %%# in (1,x,1000000) do rem"
 set "ifOdd=1/(x&1)"
 set "ifEven=1/(1+x&1)"
 set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
@@ -226,10 +224,6 @@ set "home=DFX=0, DFY=0, DFA=0"
 set "cent=DFX=wid/2, DFY=hei/2"
 set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 goto :eof
-:mouseMacros
-set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
-set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
-goto :eof
 :quikzip
 set "ZIP=tar -cf ?.zip ?"
 set "unZIP=tar -xf ?.zip"
@@ -237,7 +231,7 @@ set "unZIP_PS=powershell.exe -nologo -noprofile -command "Add-Type -A 'System.IO
 goto :eof
 
 :colorRange <rtn> color[] range totalColorsInRange
-REM 1, 3, 5, 15, 17, 51, 85, 255
+REM 1, 3, 5, 15, 17, 51, 85, 255 - recommended
 set /a "range=%~1"
 set "totalColorsInRange=0"
 for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;%%a;0m"
@@ -256,21 +250,21 @@ goto :eof
 :macros
 
 :_point
-rem %point% x y <rtn> _$_
+rem %point% x y <rtn> _scrn_
 set point=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	set "_$_=^!_$_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
+	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
 )) else set args=
 
 :_plot
-rem %plot% x y 0-255 CHAR <rtn> _$_
+rem %plot% x y 0-255 CHAR <rtn> _scrn_
 set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;5;%%3m%%~4!esc![0m"%\n%
+	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H!esc![38;5;%%3m%%~4!esc![0m"%\n%
 )) else set args=
 
 :_RGBpoint
 rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
 set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set "_$_=^!_$_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
+	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
 )) else set args=
 
 :_hexToRGB
@@ -288,17 +282,16 @@ set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!arg
 :_BVector
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1,2" %%1 in ("^!args^!") do (%\n%
-		   set /a "%%~1.x=^!random^! %% wid + 1"%\n%
-		   set /a "%%~1.y=^!random^! %% hei + 1"%\n%
-	if /i "%%~2" neq "RAD" (%\n%
-		   set /a "%%~1.t=^!random^! %% 360"%\n%
-	) else set /a "%%~1.t=^!random^! %% TWO_PI"%\n%
-		   set /a "%%~1.m=^!random^! %% 4 + 1"%\n%
-		   set /a "%%~1.i=^!random^! %% 3 + 1"%\n%
-		   set /a "%%~1.j=^!random^! %% 3 + 1"%\n%
-		   set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
-		   set "%%~1.rgb=^!bvr^!;^!bvg^!;^!bvb^!"%\n%
-		   for %%a in (bvr bvg bvb) do set "%%a="%\n%
+	set /a "%%~1.x=^!random^! %% wid + 1"%\n%
+	set /a "%%~1.y=^!random^! %% hei + 1"%\n%
+	set /a "%%~1.td=^!random^! %% 360"%\n%
+	set /a "%%~1.tr=^!random^! %% TWO_PI"%\n%
+	set /a "%%~1.m=^!random^! %% 3 + 2"%\n%
+	set /a "%%~1.i=^!random^! %% 3 + 1"%\n%
+	set /a "%%~1.j=^!random^! %% 3 + 1"%\n%
+	set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
+	set "%%~1.rgb=^!bvr^!;^!bvg^!;^!bvb^!"%\n%
+	for %%a in (bvr bvg bvb) do set "%%a="%\n%
 )) else set args=
 
 :_lerpRGB
@@ -354,6 +347,7 @@ set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	set "$rect=^!$rect^!%esc%[0m"%\n%
 )) else set args=
 
+:_line
 rem line x0 y0 x1 y1 color
 set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	if "%%~5" equ "" ( set "hue=15" ) else ( set "hue=%%~5")%\n%
@@ -380,7 +374,7 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 )) else set args=
 goto :eof
 
-:_$bezier
+:_bezier
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
 	set "$bezier=" ^& set "c=0"%\n%
@@ -460,12 +454,6 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	)%\n%
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
-)) else set args=
-
-:_ifAnd
-rem %ifAnd% value LO HI RETURNVAR
-set ifAnd=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set /a "aux=(%%~2-%%~1)*(%%~1-%%~3), %%~4=(aux-1)/aux"%\n%
 )) else set args=
 
 :_clamp
@@ -554,7 +542,7 @@ rem %getlen% "string" <rtn> $length
 set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	set "$_str=%%~1#"%\n%
 	set "$length=0"%\n%
-	for %%P in (1024 512 256 128 64 32 16 8 4 2 1) do (%\n%
+	for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (%\n%
 		if "^!$_str:~%%P,1^!" NEQ "" (%\n%
 			set /a "$length+=%%P"%\n%
 			set "$_str=^!$_str:~%%P^!"%\n%
@@ -587,7 +575,7 @@ set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 )) else set args=
 
 :_decodeB64
-rem %decode:?!base64!%
+rem %decode:?=!base64!%
 set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	echo %%~1^>inFile.txt%\n%
 	certutil -decode "inFile.txt" "outFile.txt"^>nul%\n%
@@ -609,16 +597,6 @@ set $string_=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("
     for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do set "$_upp=^!$_upp:%%i=%%i^!"%\n%
     for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "$_low=^!$_low:%%i=%%i^!"%\n%
 )) else set args=
-
-:_memset
-rem %memset% var "replacement" "length"
-set memset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%0 in ("^!args^!") do ( for /f "tokens=1,2 delims=+" %%3 in ("%%~0") do (%\n%
-	set /a "$l=%%~4, $k=%%~2", "ep=%%~4+$k" ^& set "$tr=^!%%~3^!" ^& set "$b="%\n%
-	for %%j in (^^!$k^^!) do ( for /l %%a in (1,1,%%~j) do set "$b=^!$b^!%%~1"%\n%
-		if "%%~4" equ "" ( set "%%~3=^!$b^!^!$tr:~%%~j^!"%\n%
-		) else for /f "tokens=1,2" %%e in ("^!$l^! ^!ep^!") do (%\n%
-			set "%%~3=^!$tr:~0,%%~e^!^!$b^!^!$tr:~%%~f^!"%\n%
-))))) else set args=
 
 :_injectLineIntoFile
 rem %injectLineIntoFile:?=FILE NAME.EXT% "String":Line#
@@ -687,6 +665,9 @@ set "curl=%temp%/batch/curl.exe"
 set "import_getInput.dll="%temp%/batch/inject.exe" "%temp%/batch/getInput.dll""
 set "NirCmd="%temp%/batch/NirCmd.exe""
 set "curl="%temp%/batch/curl.exe""
+set "wget="%temp%/batch/wget.exe""
+set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
+set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
 goto :eof
 
 :buildSketch
@@ -707,44 +688,6 @@ for %%i in (
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
-goto :eof
-
-:mouse
-    if exist "%temp%\mouse.exe" call :mouseMacros & goto :eof
-    for %%a in (
-		"TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        "AAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5v"
-        "dCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAECAAAAAAAAAAAA"
-        "AAAAAOAADwMLAQYAAAAAAAAAAAAAAAAAQBEAAAAQAAAAIAAAAABAAAAQAAAAAgAA"
-        "BAAAAAAAAAAEAAAAAAAAAFAhAAAAAgAAAAAAAAMAAAAAABAAABAAAAAAEAAAEAAA"
-        "AAAAABAAAAAAAAAAAAAAACAgAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        "AAAAAAAAAABcIAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC50ZXh0AAAA"
-        "ABAAAAAQAAAAAgAAAAIAAAAAAAAAAAAAAAAAACAAAGAuZGF0YQAAAFABAAAAIAAA"
-        "UgEAAAAEAAAAAAAAAAAAAAAAAABAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVieWB7AgAAACQjUX6UOgs"
-        "AAAAg8QED79F/lAPv0X8UA+2RfpQuAAgQABQ6IgBAACDxBC4AAAAAOkAAAAAycNV"
-        "ieWB7CQAAACQuPb///9Q6GwBAACJRfy4AAAAAIlF3I1F+FCLRfxQ6FwBAACLRfiD"
-        "yBCD4L+D4N9Qi0X8UOhOAQAAi0XchcAPhAUAAADpnAAAAI1F9FC4AQAAAFCNReBQ"
-        "i0X8UOgvAQAAD7dF4IP4Ag+FcwAAAItF6IP4AbgAAAAAD5TAiUXchcAPhA8AAACL"
-        "RQi5AQAAAIgI6SMAAACLReiD+AK4AAAAAA+UwIlF3IXAD4QKAAAAi0UIuQIAAACI"
-        "CItF3IXAD4QdAAAAi0UIg8ACD79N5GaJCItFCIPAAoPAAg+/TeZmiQjpVP///4tF"
-        "+FCLRfxQ6JUAAADJwwAAAFWJ5YHsFAAAAJC4AAAAAIlF7LgAAAMAULgAAAEAUOh9"
-        "AAAAg8QIuAEAAABQ6HcAAACDxASNRexQuAAAAABQjUX0UI1F+FCNRfxQ6GEAAACD"
-        "xBSLRfRQi0X4UItF/FDoXf7//4PEDIlF8ItF8FDoRgAAAIPEBMnDAP8lXCBAAAAA"
-        "/yV0IEAAAAD/JXggQAAAAP8lfCBAAAAA/yWAIEAAAAD/JWAgQAAAAP8lZCBAAAAA"
-        "/yVoIEAAAAD/JWwgQAAAACVkICVkICVkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        "iCAAAAAAAAAAAAAAtCAAAFwgAACgIAAAAAAAAAAAAAD9IAAAdCAAAAAAAAAAAAAA"
-        "AAAAAAAAAAAAAAAAvyAAAMggAADVIAAA5iAAAPYgAAAAAAAACiEAABkhAAAqIQAA"
-        "OyEAAAAAAAC/IAAAyCAAANUgAADmIAAA9iAAAAAAAAAKIQAAGSEAACohAAA7IQAA"
-        "AAAAAG1zdmNydC5kbGwAAABwcmludGYAAABfY29udHJvbGZwAAAAX19zZXRfYXBw"
-        "X3R5cGUAAABfX2dldG1haW5hcmdzAAAAZXhpdABrZXJuZWwzMi5kbGwAAABHZXRT"
-        "dGRIYW5kbGUAAABHZXRDb25zb2xlTW9kZQAAAFNldENvbnNvbGVNb2RlAAAAUmVh"
-        "ZENvbnNvbGVJbnB1dEEAAAAA"
-) do echo %%~a>>cMouse.txt
-certutil -decode cMouse.txt %temp%\mouse.exe
-del /f /q cmouse.txt
-call :mouseMacros
 goto :eof
 
 :init_setfont
