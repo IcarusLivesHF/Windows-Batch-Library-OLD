@@ -7,15 +7,13 @@ and other types of text-based user interfaces (TUIs).
 *This library includes a wide range of functions and macros, including standard console manipulations, 
 mathematical calculations, color and  text formatting, and mouse input.*
 
-    +Basic mathematical operations: A batch library can include pre-written scripts for performing basic mathematical operations such as addition, subtraction, multiplication, and division. These scripts can be particularly useful for automating calculations that need to be performed repeatedly.
+    +Basic mathematical operations: For performing basic mathematical operations such as addition, subtraction, multiplication, and division. These scripts can be particularly useful for automating calculations that need to be performed repeatedly.
 
-    +Advanced mathematical functions: A batch library can include pre-written scripts for performing advanced mathematical functions such as trigonometric functions, logarithms, and exponential functions. These scripts can be particularly useful for scientific research and data analysis.
+    +Advanced mathematical functions: For performing advanced mathematical functions such as trigonometric functions, logarithms, and exponential functions. These scripts can be particularly useful for scientific research and data analysis.
 
-    +Graphics generation: A batch library can include pre-written scripts for generating 2D and 3D graphics. These scripts can be particularly useful for computer-aided design and computer graphics applications.
-
-    +Image manipulation: A batch library can include pre-written scripts for performing image manipulation tasks such as cropping, resizing, and rotating images. These scripts can be particularly useful for graphic designers and photographers.
+    +Graphics generation: For generating 2D graphics. These scripts can be particularly useful for computer-aided design and computer graphics applications.
     
-    +Data visualization: A batch library can include pre-written scripts for visualizing data using graphs, charts, and other visual representations. These scripts can be particularly useful for scientific research and data analysis.
+    +Data visualization: For visualizing data using graphs, charts, and other visual representations. These scripts can be particularly useful for scientific research and data analysis.
 
 Overall, the **Window Batch Library** is a powerful tool for anyone looking to create 
 command-line interfaces or other types of text-based user interfaces using Windows Batch 
