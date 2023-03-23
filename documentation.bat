@@ -165,7 +165,7 @@ pause & exit
     %volBOX(l,w,h)%     - provide l, w, h   - returns l * w * h
 
     CALL :algorithicConditions <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-    
+
     %LSS(x,y)%             - provide x, y         - <
     %LEQ(x,y)%             - provide x, y         - <=
     %GTR(x,y)%             - provide x, y         - >
@@ -176,66 +176,147 @@ pause & exit
     %OR(b1,b2)%            - provide b1, b2       - ||
     %XOR(b1,b2)%           - provide b1, b2       - ^
     %TERN(bool,v1,v2)%     - provide bool, v1, v2 - ?:
-	
-	CALL :turtleFunctions X Y THETA/ANGLE- Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-	
-	Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
-	
-	%forward%       - upon execution, sub ? for 1-n    EX: %forward:?=1%
-	%turnLeft%      - upon execution, sub ? for 0-360  EX: %turnLeft:?=1%
-	%turnRight%     - upon execution, sub ? for 0-360  EX: %turnRight:?=1%
-	%TF_push%       - save turtle position
-	%TF_pop%        - return to saved turtle position
-	%draw%          - %draw:?=VARIABLE% will write dfx dfy dfa to VARIABLE - NOT MATH
-	%home%          - sends turtle home
-	%cent%          - sends turtle to middle screen
-	%penDown%       - draw while the turtle moves  EX: %pendown:#=1%  - NOT MATH
-	
-	Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
-	
-	CALL :quikzip <no arguements>  - NOT MATH - Provides the following tools
-	
-	%ZIP%           - %zip:?=File.ext%
-	%unZIP%         - %unZIP:?=NAME_OF_ZIP%   DO NOT EXTENTION
-	
-	CALL :colorRange <1-255> - Provides array of colors sorted in RGB in color[]
-	
-	Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
-	Also provides %range% (CONSTANT) which is 255 / %~1
-	
-	CALL :macros <no arguments> Provides list of larger functions
-	
-	%point%               - x y                                                                     <rtn> _scrn_
-	%plot%                - x y 0-255 CHAR <rtn> _scrn__
-	%RGBpoint%            - x y 0-255 0-255 0-255 CHAR <rtn> _scrn_
-	%hexToRGB%            - '00a2ed' no quotes <rtn> R G B
-	%translate%           - x Xoffset y Yoffset
-	%Bvector%             - x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
-	%lerpRGB%             - %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
-	%getDistance%         - x2 x1 y2 y1 <rtnVar>
-	%exp%                 - num pow <rtnVar>
-	%circle%              - x y ch cw <rtn> $circle
-	%rect%                - x r length <rtn> $rect
-	%line%                - x0 y0 x1 y1 color <rtn> $line
-	%bezier%              - x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $bezier
-	%RGBezier%            - x1 y1 x2 y2 x3 y3 x4 y4 length <rtn> $RGBezier
-	%arc%                 - x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color
-	%plot_HSL_RGB%        - x y 0-360 0-10000 0-10000
-	%plot_HSV_RGB%        - x y 0-360 0-10000 0-10000
-	%clamp%               - x min max RETURNVAR
-	%map%                 - min max X RETURNVAR
-	%fncross%             - x1 y1 x2 y2 RETURNVAR
-	%intersect%           - x1 y1 x2 y2 x3 y3 x4 y4 RETURNVAR RETURNVAR - CROSS VECTOR PRODUCT algorithm
-	%HSL_line%            - x1 y1 x2 y2 0-360 0-10000 0-10000
-	%getLen%              - "string" <rtn> $length
-	%pad%                 - "string".int <rtn> $padding
-	%encode%              - "string" <rtn> base64
-	%decode%              - %decode:?=!base64!%
-	%$string_%            - "string" <rtn> $_len, $_rev $_upp $_low
-	%memset%              - var "replacement" "length" - May be removed
-	%injectLineIntoFile%  - %injectLineIntoFile:?=FILE NAME.EXT% "String":LineNumber
-	%getLatency%          - <rtn> %latency%
-	%download%            - %url% %file%
-	%zip%                 - file.ext zipFileName
-	%unzip%               - zipFileName
-	%license%             - "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
+
+    CALL :turtleFunctions X Y THETA/ANGLE- Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
+
+    Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
+
+    %forward%       - upon execution, sub ? for 1-n    EX: %forward:?=1%
+    %turnLeft%      - upon execution, sub ? for 0-360  EX: %turnLeft:?=1%
+    %turnRight%     - upon execution, sub ? for 0-360  EX: %turnRight:?=1%
+    %TF_push%       - save turtle position
+    %TF_pop%        - return to saved turtle position
+    %draw%          - %draw:?=VARIABLE% will write dfx dfy dfa to VARIABLE - NOT MATH
+    %home%          - sends turtle home
+    %cent%          - sends turtle to middle screen
+    %penDown%       - draw while the turtle moves  EX: %pendown:#=1%  - NOT MATH
+
+    Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
+
+    CALL :quikzip <no arguements>  - NOT MATH - Provides the following tools
+
+    %ZIP%           - %zip:?=File.ext%
+    %unZIP%         - %unZIP:?=NAME_OF_ZIP%   DO NOT EXTENTION
+
+    CALL :colorRange <1-255> - Provides array of colors sorted in RGB in color[]
+
+    Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
+    Also provides %range% (CONSTANT) which is 255 / %~1
+
+    CALL :macros <no arguments> Provides list of larger functions
+
+    %point%               - x y                                                                     <rtn> _scrn_
+	    draws %pixel% at x y
+
+    %plot%                - x y 0-255 CHAR                                                          <rtn> _scrn_
+	    draws CHAR at x y
+
+    %RGBpoint%            - x y 0-255 0-255 0-255 CHAR                                              <rtn> _scrn_
+		draws CHAR at x y in color specified
+
+    %hexToRGB%            - '00a2ed' no quotes                                                      <rtn> R G B
+		converts hex to to R G B values
+
+    %translate%           - x Xoffset y Yoffset
+		shift x and y by their offset
+
+    %Bvector%             - ID                                                                      <rtn> %~1.x %~1.y %~1.td %~1.tr %~1.m %~1.i %~1.j %~1.rgb 
+		creates vector[ID] with the following attributes
+			x  - x position
+			y  - y position
+			td - thetaDegrees
+			tr - thetaRadians
+			m  - magnitude
+			i  - x increment
+			j  - y increment
+			rgb - vectors color
+
+    %lerpRGB%             - 1 2 1-100                                                               <rtn> $r $g $b
+		blend two RGB values together using r[] g[] b[]
+		%~1 - r[1] g[1] b[1]
+		%~2 - r[2] g[2] b[2]
+		%~3 - blend amount
+
+    %getDistance%         - x2 x1 y2 y1                                                             <rtnVar> youNameIt
+		get the distance between two points
+
+    %exp%                 - num pow                                                                 <rtnVar> youNameIt
+		calculate exponents
+
+    %circle%              - x y ch cw                                                               <rtn> $circle
+		draw a circle to $circle at x y at the size of CHxCW
+
+    %rect%                - x r wid hei                                                             <rtn> $rect
+		draw a rectangle to $rect at x y the size of HEIxWID
+
+    %line%                - x0 y0 x1 y1 color                                                       <rtn> $line
+		draw a line to $line from x0 y0 to x1 y1
+
+    %bezier%              - x1 y1 x2 y2 x3 y3 x4 y4 length                                          <rtn> $bezier
+		draw a bezier curve from x1 y1, x2 y2, x3 y3, x4 y4 at your desired length
+
+    %RGBezier%            - x1 y1 x2 y2 x3 y3 x4 y4 length                                          <rtn> $RGBezier
+		draw a bezier curve from x1 y1, x2 y2, x3 y3, x4 y4 at your desired length
+		works with :colorRange
+
+    %arc%                 - x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color    <rtn> _scrn_
+		draws an ARC on the screen
+
+    %plot_HSL_RGB%        - x y 0-360 0-10000 0-10000                                               <rtn> _scrn_
+		plot in HUE SATURATION LUMINOUSITY
+
+    %plot_HSV_RGB%        - x y 0-360 0-10000 0-10000                                               <rtn> _scrn_
+		plot in HUE SATURATION VALUE
+
+    %clamp%               - x min max                                                               <rtnVar> youNameIt
+		clamp x between MIN and MAX
+
+    %map%                 - min max X                                                               <rtnVar> youNameIt
+		map X to the range of min max
+
+    %fncross%             - x1 y1 x2                                                                <rtnVar> youNameIt
+
+    %intersect%           - x1 y1 x2 y2 x3 y3 x4 y4 <rtnVar> <rtnVar> - CROSS VECTOR PRODUCT algorithm
+
+    %HSL_line%            - x1 y1 x2 y2 0-360 0-10000 0-10000                                       <rtn> _scrn_
+		draw line using plot_HSL_RGB
+
+    %getLen%              - "string"                                                                <rtn> $length
+		get the length of a string
+
+    %pad%                 - "string".int                                                            <rtn> $padding
+		padding function to get nice spacing in "menus".
+
+    %encode%              - "string"                                                                <rtn> base64
+		encode a string in base64 using certutil
+
+    %decode%              - %decode:?=!base64!%
+		decode a given string in base64
+
+    %$string_%            - "string"                                                                <rtn> $_len, $_rev $_upp $_low
+		use to get the length, reverse, upper, and lower version of the provided string
+
+    %memset%              - var "replacement" "length" - May be removed
+
+    %injectLineIntoFile%  - %injectLineIntoFile:?=FILE NAME.EXT% "String":LineNumber
+		Use to inject/swap specific lines in files
+
+    %getLatency%          -                                                                         <rtn> %latency%
+		use to see your current ping
+    %download%            - %url% %file%
+		download a file via url
+
+    %zip%                 - file.ext zipFileName
+		zipping tool using TAR
+
+    %unzip%               - zipFileName
+		unzipping tool using TAR
+
+    %license%             - "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
+		It is important that you do NOT add this to your code until you are COMPLETELY finished editiing it, and ready to release.
+		
+		This function calculates a magic number based on the script itself, and stores the value in a file in %temp%
+		
+		Once you add this to your script, AND RUN IT, you can NOT modify your script. It WILL delete itself.
+		
+		This is to protect the creators work from being tampered with. USE AT YOUR OWN RISK!!!
