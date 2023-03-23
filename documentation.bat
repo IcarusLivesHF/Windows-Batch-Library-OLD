@@ -271,7 +271,7 @@ pause & exit
     %clamp%               - x min max                                                               <rtnVar> youNameIt
 		clamp x between MIN and MAX
 
-    %map%                 - min max X                                                               <rtnVar> youNameIt
+    %_map%                 - min max X                                                               <rtnVar> youNameIt
 		map X to the range of min max
 
     %fncross%             - x1 y1 x2                                                                <rtnVar> youNameIt
