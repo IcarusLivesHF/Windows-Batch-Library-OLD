@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.8"
+	set "revision=3.29.9"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -30,7 +30,7 @@ set "pixel=Û"
 set ".=Û"
 set "esc="
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
-set "\e=%esc%"
+set "\e=%esc%["
 set "\rgb=^!r^!;^!g^!;^!b^!"
 set "cls=%esc%[2J"
 set "\c=%esc%[2J"
@@ -59,6 +59,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set /a "defaultFontSize=!argumentArgument[%%i][1]!"
 	) else if /i "!argumentCommand[%%i]!" equ "title" (
 			title !argumentArgument[%%i][1]!
+			set "title=!argumentArgument[%%i][1]!"
 	) else if /i "!argumentCommand[%%i]!" equ "rgb" (
 			set "providedColorArguments=True"
 			set "backgroundColor=!argumentArgument[%%i][1]!"
@@ -171,7 +172,7 @@ set "swap=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
 goto :eof
 :misc
-set "gravity=grav=1, a#+=grav, v#+=a#, a#*=0, #+=v#"
+set "gravity=_G_=1, ?.acceleration+=_G_, ?.velocity+=?.acceleration, ?.acceleration*=0, ?+=?.velocity"
 set "percentOf=p=x*y/100"
 set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
@@ -281,16 +282,16 @@ set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!arg
 
 :_BVector
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
-set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1,2" %%1 in ("^!args^!") do (%\n%
+set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~1.x=^!random^! %% wid + 1"%\n%
 	set /a "%%~1.y=^!random^! %% hei + 1"%\n%
 	set /a "%%~1.td=^!random^! %% 360"%\n%
-	set /a "%%~1.tr=^!random^! %% TWO_PI"%\n%
+	set /a "%%~1.tr=^!random^! %% 62832"%\n%
 	set /a "%%~1.m=^!random^! %% 3 + 2"%\n%
 	set /a "%%~1.i=^!random^! %% 3 + 1"%\n%
 	set /a "%%~1.j=^!random^! %% 3 + 1"%\n%
 	set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
-	set "%%~1.rgb=^!bvr^!;^!bvg^!;^!bvb^!"%\n%
+	set "%%~1.rgb=38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
 	for %%a in (bvr bvg bvb) do set "%%a="%\n%
 )) else set args=
 
