@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.29.9"
+	set "revision=3.30.0"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -170,10 +170,12 @@ set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
 set "lerp=?=(a+c*(b-a)*10)/1000+a"
 set "swap=t=x, x=y, y=t"
 set "getState=a*8+b*4+c*2+d*1"
+set "max=(((((y-x)>>31)&1)*x)|((~(((y-x)>>31)&1)&1)*y))"
+set "min=(((((x-y)>>31)&1)*x)|((~(((x-y)>>31)&1)&1)*y))"
+set "percentOf=p=x*y/100"
 goto :eof
 :misc
 set "gravity=_G_=1, ?.acceleration+=_G_, ?.velocity+=?.acceleration, ?.acceleration*=0, ?+=?.velocity"
-set "percentOf=p=x*y/100"
 set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
 set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
@@ -201,16 +203,16 @@ set "areaTRI(b,h)=(b*h)/2"
 set "areaTRA(b1,b2,h)=(b1*b2)*h/2"
 set "volBOX(l,w,h)=l*w*h"
 goto :eof
-:algorithicConditions
-set "LSS(x,y)=(((x-y)>>31)&1)"                     &REM <
-set "LEQ(x,y)=((~(y-x)>>31)&1)"                    &REM <=
-set "GTR(x,y)=(((y-x)>>31)&1)"                     &REM >
-set "GEQ(x,y)=((~(x-y)>>31)&1)"                    &REM >=
-set "EQU(x,y)=(((~(y-x)>>31)&1)&((~(x-y)>>31)&1))" &REM ==
-set "NEQ(x,y)=((((x-y)>>31)&1)|(((y-x)>>31)&1))"   &REM !=
-set "AND(b1,b2)=(b1&b2)"                           &REM &&
-set "OR(b1,b2)=(b1|b2)"                            &REM ||
-set "XOR(b1,b2)=(b1^b2)"                           &REM ^
+:algorithmicConditions
+set "LSS(x,y)=(((x-y)>>31)&1)"
+set "LEQ(x,y)=((~(y-x)>>31)&1)"
+set "GTR(x,y)=(((y-x)>>31)&1)"
+set "GEQ(x,y)=((~(x-y)>>31)&1)"
+set "EQU(x,y)=(((~(y-x)>>31)&1)&((~(x-y)>>31)&1))"
+set "NEQ(x,y)=((((x-y)>>31)&1)|(((y-x)>>31)&1))"
+set "AND(b1,b2)=(b1&b2)"
+set "OR(b1,b2)=(b1|b2)"
+set "XOR(b1,b2)=(b1^b2)"
 set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
 goto :eof
 :turtleFunctions
@@ -373,7 +375,6 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 		)%\n%
 	)%\n%
 )) else set args=
-goto :eof
 
 :_bezier
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
