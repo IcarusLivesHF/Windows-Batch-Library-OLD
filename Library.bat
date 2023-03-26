@@ -1,6 +1,6 @@
 (call :buildSketch) & exit
 :revision
-	set "revision=3.30.0"
+	set "revision=3.30.1"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% lss %revisionRequired:.=% (
@@ -26,11 +26,13 @@ set "clearEnvironment=False"
 set "providedColorArguments=False"
 set "extendedLibrary=False"
 set "getThirdParty=False"
+set "multiThreaded=False"
 set "pixel=Û"
 set ".=Û"
 set "esc="
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 set "\e=%esc%["
+set "\p=echo %esc%["
 set "\rgb=^!r^!;^!g^!;^!b^!"
 set "cls=%esc%[2J"
 set "\c=%esc%[2J"
@@ -70,6 +72,8 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "extendedLibrary=True"
 	) else if /i "!argumentCommand[%%i]!" equ "3rdparty" (
 			set "getThirdParty=True"
+	) else if /i "!argumentCommand[%%i]!" equ "multi" (
+			set "multiThreaded=True"
 	)
 	set "argumentCommand[%%i]="
 	set "argumentCommand[%%i][1]="
@@ -80,12 +84,12 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 if "%debug%" neq "False" (
 	@echo on
 	call :setfont 16 Consolas
-	call :size 180 100
+	mode 180,100
 ) else (
 	if not defined wid set /a "wid=width=hei=height"
 	if not defined hei set /a "hei=height=wid=width"
 	call :setfont %defaultFontSize% Terminal
-	call :size !wid! !hei!
+	mode !wid!,!hei!
 )
 
 if "!providedColorArguments!" neq "False" (
@@ -111,12 +115,9 @@ if "!extendedLibrary!" neq "False" (
 if "!getThirdParty!" neq "False" (
 	call :get_Batch_3rdParty_Tools
 )
-goto :eof
-
-:size
-if "%~2" equ "" goto :eof
-set /a "wid=%~1, hei=%~2"
-mode !wid!,!hei!
+if "!multiThreaded!" neq "False" (
+	call :multithreadedFunctions
+)
 goto :eof
 
 :setFont
@@ -124,7 +125,6 @@ if "%~2" equ "" goto :eof
 call :init_setfont
 %setFont% %~1 %~2
 goto :eof
-
 
 :cursor
 set ">=<nul set /p ="
@@ -246,6 +246,11 @@ for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!t
 set /a "range=255 / %~1"
 goto :eof
 
+:multithreadedFunctions
+set "controller=True"
+set "fetchDataFromController=if "^^!controller^^!" equ "True" set "com=" & set /p "com=""
+goto :eof
+
 :loadArray
 	set "i=1" & set "array[!i!]=%load:.=" & set /a i+=1 & set "array[!i!]=%"
 goto :eof
@@ -289,11 +294,12 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!"
 	set /a "%%~1.y=^!random^! %% hei + 1"%\n%
 	set /a "%%~1.td=^!random^! %% 360"%\n%
 	set /a "%%~1.tr=^!random^! %% 62832"%\n%
-	set /a "%%~1.m=^!random^! %% 3 + 2"%\n%
+	set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
 	set /a "%%~1.i=^!random^! %% 3 + 1"%\n%
 	set /a "%%~1.j=^!random^! %% 3 + 1"%\n%
 	set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
 	set "%%~1.rgb=38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
+	set "%%~1.fcol=48;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
 	for %%a in (bvr bvg bvb) do set "%%a="%\n%
 )) else set args=
 
@@ -670,6 +676,47 @@ set "curl="%temp%/batch/curl.exe""
 set "wget="%temp%/batch/wget.exe""
 set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
+goto :eof
+
+:characterSprites
+set "chr[-A]=[C[C[CÛÛ[C[C[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-B]=ÛÛÛÛÛÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[CÛ[C[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
+set "chr[-C]=[C[CÛÛÛÛ[CÛ[B[8D[CÛ[C[C[C[CÛÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[C[C[B[8DÛ[C[C[C[C[C[C[C[B[8DÛ[C[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[CÛÛ[B[8D[C[CÛÛÛÛ[CÛ[7A[0m"
+set "chr[-D]=ÛÛÛÛÛÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛÛÛÛ[C[C[7A[0m"
+set "chr[-E]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛÛÛ[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[-F]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[CÛ[C[C[C[B[8D[CÛÛÛÛ[C[C[C[B[8D[CÛ[C[CÛ[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8DÛÛÛ[C[C[C[C[C[7A[0m"
+set "chr[-G]=[C[CÛÛÛÛÛÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[C[C[B[8DÛ[C[CÛÛÛÛÛ[B[8DÛ[C[CÛ[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛÛÛÛ[C[C[7A[0m"
+set "chr[-H]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-I]=ÛÛÛÛÛÛÛ[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
+set "chr[-J]=[C[CÛÛÛÛÛÛ[B[8D[C[C[C[C[CÛ[C[C[B[8D[C[C[C[C[CÛ[C[C[B[8D[C[C[C[C[CÛ[C[C[B[8DÛÛ[C[C[CÛ[C[C[B[8DÛ[C[C[C[CÛ[C[C[B[8DÛ[C[C[C[CÛ[C[C[B[8D[CÛÛÛÛ[C[C[C[7A[0m"
+set "chr[-K]=ÛÛÛ[CÛÛÛÛ[B[8D[CÛ[C[C[CÛ[C[C[B[8D[CÛ[C[CÛ[C[C[C[B[8D[CÛÛÛ[C[C[C[C[B[8D[CÛ[C[CÛ[C[C[C[B[8D[CÛ[C[C[CÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-L]=ÛÛÛ[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[-M]=ÛÛ[C[C[CÛÛÛ[B[8D[CÛÛ[CÛ[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-N]=ÛÛ[C[C[CÛÛÛ[B[8D[CÛÛ[C[C[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[CÛ[C[CÛ[CÛ[C[B[8D[CÛ[C[C[CÛÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-O]=[C[CÛÛÛÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛÛÛÛ[C[C[7A[0m"
+set "chr[-P]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[C[C[C[B[8D[CÛ[C[C[C[C[C[C[B[8DÛÛÛ[C[C[C[C[C[7A[0m"
+set "chr[-Q]=[CÛÛÛÛÛÛ[C[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛ[C[CÛ[C[C[CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[C[C[CÛ[C[C[C[C[7A[0m"
+set "chr[-R]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[C[C[CÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-S]=[CÛÛÛÛÛ[CÛ[B[8DÛ[C[C[C[C[CÛÛ[B[8DÛ[C[C[C[C[C[CÛ[B[8D[CÛÛÛÛÛ[C[C[B[8D[C[C[C[C[C[CÛ[C[B[8DÛ[C[C[C[C[C[CÛ[B[8DÛÛ[C[C[C[C[CÛ[B[8DÛ[CÛÛÛÛÛ[C[7A[0m"
+set "chr[-T]=ÛÛÛÛÛÛÛÛ[B[8DÛ[C[C[CÛ[C[CÛ[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[CÛÛÛ[C[C[7A[0m"
+set "chr[-U]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛÛÛÛ[C[C[7A[0m"
+set "chr[-V]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛ[C[C[CÛ[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[C[C[CÛ[CÛ[C[C[B[8D[C[C[C[CÛ[C[C[C[7A[0m"
+set "chr[-W]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[C[C[C[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[CÛ[CÛ[C[CÛ[C[B[8D[C[CÛ[CÛÛ[C[C[7A[0m"
+set "chr[-X]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[C[C[CÛÛ[C[C[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[CÛ[C[C[C[CÛ[C[B[8DÛÛÛ[C[CÛÛÛ[7A[0m"
+set "chr[-Y]=ÛÛÛ[C[CÛÛÛ[B[8D[CÛ[C[C[C[CÛ[C[B[8D[C[CÛ[C[CÛ[C[C[B[8D[C[C[CÛ[CÛ[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[CÛÛÛ[C[C[7A[0m"
+set "chr[-Z]=ÛÛÛÛÛÛÛÛ[B[8DÛ[C[C[C[C[CÛ[C[B[8DÛ[C[C[C[CÛ[C[C[B[8D[C[C[C[CÛ[C[C[C[B[8D[C[C[CÛ[C[C[C[C[B[8D[C[CÛ[C[C[C[CÛ[B[8D[CÛ[C[C[C[C[CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[0]=[C[CÛÛÛÛ[C[C[1B[8D[CÛ[C[C[C[CÛ[C[1B[8DÛ[C[C[C[CÛ[CÛ[1B[8DÛ[C[C[CÛ[C[CÛ[1B[8DÛ[C[CÛ[C[C[CÛ[1B[8DÛ[CÛ[C[C[C[CÛ[1B[8D[CÛ[C[C[C[CÛ[C[1B[8D[C[CÛÛÛÛ[C[C[7A[0m"
+set "chr[1]=[C[CÛÛ[C[C[C[C[1B[8D[CÛ[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[2]=[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[C[C[C[C[C[C[CÛ[1B[8D[C[C[C[C[CÛÛ[C[1B[8D[C[C[CÛÛ[C[C[C[1B[8D[CÛÛ[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[3]=[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[C[C[C[CÛÛÛ[C[1B[8D[C[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[4]=[C[C[C[C[CÛÛ[C[1B[8D[C[C[C[CÛ[CÛ[C[1B[8D[C[C[CÛ[C[CÛ[C[1B[8D[C[CÛ[C[C[CÛ[C[1B[8D[CÛ[C[C[C[CÛ[C[1B[8DÛÛÛÛÛÛÛÛ[1B[8D[C[C[C[C[C[CÛ[C[1B[8D[C[C[C[C[CÛÛÛ[7A[0m"
+set "chr[5]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8D[C[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[6]=[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[7]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[C[C[C[C[C[CÛ[C[1B[8D[C[C[C[C[CÛ[C[C[1B[8D[C[C[C[CÛ[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[C[CÛ[C[C[C[C[1B[8D[C[CÛÛÛ[C[C[C[7A[0m"
+set "chr[8]=[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[9]=[CÛÛÛÛÛÛ[C[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛÛ[1B[8D[C[C[C[C[C[C[CÛ[1B[8DÛ[C[C[C[C[C[CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[_]=[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D[C[C[C[C[C[C[C[C[1B[8D        [7A[0m"
+set "chr[.]=ÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
 goto :eof
 
 :buildSketch
