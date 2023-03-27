@@ -1,6 +1,6 @@
-    Rev. 3.29.8
-    
-    The Window Batch Library is a collection of pre-written batch scripts that can be used 
+    Revision 3.30.2 or Earlier
+	
+	The Window Batch Library is a collection of pre-written batch scripts that can be used 
     to simplify and speed up the process of creating command-line interfaces (CLIs) and other 
     types of text-based user interfaces (TUIs). The library includes a wide range of functions 
     and macros, including standard console manipulations, mathematical calculations, color and 
@@ -12,11 +12,17 @@
     streamline the development process and make it easier to create complex and powerful 
     applications using the command line.
 
-
     Open the library by substituting '?' with the name of the library in the variable %(%
     and check if the required revision OR LESS is being used. If everything checks out,
     it will CALL :FUNCTIONS from INSIDE the "Library.bat."
 
+	Library.bat contains many labels, but not all of them are intended to be called, rather than
+	they are book markers when using Notepad++. Clicking the "fx" button on the top menu bar will
+	display all of the "book marks" as well as labels intended to be called by the user. 
+	Be mindful of the documentation below, as well as the "DON'T CALL" next to the labels that are
+	not intended to be called. Thanks <3
+
+------------------------------------------------------------------------------------------------------------------------------------------
 (%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
     call :stdlib /w:50 /h:50 /fs:8 /title:"My Title" /extlib /rgb:"r;g;b":"r;g;b" /3rdparty /debug
     call :cursor
@@ -29,13 +35,16 @@
     call :colorRange
     call :loadArray
     call :macros
+    call :characterSprites
+    call :sprites
+    call :multithreadFunctions
 %)%  && (cls&goto :setup)
 
 :setup
 
 pause & exit
-
-    CALL :STDLIB <ARGUEMENTS CAN BE IN ANY ORDER YOU WANT>
+------------------------------------------------------------------------------------------------------------------------------------------
+    CALL :STDLIB <arguments CAN BE IN ANY ORDER YOU WANT>
     
     /w        -  set width  of console, returns %wid%, %width%
     /h        -  set height of console, returns %hei%, %height%
@@ -78,14 +87,17 @@ pause & exit
     STDLIB provides the following variables for you to use.
     %pixel% - Û character
     %.%     - Û character
-    %esc%   - esc character
-    %\e%    - esc character
-    %cls%   - echo or <nul set /p "=" to clear screen
-    %\c%    - same as %cls%
-    %\rgb%  - sets the color code from %R% %G% %B% if defined.
+    %esc%   - esc character  Example: echo %esc%[5;5HHello World
+    %\e%    - esc[           Example: echo %\e%5;5HHello World
+	%\p%    - 'echo %esc%['  Example: %/p%5;5HHello World
+    %cls%   - echo or <nul set /p "=" to clear screen NOT the same as CLS
+    %\c%    - same as %cls%                           NOT the same as CLS
+    %\rgb%  - sets the color code from %R% %G% %B% to TEXT color if defined.
+    %\fcol% - sets the color code from %R% %G% %B% to BACKGROUND color if defined.
     %\n%     - new line
     Hides cursor
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :CURSOR <no arguments> - Provides the following as macros.
     
     %>%               - <nul set /p "=" but less to type.
@@ -107,6 +119,7 @@ pause & exit
     %setStyle% - 1 arguement. RGB or BIT. RGB(2) will expect "r;g;b" as a color code where as BIT(5)
         will expect 0-255 as a color code.
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :MATH <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %PI%                -  31416 CONSTANT
@@ -129,16 +142,25 @@ pause & exit
     %lerp%              - provide a, b, c, refer to: https://en.wikipedia.org/wiki/Linear_interpolation
     %swap%              - provided x and y are defined, swap them
     %getState%          - provide a, b, c, d, returns 0-15
+	%percentOf%         - provide x, y as X percent of Y. EX set /a "x=76, y=83", "out=%percentOf%" %out% = 63. True answer is 63.08.
+    %min%               - provide x, y returns smaller integer
+    %max%               - provide x, y returns larger  integer
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :MISC <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
-    %gravity%           - accerlation increases by 1 per frame,
-                            velocity increases by accerlation per frame,
-                            Y position is increased by velocity per frame
-    %percentOf%         - provide x, y as X percent of Y. EX set /a "x=76, y=83", "out=%percentOf%" %out% = 63. True answer is 63.08.
+    %gravity%           - substitute ? for affected variable
+						    accerlation increases by 1 per frame,
+                              velocity increases by accerlation per frame,
+                              Y position is increased by velocity per frame
+						provides as variables:
+							%_G_%             - Gravity added to Accerlation
+							%?.acceleration%  - Acceleration add to Velocity
+							%?.velocity%      - Velocity added to substituted ?
+
     %chance%            - provide x. requires 2>nul redirection, but works as such.
                            EX: set /a "%chance:x=25%" && ( echo 25 percent chance ) || ( echo 75 percent chance )
-    %every%             - provide x  EX: set /a "%every:x=frameCount%" && ( code )
+    %every%             - provide x  MUST ITERATE frameCount+=1 EX: set /a "%every:x=frameCount%" && ( code )
     %smoothStep%        - provide x
     %bitcolor%          - translate R G B to BITCOLOR
     %loop%              - begin infinite loop 
@@ -154,6 +176,7 @@ pause & exit
     %fib%               - returns fibonacci sequence
     %mouseBound%        - provide ma, mb, mc, md as edge cases to mouse clicks.
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :SHAPES <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %SQ(x)%             - provide x         - returns x^2 or area of square.
@@ -166,6 +189,7 @@ pause & exit
     %areaTRA(b1,b2,h)%  - provide b1, b2, h - returns b1 * b2 * h / 2
     %volBOX(l,w,h)%     - provide l, w, h   - returns l * w * h
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :algorithicConditions <no arguments> - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     %LSS(x,y)%             - provide x, y         - <
@@ -179,6 +203,7 @@ pause & exit
     %XOR(b1,b2)%           - provide b1, b2       - ^
     %TERN(bool,v1,v2)%     - provide bool, v1, v2 - ?:
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :turtleFunctions X Y THETA/ANGLE- Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
 
     Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
@@ -195,11 +220,13 @@ pause & exit
 
     Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
 
-    CALL :quikzip <no arguements>  - NOT MATH - Provides the following tools
+------------------------------------------------------------------------------------------------------------------------------------------
+    CALL :quikzip <no arguments>  - NOT MATH - Provides the following tools
 
     %ZIP%           - %zip:?=File.ext%
     %unZIP%         - %unZIP:?=NAME_OF_ZIP%   DO NOT EXTENTION
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :colorRange <1-255> - Provides array of colors sorted in RGB in color[]
 
     Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
@@ -208,13 +235,13 @@ pause & exit
     CALL :macros <no arguments> Provides list of larger functions
 
     %point%               - x y                                                                     <rtn> _scrn_
-	    draws %pixel% at x y
+	    draws %pixel% at x y to %_scrn_%
 
     %plot%                - x y 0-255 CHAR                                                          <rtn> _scrn_
-	    draws CHAR at x y
+	    draws CHAR at x y to %_scrn_%
 
     %RGBpoint%            - x y 0-255 0-255 0-255 CHAR                                              <rtn> _scrn_
-		draws CHAR at x y in color specified
+		draws CHAR at x y in color specified to %_scrn_%
 
     %hexToRGB%            - '00a2ed' no quotes                                                      <rtn> R G B
 		converts hex to to R G B values
@@ -222,18 +249,29 @@ pause & exit
     %translate%           - x Xoffset y Yoffset
 		shift x and y by their offset
 
-    %Bvector%             - name[ID]                                                                <rtn> %~1.x %~1.y %~1.td %~1.tr %~1.m %~1.i %~1.j %~1.rgb 
+    %Bvector%             - name[ID] diameter character/sprite %~2 & %~3 not necessary              <rtn> %~1.x %~1.y %~1.td %~1.tr %~1.m %~1.i %~1.j %~1.rgb 
 		creates vector[ID] with the following attributes
-			x  - x position
-			y  - y position
-			td - thetaDegrees
-			tr - thetaRadians
-			m  - magnitude
-			i  - x increment
-			j  - y increment
-			rgb - vectors color
+			x  - x position     1 to wid unless %~2 is provided where %~2 to wid-%~2
+			y  - y position     1 to hei unless %~2 is provided where %~2 to hei-%~2
+			td - thetaDegrees   0 to 360
+			tr - thetaRadians   0 to 62832
+			m  - magnitude      2 to 4
+			i  - x increment   -2 to 2
+			j  - y increment   -2 to 2
+			rgb - vectors color 0 to 255
+			if %~2 is defined
+				vd  - diameter
+				vr  - radius
+				vmw - vectors Max Width
+				vmh - vectors Max Height
+			if %~3 is defined
+				ch  - character or spriteVariable
+		usage:
+			%Bvector% this
+			echo %this.x% %this.y% %this.td% %this.tr% %this.m% %this.i% 
+			echo %this.j% %this.rgb% %this.vd% %this.vr% %this.vmw% %this.vmh% %this.ch%
 
-    %lerpRGB%             - 1 2 1-100                                                               <rtn> $r $g $b
+    %lerpRGB%             - 1 2 (1-100:blend amount)                                                 <rtn> $r $g $b
 		blend two RGB values together using r[] g[] b[]
 		%~1 - r[1] g[1] b[1]
 		%~2 - r[2] g[2] b[2]
@@ -241,6 +279,7 @@ pause & exit
 
     %getDistance%         - x2 x1 y2 y1                                                             <rtnVar> youNameIt
 		get the distance between two points
+		no need to define x2 x1 y2 y1 first like when using %dist% from :math
 
     %exp%                 - num pow                                                                 <rtnVar> youNameIt
 		calculate exponents
@@ -273,7 +312,7 @@ pause & exit
     %clamp%               - x min max                                                               <rtnVar> youNameIt
 		clamp x between MIN and MAX
 
-    %_map%                 - min max X                                                               <rtnVar> youNameIt
+    %map%                 - min max X                                                               <rtnVar> youNameIt
 		map X to the range of min max
 
     %fncross%             - x1 y1 x2                                                                <rtnVar> youNameIt
@@ -295,12 +334,12 @@ pause & exit
     %decode%              - %decode:?=!base64!%
 		decode a given string in base64
 
-    %$string_%            - "string"                                                                <rtn> $_len, $_rev $_upp $_low
+	old name: $string_
+    %string_properties%   - "string"                                                                <rtn> $_len, $_rev $_upp $_low
 		use to get the length, reverse, upper, and lower version of the provided string
 
-    %memset%              - var "replacement" "length" - May be removed
-
-    %injectLineIntoFile%  - %injectLineIntoFile:?=FILE NAME.EXT% "String":LineNumber
+	old name: injectStringIntoFile
+    %fart%  - %fart:?=FILE NAME.EXT% "String":LineNumber
 		Use to inject/swap specific lines in files
 
     %getLatency%          -                                                                         <rtn> %latency%
@@ -322,3 +361,23 @@ pause & exit
 		Once you add this to your script, AND RUN IT, you can NOT modify your script. It WILL delete itself.
 		
 		This is to protect the creators work from being tampered with. USE AT YOUR OWN RISK!!!
+
+------------------------------------------------------------------------------------------------------------------------------------------
+	CALL :sprites <no arguments>
+		Currently only provides:
+			%ball[0]% - Ball sprite made from " " color using background colors
+			%ball[1]% - Ball sprite made from "Û" color using text colors
+	
+------------------------------------------------------------------------------------------------------------------------------------------
+	CALL :characterSprites <no arguments>
+		Currently only provides:
+			Letters A-Z(uppercase only) Example: echo %chr[-A]%
+			Numbers 0-9                 Example: echo %chr[4]%
+			Tile[grass][0-3]            Example: echo %tile[grass][0]% - May be removed. Too much data.
+	
+------------------------------------------------------------------------------------------------------------------------------------------
+	CALL :multithreadFunctions <no arguments>
+		Provides the following macro:
+			%fetchDataFromController%
+			
+		Sets %controller% = True
