@@ -232,6 +232,7 @@ pause & exit
     Use %totalColorsInRange% (CONSTANT) to get the max out the the color[] array
     Also provides %range% (CONSTANT) which is 255 / %~1
 
+------------------------------------------------------------------------------------------------------------------------------------------
     CALL :macros <no arguments> Provides list of larger functions
 
     %point%               - x y                                                                     <rtn> _scrn_
