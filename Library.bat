@@ -1,5 +1,5 @@
 (call :buildSketch) & exit
-:revision DONT CALL
+:revision DON'T CALL
 	set "revision=3.30.2"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
@@ -27,8 +27,8 @@ set "providedColorArguments=False"
 set "extendedLibrary=False"
 set "getThirdParty=False"
 set "multiThreaded=False"
-set "pixel=л"
-set ".=л"
+set "pixel=Û"
+set ".=Û"
 set "esc="
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" )
 set "\e=%esc%["
@@ -121,7 +121,7 @@ if "!multiThreaded!" neq "False" (
 )
 goto :eof
 
-:setFont DONT CALL
+:setFont DON'T CALL
 if "%~2" equ "" goto :eof
 call :init_setfont
 %setFont% %~1 %~2
@@ -188,7 +188,7 @@ set "ifEven=1/(1+x&1)"
 set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
 set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
 set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
-set "rndBetween=(^!random^! %% (x * 2 + 1) + -x)"
+set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 set "fib=?=c=a+b, a=b, b=c"
 set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
 set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"
@@ -259,37 +259,37 @@ goto :eof
 
 :macros
 
-:_point DONT CALL
+:_point DON'T CALL
 rem %point% x y <rtn> _scrn_
 set point=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H%pixel%!esc![0m"%\n%
 )) else set args=
 
-:_plot DONT CALL
+:_plot DON'T CALL
 rem %plot% x y 0-255 CHAR <rtn> _scrn_
 set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H!esc![38;5;%%3m%%~4!esc![0m"%\n%
 )) else set args=
 
-:_RGBpoint DONT CALL
+:_RGBpoint DON'T CALL
 rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
 set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
 )) else set args=
 
-:_hexToRGB DONT CALL
+:_hexToRGB DON'T CALL
 rem %hexToRGB% 00a2ed
 set hexToRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args:~1,2^! ^!args:~3,2^! ^!args:~5,2^!") do (%\n%
 	set /a "R=0x%%~1", "G=0x%%~2", "B=0x%%~3"%\n%
 )) else set args=
 
-:_translate DONT CALL
+:_translate DON'T CALL
 rem %translate% x Xoffset y Yoffset
 set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~1+=%%~2, %%3+=%%~4"%\n%
 )) else set args=
 
-:_BVector DONT CALL
+:_BVector DON'T CALL
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~1.x=^!random^! %% wid + 1"%\n%
@@ -317,7 +317,7 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 	if "%%~3" neq "" set "%%~1.ch=%%~3"%\n%
 )) else set args=
 
-:_lerpRGB DONT CALL
+:_lerpRGB DON'T CALL
 rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
 set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!"%\n%
@@ -325,13 +325,13 @@ set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 	set /a "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
 
-:_getDistance DONT CALL
+:_getDistance DON'T CALL
 rem %getDistance% x2 x1 y2 y1 <rtnVar>
 set getDistance=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "%%5=( ?=((((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))>>31)+1, ?*(2*((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4))))) + ^^^!?*(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))-(((((%%1 - %%2))>>31|1)*((%%1 - %%2)))-((((%%3 - %%4))>>31|1)*((%%3 - %%4)))*2)) )"%\n%
 )) else set args=
 
-:_exp DONT CALL
+:_exp DON'T CALL
 rem %exp% num pow <rtnVar>
 for /l %%a in (1,1,1095) do set "pb=!pb!x*"
 set exp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
@@ -339,7 +339,7 @@ set exp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") 
 	for %%a in (^^!$p^^!) do set /a "%%~3=^!pb:~0,%%a^!"%\n%
 )) else set args=
 
-:_circle DONT CALL
+:_circle DON'T CALL
 rem %circle% x y ch cw <rtn> $circle
 set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "$circle="%\n%
@@ -350,7 +350,7 @@ set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!
 	set "$circle=^!$circle^!%esc%[0m"%\n%
 )) else set args=
 
-:_rect DONT CALL
+:_rect DON'T CALL
 rem %rect% x r length <rtn> $rect
 set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set "$rect="%\n%
@@ -370,7 +370,7 @@ set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	set "$rect=^!$rect^!%esc%[0m"%\n%
 )) else set args=
 
-:_line DONT CALL
+:_line DON'T CALL
 rem line x0 y0 x1 y1 color
 set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	if "%%~5" equ "" ( set "hue=15" ) else ( set "hue=%%~5")%\n%
@@ -384,19 +384,19 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 		for /l %%x in (^^!xa^^!,^^!stepx^^!,^^!xb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "ya+=stepy", "fraction-=dx"%\n%
 			set /a "fraction+=dy"%\n%
-			set "$line=^!$line^!%esc%[^!ya^!;%%xHл"%\n%
+			set "$line=^!$line^!%esc%[^!ya^!;%%xHÛ"%\n%
 		)%\n%
 	) else (%\n%
 		set /a "fraction=dx - (dy >> 1)"%\n%
 		for /l %%y in (^^!ya^^!,^^!stepy^^!,^^!yb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "xa+=stepx", "fraction-=dy"%\n%
 			set /a "fraction+=dx"%\n%
-			set "$line=^!$line^!%esc%[%%y;^!xa^!Hл"%\n%
+			set "$line=^!$line^!%esc%[%%y;^!xa^!HÛ"%\n%
 		)%\n%
 	)%\n%
 )) else set args=
 
-:_bezier DONT CALL
+:_bezier DON'T CALL
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
 	set "$bezier=" ^& set "c=0"%\n%
@@ -407,7 +407,7 @@ set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!
 	)%\n%
 )) else set args=
 
-:_RGBezier DONT CALL
+:_RGBezier DON'T CALL
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
 	set "$bezier=" ^& set "c=0"%\n%
@@ -418,7 +418,7 @@ set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args
 	)%\n%
 )) else set args=
 
-:_arc DONT CALL
+:_arc DON'T CALL
 rem arc x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color
 set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
 	if "%%~7" equ "" ( set "hue=30" ) else ( set "hue=%%~7")%\n%
@@ -428,7 +428,7 @@ set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") 
 	)%\n%
 )) else set args=
 
-:_plot_HSL_RGB DONT CALL
+:_plot_HSL_RGB DON'T CALL
 rem plot_HSL_RGB x y 0-360 0-10000 0-10000
 set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "H=%%3", "S=%%4", "L=%%5"%\n%
@@ -454,7 +454,7 @@ set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
-:_plot_HSV_RGB DONT CALL
+:_plot_HSV_RGB DON'T CALL
 rem plot_HSV_RGB x y 0-360 0-10000 0-10000
 set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "H=%%3", "S=%%4", "V=%%5"%\n%
@@ -478,7 +478,7 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
-:_clamp DONT CALL
+:_clamp DON'T CALL
 rem clamp x min max RETURNVAR
 set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	set /a "xx=%%~1", "yy=%%2", "zz=%%3"%\n%
@@ -491,7 +491,7 @@ set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!"
 	)%\n%
 )) else set args=
 
-:__map DONT CALL
+:__map DON'T CALL
 rem _map min max X RETURNVAR
 set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
 	%= Scale, bias and saturate x to 0..100 range =%%\n%
@@ -504,13 +504,13 @@ set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!")
 	)%\n%
 )) else set args=
 
-:_FNCross DONT CALL
+:_FNCross DON'T CALL
 rem FNcross x1 y1 x2 y2 RETURNVAR
 set FNcross=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
 	set /a "%%~5=%%~1*%%~4 - %%~2*%%~3"%\n%
 )) else set args=
 
-:_intersect DONT CALL
+:_intersect DON'T CALL
 rem CROSS VECTOR PRODUCT algorithm
 rem intersect x1 y1 x2 y2 x3 y3 x4 y4 RETURNVAR RETURNVAR
 set intersect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-10" %%a in ("^!args^!") do (%\n%
@@ -527,7 +527,7 @@ set intersect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-10" %%a in ("^!ar
 	)%\n%
 )) else set args=
 
-:_HSLline DONT CALL
+:_HSLline DON'T CALL
 rem HSLline x1 y1 x2 y2 0-360 0-10000 0-10000
 set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
 	set /a "xa=%%~1", "ya=%%~2", "xb=%%~3", "yb=%%~4", "dx=%%~3 - %%~1", "dy=%%~4 - %%~2"%\n%
@@ -559,7 +559,7 @@ set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^
 	)%\n%
 )) else set args=
 
-:_getLen DONT CALL
+:_getLen DON'T CALL
 rem %getlen% "string" <rtn> $length
 set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	set "$_str=%%~1#"%\n%
@@ -572,7 +572,7 @@ set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 	)%\n%
 )) else set args=
 
-:_pad DONT CALL
+:_pad DON'T CALL
 rem %pad% "string".int <rtn> $padding
 set "$paddingBuffer=                                                                                "
 set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!args^!") do (%\n%
@@ -582,7 +582,7 @@ set pad=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3 delims=." %%x in ("^!
     if "%%~z" neq "" set "%%~z=^!$padding^!"%\n%
 )) else set args=
 
-:_encodeB64 DONT CALL
+:_encodeB64 DON'T CALL
 rem %encode% "string" <rtn> base64
 set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	echo=%%~1^>inFile.txt%\n%
@@ -596,7 +596,7 @@ set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 	del /f /q "inFile.txt"%\n%
 )) else set args=
 
-:_decodeB64 DONT CALL
+:_decodeB64 DON'T CALL
 rem %decode:?=!base64!%
 set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	echo %%~1^>inFile.txt%\n%
@@ -608,7 +608,7 @@ set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 	del /f /q inFile.txt%\n%
 )) else set args=
 
-:_string_properties DONT CALL
+:_string_properties DON'T CALL
 rem %string_properties "string" <rtn> $_len, $_rev $_upp $_low
 set string_properties=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
 	for %%i in ($_len $_rev $_upp $_low) do set "%%i="%\n%
@@ -621,7 +621,7 @@ set string_properties=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" 
 )) else set args=
 
 rem I take no credit for this gem of a name, but the function does as the name suggests.
-:_fart DONT CALL fart = F.ind A.nd R.eplace T.ool Used to inject strings into files or swap strings on specific lines of files.
+:_F.A.R.T - Find And Replace Tool DON'T CALL
 rem %fart:?=FILE NAME.EXT% "String":Line#
 set fart=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
 	set "linesInFile=0"%\n%
@@ -637,23 +637,23 @@ set fart=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("
 	ren "%%~1" "deltmp.txt" ^& ren "-temp-.txt" "%%~1" ^& del /f /q "deltmp.txt"%\n%
 )) else set args=
 
-:_getLatency DONT CALL
+:_getLatency DON'T CALL
 rem %getLatency% <rtn> %latency%
 set "getLatency=for /f "tokens=2 delims==" %%l in ('ping -n 1 google.com ^| findstr /L "time="') do set "latency=%%l""
 
-:_download DONT CALL
+:_download DON'T CALL
 rem %download% url file
 set download=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%%~1','%%~2')"%\n%
 )) else set args=
 
-:_ZIP DONT CALL
+:_ZIP DON'T CALL
 rem %zip% file.ext zipFileName
 set ZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	tar -cf %%~2.zip %%~1%\n%
 )) else set args=
 
-:_UNZIP DONT CALL
+:_UNZIP DON'T CALL
 rem %unzip% zipFileName
 set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
 	tar -xf %%~1.zip%\n%
@@ -696,52 +696,52 @@ goto :eof
 :sprites
 rem 4x4
 set "ball[0]=[1C   [1B[4D     [1B[5D     [1B[5D     [1B[4D   [1D[2A[0m"
-set "ball[1]=[1Cллл[1B[4Dллллл[1B[5Dллллл[1B[5Dллллл[1B[4Dллл[1D[2A[0m"
+set "ball[1]=[1CÛÛÛ[1B[4DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[4DÛÛÛ[1D[2A[0m"
 goto :eof
 
 :characterSprites_8x8
-set "chr[-A]=[3Cлл[3C[B[8D[2Cл[2Cл[2C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cлллллл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-B]=лллллл[2C[B[8D[Cл[4Cл[C[B[8D[Cл[3Cл[2C[B[8D[Cлллллл[C[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8Dллллллл[C[7A[0m"
-set "chr[-C]=[2Cлллл[Cл[B[8D[Cл[4Cлл[B[8Dл[6Cл[B[8Dл[6C[C[B[8Dл[6C[C[B[8Dл[6Cл[B[8D[Cл[4Cлл[B[8D[2Cлллл[Cл[7A[0m"
-set "chr[-D]=лллллл[2C[B[8D[Cл[4Cл[C[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[4Cл[C[B[8Dлллллл[2C[7A[0m"
-set "chr[-E]=лллллллл[B[8D[Cл[5Cл[B[8D[Cл[6C[B[8D[Cллл[4C[B[8D[Cл[6C[B[8D[Cл[6C[B[8D[Cл[5Cл[B[8Dлллллллл[7A[0m"
-set "chr[-F]=лллллллл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[2Cл[3C[B[8D[Cлллл[3C[B[8D[Cл[2Cл[3C[B[8D[Cл[6C[B[8Dллл[5C[7A[0m"
-set "chr[-G]=[2Cлллллл[B[8D[Cл[5Cл[B[8Dл[6C[C[B[8Dл[2Cллллл[B[8Dл[2Cл[3Cл[B[8Dл[6Cл[B[8D[Cл[4Cл[C[B[8D[2Cлллл[2C[7A[0m"
-set "chr[-H]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cлллллл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-I]=ллллллл[C[B[8D[3Cл[4C[B[8D[3Cл[4C[B[8D[3Cл[4C[B[8D[3Cл[4C[B[8D[3Cл[4C[B[8D[3Cл[4C[B[8Dллллллл[C[7A[0m"
-set "chr[-J]=[2Cлллллл[B[8D[5Cл[2C[B[8D[5Cл[2C[B[8D[5Cл[2C[B[8Dлл[3Cл[2C[B[8Dл[4Cл[2C[B[8Dл[4Cл[2C[B[8D[Cлллл[3C[7A[0m"
-set "chr[-K]=ллл[Cлллл[B[8D[Cл[3Cл[2C[B[8D[Cл[2Cл[3C[B[8D[Cллл[4C[B[8D[Cл[2Cл[3C[B[8D[Cл[3Cл[2C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-L]=ллл[5C[B[8D[Cл[6C[B[8D[Cл[6C[B[8D[Cл[6C[B[8D[Cл[6C[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8Dлллллллл[7A[0m"
-set "chr[-M]=лл[3Cллл[B[8D[Cлл[Cл[Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-N]=лл[3Cллл[B[8D[Cлл[3Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[Cл[2Cл[Cл[C[B[8D[Cл[3Cлл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-O]=[2Cлллл[2C[B[8D[Cл[4Cл[C[B[8Dл[6Cл[B[8Dл[6Cл[B[8Dл[6Cл[B[8Dл[6Cл[B[8D[Cл[4Cл[C[B[8D[2Cлллл[2C[7A[0m"
-set "chr[-P]=ллллллл[C[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cлллллл[C[B[8D[Cл[6C[B[8D[Cл[6C[B[8Dллл[5C[7A[0m"
-set "chr[-Q]=[Cлллллл[C[B[8Dл[6Cл[B[8Dл[6Cл[B[8Dл[6Cл[B[8Dл[6Cл[B[8Dл[2Cл[3Cл[B[8D[Cлллллл[C[B[8D[3Cл[4C[7A[0m"
-set "chr[-R]=ллллллл[C[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cл[5Cл[B[8D[Cлллллл[C[B[8D[Cл[3Cл[2C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-S]=[Cллллл[Cл[B[8Dл[5Cлл[B[8Dл[6Cл[B[8D[Cллллл[2C[B[8D[6Cл[C[B[8Dл[6Cл[B[8Dлл[5Cл[B[8Dл[Cллллл[C[7A[0m"
-set "chr[-T]=лллллллл[B[8Dл[3Cл[2Cл[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[3Cллл[2C[7A[0m"
-set "chr[-U]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[2Cлллл[2C[7A[0m"
-set "chr[-V]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[2Cл[3Cл[C[B[8D[2Cл[2Cл[2C[B[8D[3Cл[Cл[2C[B[8D[4Cл[3C[7A[0m"
-set "chr[-W]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[4Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[Cл[Cл[2Cл[C[B[8D[2Cл[Cлл[2C[7A[0m"
-set "chr[-X]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[2Cл[2Cл[2C[B[8D[3Cлл[3C[B[8D[2Cл[2Cл[2C[B[8D[2Cл[2Cл[2C[B[8D[Cл[4Cл[C[B[8Dллл[2Cллл[7A[0m"
-set "chr[-Y]=ллл[2Cллл[B[8D[Cл[4Cл[C[B[8D[2Cл[2Cл[2C[B[8D[3Cл[Cл[2C[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[4Cл[3C[B[8D[3Cллл[2C[7A[0m"
-set "chr[-Z]=лллллллл[B[8Dл[5Cл[C[B[8Dл[4Cл[2C[B[8D[4Cл[3C[B[8D[3Cл[4C[B[8D[2Cл[4Cл[B[8D[Cл[5Cл[B[8Dлллллллл[7A[0m"
-set "chr[0]=[2Cлллл[2C[1B[8D[Cл[4Cл[C[1B[8Dл[4Cл[Cл[1B[8Dл[3Cл[2Cл[1B[8Dл[2Cл[3Cл[1B[8Dл[Cл[4Cл[1B[8D[Cл[4Cл[C[1B[8D[2Cлллл[2C[7A[0m"
-set "chr[1]=[2Cлл[4C[1B[8D[Cл[Cл[4C[1B[8D[3Cл[4C[1B[8D[3Cл[4C[1B[8D[3Cл[4C[1B[8D[3Cл[4C[1B[8D[3Cл[4C[1B[8Dлллллллл[7A[0m"
-set "chr[2]=[Cлллллл[C[1B[8Dл[6Cл[1B[8D[6C[Cл[1B[8D[5Cлл[C[1B[8D[3Cлл[3C[1B[8D[Cлл[4Cл[1B[8Dл[6Cл[1B[8Dлллллллл[7A[0m"
-set "chr[3]=[Cлллллл[C[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[4Cллл[C[1B[8D[6C[Cл[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[7A[0m"
-set "chr[4]=[5Cлл[C[1B[8D[4Cл[Cл[C[1B[8D[3Cл[2Cл[C[1B[8D[2Cл[3Cл[C[1B[8D[Cл[4Cл[C[1B[8Dлллллллл[1B[8D[6Cл[C[1B[8D[5Cллл[7A[0m"
-set "chr[5]=лллллллл[1B[8Dл[6Cл[1B[8Dл[6C[C[1B[8Dллллллл[C[1B[8D[6C[Cл[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[7A[0m"
-set "chr[6]=[Cлллллл[C[1B[8Dл[6Cл[1B[8Dл[6C[C[1B[8Dллллллл[C[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[7A[0m"
-set "chr[7]=лллллллл[1B[8Dл[6Cл[1B[8D[6Cл[C[1B[8D[5Cл[2C[1B[8D[4Cл[3C[1B[8D[3Cл[4C[1B[8D[3Cл[4C[1B[8D[2Cллл[3C[7A[0m"
-set "chr[8]=[Cлллллл[C[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[7A[0m"
-set "chr[9]=[Cлллллл[C[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8Dл[6Cл[1B[8D[Cллллллл[1B[8D[6C[Cл[1B[8Dл[6Cл[1B[8D[Cлллллл[C[7A[0m"
+set "chr[-A]=[3CÛÛ[3C[B[8D[2CÛ[2CÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-B]=ÛÛÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[3CÛ[2C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
+set "chr[-C]=[2CÛÛÛÛ[CÛ[B[8D[CÛ[4CÛÛ[B[8DÛ[6CÛ[B[8DÛ[6C[C[B[8DÛ[6C[C[B[8DÛ[6CÛ[B[8D[CÛ[4CÛÛ[B[8D[2CÛÛÛÛ[CÛ[7A[0m"
+set "chr[-D]=ÛÛÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[4CÛ[C[B[8DÛÛÛÛÛÛ[2C[7A[0m"
+set "chr[-E]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[6C[B[8D[CÛÛÛ[4C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[-F]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[2CÛ[3C[B[8D[CÛÛÛÛ[3C[B[8D[CÛ[2CÛ[3C[B[8D[CÛ[6C[B[8DÛÛÛ[5C[7A[0m"
+set "chr[-G]=[2CÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8DÛ[6C[C[B[8DÛ[2CÛÛÛÛÛ[B[8DÛ[2CÛ[3CÛ[B[8DÛ[6CÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
+set "chr[-H]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-I]=ÛÛÛÛÛÛÛ[C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
+set "chr[-J]=[2CÛÛÛÛÛÛ[B[8D[5CÛ[2C[B[8D[5CÛ[2C[B[8D[5CÛ[2C[B[8DÛÛ[3CÛ[2C[B[8DÛ[4CÛ[2C[B[8DÛ[4CÛ[2C[B[8D[CÛÛÛÛ[3C[7A[0m"
+set "chr[-K]=ÛÛÛ[CÛÛÛÛ[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[2CÛ[3C[B[8D[CÛÛÛ[4C[B[8D[CÛ[2CÛ[3C[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-L]=ÛÛÛ[5C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[-M]=ÛÛ[3CÛÛÛ[B[8D[CÛÛ[CÛ[CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-N]=ÛÛ[3CÛÛÛ[B[8D[CÛÛ[3CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[2CÛ[CÛ[C[B[8D[CÛ[3CÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-O]=[2CÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
+set "chr[-P]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8DÛÛÛ[5C[7A[0m"
+set "chr[-Q]=[CÛÛÛÛÛÛ[C[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[2CÛ[3CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[3CÛ[4C[7A[0m"
+set "chr[-R]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-S]=[CÛÛÛÛÛ[CÛ[B[8DÛ[5CÛÛ[B[8DÛ[6CÛ[B[8D[CÛÛÛÛÛ[2C[B[8D[6CÛ[C[B[8DÛ[6CÛ[B[8DÛÛ[5CÛ[B[8DÛ[CÛÛÛÛÛ[C[7A[0m"
+set "chr[-T]=ÛÛÛÛÛÛÛÛ[B[8DÛ[3CÛ[2CÛ[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[3CÛÛÛ[2C[7A[0m"
+set "chr[-U]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
+set "chr[-V]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[3CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛ[CÛ[2C[B[8D[4CÛ[3C[7A[0m"
+set "chr[-W]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[2CÛ[CÛÛ[2C[7A[0m"
+set "chr[-X]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛÛ[3C[B[8D[2CÛ[2CÛ[2C[B[8D[2CÛ[2CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
+set "chr[-Y]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛ[CÛ[2C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[3CÛÛÛ[2C[7A[0m"
+set "chr[-Z]=ÛÛÛÛÛÛÛÛ[B[8DÛ[5CÛ[C[B[8DÛ[4CÛ[2C[B[8D[4CÛ[3C[B[8D[3CÛ[4C[B[8D[2CÛ[4CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[0]=[2CÛÛÛÛ[2C[1B[8D[CÛ[4CÛ[C[1B[8DÛ[4CÛ[CÛ[1B[8DÛ[3CÛ[2CÛ[1B[8DÛ[2CÛ[3CÛ[1B[8DÛ[CÛ[4CÛ[1B[8D[CÛ[4CÛ[C[1B[8D[2CÛÛÛÛ[2C[7A[0m"
+set "chr[1]=[2CÛÛ[4C[1B[8D[CÛ[CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[2]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8D[6C[CÛ[1B[8D[5CÛÛ[C[1B[8D[3CÛÛ[3C[1B[8D[CÛÛ[4CÛ[1B[8DÛ[6CÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "chr[3]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[4CÛÛÛ[C[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[4]=[5CÛÛ[C[1B[8D[4CÛ[CÛ[C[1B[8D[3CÛ[2CÛ[C[1B[8D[2CÛ[3CÛ[C[1B[8D[CÛ[4CÛ[C[1B[8DÛÛÛÛÛÛÛÛ[1B[8D[6CÛ[C[1B[8D[5CÛÛÛ[7A[0m"
+set "chr[5]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[6CÛ[1B[8DÛ[6C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[6]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[7]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[6CÛ[1B[8D[6CÛ[C[1B[8D[5CÛ[2C[1B[8D[4CÛ[3C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[2CÛÛÛ[3C[7A[0m"
+set "chr[8]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
+set "chr[9]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛÛ[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
 set "chr[_]=[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D        [7A[0m"
-set "chr[.]=лллллллл[1B[8Dлллллллл[1B[8Dлллллллл[1B[8Dлллллллл[1B[8Dлллллллл[1B[8Dлллллллл[1B[8Dлллллллл[1B[8Dлллллллл[7A[0m"
-set "tile[grass][0]=[38;2;8;222;36mлллллллл[B[8D[38;2;0;139;94mл[38;2;8;222;36mллл[38;2;0;139;94mл[38;2;8;222;36mллл[B[8D[38;2;0;139;94mлл[38;2;8;222;36mл[38;2;0;139;94mллл[38;2;8;222;36mл[38;2;0;139;94mл[B[8D[38;2;165;85;62mл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mллл[38;2;0;139;94mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mл[38;2;124;38;77mл[38;2;165;85;62mллл[B[8D[38;2;165;85;62mл[38;2;0;139;94mл[38;2;165;85;62mлллллл[B[8D[38;2;165;85;62mллллл[38;2;110;125;164mл[38;2;165;85;62mлл[B[8D[38;2;165;85;62mл[38;2;254;168;0mл[38;2;165;85;62mлллллл[7A[0m"
-set "tile[grass][1]=[38;2;8;222;36mлллллллл[B[8D[38;2;8;222;36mлллл[38;2;0;139;94mл[38;2;8;222;36mллл[B[8D[38;2;0;139;94mл[38;2;8;222;36mлл[38;2;0;139;94mлл[38;2;8;222;36mллл[B[8D[38;2;0;139;94mл[38;2;8;222;36mлл[38;2;0;139;94mл[38;2;165;85;62mл[38;2;0;139;94mл[38;2;8;222;36mл[38;2;0;139;94mл[B[8D[38;2;0;139;94mл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mллл[38;2;0;139;94mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mл[38;2;0;139;94mл[38;2;165;85;62mллл[38;2;254;168;0mл[38;2;0;139;94mлл[B[8D[38;2;165;85;62mлллллллл[B[8D[38;2;165;85;62mлл[38;2;110;125;164mл[38;2;165;85;62mллл[38;2;249;206;164mл[38;2;165;85;62mл[7A[0m"
-set "tile[grass][2]=[38;2;8;222;36mлллллллл[B[8D[38;2;0;139;94mл[38;2;8;222;36mл[38;2;0;139;94mллл[38;2;8;222;36mлл[38;2;0;139;94mл[B[8D[38;2;0;139;94mлл[38;2;165;85;62mлл[38;2;0;139;94mл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mллллл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mл[38;2;254;168;0mл[38;2;165;85;62mллл[38;2;0;139;94mл[38;2;8;222;36mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mллллл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mллл[38;2;94;85;80mл[38;2;165;85;62mл[38;2;0;139;94mл[38;2;165;85;62mлл[B[8D[38;2;165;85;62mлллллллл[7A[0m"
-set "tile[grass][3]=[38;2;8;222;36mлллллллл[B[8D[38;2;8;222;36mллллл[38;2;0;139;94mлл[38;2;8;222;36mл[B[8D[38;2;0;139;94mлл[38;2;8;222;36mллл[38;2;0;139;94mл[38;2;165;85;62mл[38;2;0;139;94mл[B[8D[38;2;165;85;62mл[38;2;0;139;94mл[38;2;8;222;36mлл[38;2;0;139;94mл[38;2;165;85;62mллл[B[8D[38;2;165;85;62mлл[38;2;0;139;94mл[38;2;8;222;36mл[38;2;0;139;94mл[38;2;165;85;62mллл[B[8D[38;2;165;85;62mллл[38;2;0;139;94mл[38;2;165;85;62mлл[38;2;124;38;77mл[38;2;165;85;62mл[B[8D[38;2;165;85;62mл[38;2;254;168;0mл[38;2;165;85;62mлллллл[B[8D[38;2;165;85;62mлллл[38;2;255;118;167mл[38;2;165;85;62mллл[7A[0m"
+set "chr[.]=ÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
+set "tile[grass][0]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[B[8D[38;2;165;85;62mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;124;38;77mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;110;125;164mÛ[38;2;165;85;62mÛÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛÛÛÛ[7A[0m"
+set "tile[grass][1]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;8;222;36mÛÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;254;168;0mÛ[38;2;0;139;94mÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛ[38;2;110;125;164mÛ[38;2;165;85;62mÛÛÛ[38;2;249;206;164mÛ[38;2;165;85;62mÛ[7A[0m"
+set "tile[grass][2]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛÛÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[B[8D[38;2;0;139;94mÛÛ[38;2;165;85;62mÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛ[38;2;94;85;80mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛÛÛÛ[7A[0m"
+set "tile[grass][3]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;8;222;36mÛÛÛÛÛ[38;2;0;139;94mÛÛ[38;2;8;222;36mÛ[B[8D[38;2;0;139;94mÛÛ[38;2;8;222;36mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛ[38;2;124;38;77mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛÛÛ[38;2;255;118;167mÛ[38;2;165;85;62mÛÛÛ[7A[0m"
 goto :eof
 
 :buildSketch
@@ -764,7 +764,7 @@ certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
 goto :eof
 
-:init_setfont DONT CALL
+:init_setfont DON'T CALL
 :: - BRIEF -
 ::  Get or set the console font size and font name.
 :: - SYNTAX -
