@@ -7,5 +7,4 @@ set "revisionRequired=4.0.0"
 :setup
 
 rem YOUR CODE GOES HERE
-
 pause & exit
