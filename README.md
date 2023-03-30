@@ -1,5 +1,7 @@
 # Windows-Batch-Library (Windows 10 or later)
 
+Expand the list of commands your use in Batch with Library.bat!
+
 The **Window Batch Library** is a collection of pre-written macros, functions, and constants
 that can be used to simplify and speed up the process of creating command-line interfaces (CLIs) 
 and other types of text-based user interfaces (TUIs).
