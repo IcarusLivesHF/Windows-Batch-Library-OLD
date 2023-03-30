@@ -2,7 +2,7 @@
 
 set "revisionRequired=4.0.0"
 (%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
-	:StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
+	call :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
 %)%  && (cls&goto :setup)
 :setup
 
