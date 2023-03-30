@@ -126,7 +126,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "fetchDataFromController=if "^^!controller^^!" equ "True" set "com=" & set /p "com=""
 			
 	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "sprite" (
+	) else if /i "!argumentCommand[%%i]!" equ "spr" (
 			call :sprites
 			
 	REM -----------------------------------------------------------------------------------------------------------------------------
@@ -391,14 +391,14 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 		for /l %%x in (^^!xa^^!,^^!stepx^^!,^^!xb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "ya+=stepy", "fraction-=dx"%\n%
 			set /a "fraction+=dy"%\n%
-			set "$line=^!$line^!%esc%[^!ya^!;%%xHÛ"%\n%
+			set "$line=^!$line^!%esc%[^!ya^!;%%xHU"%\n%
 		)%\n%
 	) else (%\n%
 		set /a "fraction=dx - (dy >> 1)"%\n%
 		for /l %%y in (^^!ya^^!,^^!stepy^^!,^^!yb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "xa+=stepx", "fraction-=dy"%\n%
 			set /a "fraction+=dx"%\n%
-			set "$line=^!$line^!%esc%[%%y;^!xa^!HÛ"%\n%
+			set "$line=^!$line^!%esc%[%%y;^!xa^!HU"%\n%
 		)%\n%
 	)%\n%
 )) else set args=
@@ -714,7 +714,6 @@ rem 4x4
 set "ball[0]=[1C   [1B[4D     [1B[5D     [1B[5D     [1B[4D   [1D[2A[0m"
 set "ball[1]=[1CÛÛÛ[1B[4DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[4DÛÛÛ[1D[2A[0m"
 goto :eof
-
 :characterSprites_8x8
 set "chr[-A]=[3CÛÛ[3C[B[8D[2CÛ[2CÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
 set "chr[-B]=ÛÛÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[3CÛ[2C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
@@ -769,11 +768,13 @@ for %%i in (
 	"IHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAi"
 	"ZmFpbGVkTGlicmFyeT1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBu"
 	"b3QgZm91bmQgJiB0aW1lb3V0IC90IDMgJiBleGl0Ig0KDQpzZXQgInJldmlzaW9u"
-	"UmVxdWlyZWQ9My4zMC4yIg0KKCUoOj89TGlicmFyeSUgJiYgKGNhbGwgOnJldmlz"
-	"aW9uKXx8KCVmYWlsZWRMaWJyYXJ5JSkpMj5udWwNCgljYWxsIDpzdGRsaWIgL3c6"
-	"ODAgL2g6NjAgL3RpdGxlOiJNeSB0aXRsZSIgL2ZzOjgNCg0KJSklICAmJiAoY2xz"
-	"JmdvdG8gOnNldHVwKQ0KOnNldHVwDQoNCnJlbSBZT1VSIENPREUgR09FUyBIRVJF"
-	"DQoNCnBhdXNlICYgZXhpdA=="
+	"UmVxdWlyZWQ9NC4wLjAiDQooJSg6Pz1MaWJyYXJ5JSAmJiAoY2FsbCA6cmV2aXNp"
+	"b24pfHwoJWZhaWxlZExpYnJhcnklKSkyPm51bA0KCWNhbGwgOlN0ZExpYiAvdzpO"
+	"IC9oOk4gL2ZzOk4gL3RpdGxlOiJmb29iYXIiIC9yZ2I6ImZvbyI6ImJhciIgL2Rl"
+	"YnVnIC9leHRsaWIgLzNyZHBhcnR5IC9tdWx0aSAvc3ByaXRlIC9tYXRoIC9taXNj"
+	"IC9zaGFwZSAvYWMgL3R1cnRsZSAvY3Vyc29yIC9jcjpOIC9nZnggL3V0aWwNCiUp"
+	"JSAgJiYgKGNscyZnb3RvIDpzZXR1cCkNCjpzZXR1cA0KDQpyZW0gWU9VUiBDT0RF"
+	"IEdPRVMgSEVSRQ0KDQpwYXVzZSAmIGV4aXQ="
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
