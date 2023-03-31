@@ -49,23 +49,23 @@ for %%a in (%*) do (
 )
 for /l %%i in (1,1,%totalArguemnts%) do (
 
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------W
 		   if /i "!argumentCommand[%%i]!" equ "w" (
 			set /a "wid=width=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------H
 	) else if /i "!argumentCommand[%%i]!" equ "h" (
 			set /a "hei=height=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------FS
 	) else if /i "!argumentCommand[%%i]!" equ "fs" (
 			set /a "defaultFontSize=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "title" (
+	REM -----------------------------------------------------------------------------------------------------------------------------TITLE t
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
 			title !argumentArgument[%%i][1]!
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------RGB
 	) else if /i "!argumentCommand[%%i]!" equ "rgb" (
 			set "backgroundColor=!argumentArgument[%%i][1]!"
 			set "textColor=!argumentArgument[%%i][2]!"
@@ -74,14 +74,14 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			) else (
 				set "defaultStyle=5"
 			)
-			<nul set /p "=%esc%[48;!defaultStyle!;%backgroundColor%m%esc%[38;!defaultStyle!;%textColor%m"
+			<nul set /p "=%esc%[48;!defaultStyle!;!backgroundColor!m%esc%[38;!defaultStyle!;!textColor!m"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "debug" (
+	REM -----------------------------------------------------------------------------------------------------------------------------DEBUG d
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
 			set "debug=True"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "extLib" (
+	REM -----------------------------------------------------------------------------------------------------------------------------EXTLIB e
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
 			rem Backspace
 			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
 			rem BEL (sound)
@@ -92,16 +92,18 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
 			rem Heart
 			for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x03"') do set "<3=%%i"
-			for /f "tokens=1,2 delims=." %%a in ( 
-				pointer[R].10 pointer[L].11 pointer[U].1E pointer[D].1F 
-				face[0].01 face[1].02 musicNote.0E 
-				pixel[0].DB pixel[1].B0 pixel[2].B1 pixel[3].B2
+			for %%i in (
+				"pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
+				"pixel[0].DB" "pixel[1].B0" "pixel[2].B1" "pixel[3].B2"
+				"face[0].01" "face[1].02" "musicNote.0E"
 			) do (
-				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
+				for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
+					for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
+				)
 			)
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "3rdparty" (
+	REM -----------------------------------------------------------------------------------------------------------------------------3RDPARTY
+	) else if /i "!argumentCommand[%%i]:~0,3!" equ "3rd" (
 			if not exist "%temp%/batch" (
 				Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('https://download1478.mediafire.com/5991igjkrecgKaXyNCmBNY5bKGGfDrgJHdxz9p8dJpBN8c2FMylYGjY9GH0WPesKh1JjZ6gvCHu4Wz8XpjYFF2CarOg/etz48ptpp0l2lkp/batch.zip','batch.zip')" && (
 					move /y batch.zip "%temp%"
@@ -119,17 +121,17 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "wget="%temp%/batch/wget.exe""
 			set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 			set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
-			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+
+	REM -----------------------------------------------------------------------------------------------------------------------------MULTI
 	) else if /i "!argumentCommand[%%i]!" equ "multi" (
 			set "controller=True"
 			set "fetchDataFromController=if "^^!controller^^!" equ "True" set "com=" & set /p "com=""
-			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "spr" (
+
+	REM -----------------------------------------------------------------------------------------------------------------------------SPRITE s
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "s" (
 			call :sprites
-			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+
+	REM -----------------------------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
 			set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+HALF_PI, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 			REM set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
@@ -153,7 +155,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "min=(((((x-y)>>31)&1)*x)|((~(((x-y)>>31)&1)&1)*y))"
 			set "percentOf=p=x*y/100"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------MISC
 	) else if /i "!argumentCommand[%%i]!" equ "misc" (
 			set "gravity=_G_=1, ?.acceleration+=_G_, ?.velocity+=?.acceleration, ?.acceleration*=0, ?+=?.velocity"
 			set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
@@ -173,8 +175,8 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"
 			set "countLoops=loopsCounted=(loopsCounted + 1) %% 9999"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "shape" (
+	REM -----------------------------------------------------------------------------------------------------------------------------SHAPE sh
+	) else if /i "!argumentCommand[%%i]:~0,2!" equ "sh" (
 			set "SQ(x)=x*x"
 			set "CUBE(x)=x*x*x"
 			set "pmSQ(x)=x+x+x+x"
@@ -185,7 +187,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "areaTRA(b1,b2,h)=(b1*b2)*h/2"
 			set "volBOX(l,w,h)=l*w*h"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------AC
 	) else if /i "!argumentCommand[%%i]!" equ "ac" (
 			set "LSS(x,y)=(((x-y)>>31)&1)"
 			set "LEQ(x,y)=((~(y-x)>>31)&1)"
@@ -198,7 +200,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "XOR(b1,b2)=(b1^b2)"
 			set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------TURTLE
 	) else if /i "!argumentCommand[%%i]!" equ "turtle" (
 			set /a "DFX=%~1", "DFY=%~2", "DFA=%~3"
 			set "forward=DFX+=(?+1)*^!cos:x=DFA^!, DFY+=(?+1)*^!sin:x=DFA^!"
@@ -211,8 +213,8 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "cent=DFX=wid/2, DFY=hei/2"
 			set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
-	) else if /i "!argumentCommand[%%i]!" equ "cursor" (
+	REM -----------------------------------------------------------------------------------------------------------------------------CURSOR c
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "c" (
 			set ">=<nul set /p ="
 			set "push=%esc%7"
 			set "pop=%esc%8"
@@ -228,34 +230,33 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "capIt=%esc%[0m"
 			set "moveXY=%esc%[^!y^!;^!x^!H"
 			set "home=%esc%[H"
-			call :setStyle
 			set "setDefaultColor=<nul set /p "=%esc%[48;%defaultStyle%;%backgroundColor%m%esc%[38;%defaultStyle%;%textColor%m""
+			call :setStyle
 			
-			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------GFX
 	) else if /i "!argumentCommand[%%i]!" equ "gfx" (
 			call :graphicsFunctions
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------UTIL
 	) else if /i "!argumentCommand[%%i]!" equ "util" (
 			call :utilityFunctions
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------
+	REM -----------------------------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
 			set /a "range=!argumentArgument[%%i][1]!" & REM 1-255
 			set "totalColorsInRange=0"
-			for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;%%a;0m"
-			for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;255;0m"
-			for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;255;%%am"
-			for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;%%a;255m"
-			for /l %%a in (0,%range%,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;0;255m"
-			for /l %%a in (255,-%range%,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;0;%%am"
+			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;%%a;0m"
+			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;255;0m"
+			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;255;%%am"
+			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;0;%%a;255m"
+			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;%%a;0;255m"
+			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=%esc%[38;2;255;0;%%am"
 			set /a "range=255 / !argumentArgument[%%i][1]!"
 	)
 	
 	set "argumentCommand[%%i]="
-	set "argumentCommand[%%i][1]="
-	set "argumentCommand[%%i][2]="
+	set "argumentArgument[%%i][1]="
+	set "argumentArgument[%%i][2]="
 )
 
 
@@ -572,14 +573,15 @@ goto :eof
 
 :___________________________________________________________________________________________
 :utilityFunctions
-rem %sort[fwd]:#=stingArray%                               thanks lowsun for these
+rem %sort[fwd]:#=stingArray%                               thanks lowsun for these #
 SET "sort[fwd]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT"
-rem %sort[rev]:#=stingArray%
+rem %sort[rev]:#=stingArray%                                                       #
 SET "sort[rev]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT /R"
-rem %filter[fwd]:#=stingArray%
+rem %filter[fwd]:#=stingArray%                                                     #
 SET "filter[fwd]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ"
-rem %filter[rev]:#=stingArray%
+rem %filter[rev]:#=stingArray%                                                     #
 SET "filter[rev]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ /R"
+rem -------------------------------------------------------------------------------#
 
 :_hexToRGB DON'T CALL
 rem %hexToRGB% 00a2ed
