@@ -7,7 +7,7 @@
 			any particular order. You only need to remember which /tags do what.
 		+ L.32bit
 		+ rem[
-		+ rem+
+		+ ]rem
 		+ sort[fwd]
 		+ sort[rev]
 		+ filter[fwd]
