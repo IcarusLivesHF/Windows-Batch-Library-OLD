@@ -1,11 +1,11 @@
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.0.1"
+	set "revision=4.0.2"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% neq %revisionRequired:.=% (
-		echo.&echo  This %revision% of Library.bat is not supported in this script.
-		echo  %revisionRequired% of Library.bat required to run this script.
+		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
+		echo.&echo  Revision: %revisionRequired% of Library.bat required to run this script.
 		set "libraryError=True"
 	)
 	if "%winversion%" neq "10.0" (
@@ -22,10 +22,36 @@ goto :eof
 :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
 echo Loading Windows Batch Library - Revision: %Revision%...
-chcp 437>nul
+rem check for installation of PxPlus_IBM_CGA.ttf-----------------------------------
 set "defaultFontSize=12"
 set "defaultFont=Terminal"
+set "fontInstalled=False"
+for /r "%SYSTEMROOT%\Fonts" %%a in (*.ttf) do (
+	set "current=%%a"
+	set "current=!current:%SYSTEMROOT%\Fonts\=!"
+	if "!fontInstalled!" neq "True" (
+		if "!current!" equ "PxPlus_IBM_CGA.ttf" (
+			set "fontInstalled=True"
+		)
+	)
+)
+if "%fontInstalled%" neq "False" (
+	set "defaultFont=PxPlus IBM CGA"
+) else (
+	rem prompt user to install
+	echo Would you like to install 'PxPlus_IBM_CGA.ttf' to '%systemroot%\Fonts'?& echo.
+	echo You will be prompted to confirm installation.&echo.
+	set /p "continue=Y/N: "
+	if /i "!continue!" equ "Y" (
+		powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf','PxPlus_IBM_CGA.ttf')"
+		reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" /v "PxPlus_IBM_CGA" /t REG_SZ /d PxPlus_IBM_CGA.ttf /f
+		rem user must confirm
+		move /y "PxPlus_IBM_CGA.ttf" "%systemroot%\Fonts"
+	)
+)
+rem -------------------------------------------------------------------------------
 set "debug=False"
+chcp 437>nul
 set "pixel=Û" & set ".=Û"
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" )
 set "\e=%esc%["
@@ -39,7 +65,7 @@ rem newLine
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
 rem multiline Comment     %rem[%    %]rem%
-Set "rem[=rem/||(" & set "]rem=)"
+set "rem[=rem/||(" & set "]rem=)"
 <nul set /p "=%esc%[?25l"
 
 for %%a in (%*) do (
@@ -53,23 +79,23 @@ for %%a in (%*) do (
 )
 for /l %%i in (1,1,%totalArguemnts%) do (
 
-	REM -----------------------------------------------------------------------------------------------------------------------------W
+	REM -Set width of console--------------------------------------------------------------------------------------------------------W
 		   if /i "!argumentCommand[%%i]!" equ "w" (
 			set /a "wid=width=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------H
+	REM -Set height of console-------------------------------------------------------------------------------------------------------H
 	) else if /i "!argumentCommand[%%i]!" equ "h" (
 			set /a "hei=height=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------FS
+	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
 	) else if /i "!argumentCommand[%%i]!" equ "fs" (
 			set /a "defaultFontSize=!argumentArgument[%%i][1]!"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------TITLE t
+	REM -Set title-------------------------------------------------------------------------------------------------------------------TITLE t
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
 			title !argumentArgument[%%i][1]!
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------RGB
+	REM -Set color-------------------------------------------------------------------------------------------------------------------RGB
 	) else if /i "!argumentCommand[%%i]!" equ "rgb" (
 			set "backgroundColor=!argumentArgument[%%i][1]!"
 			set "textColor=!argumentArgument[%%i][2]!"
@@ -80,11 +106,11 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			)
 			<nul set /p "=%esc%[48;!defaultStyle!;!backgroundColor!m%esc%[38;!defaultStyle!;!textColor!m"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------DEBUG d
+	REM -DEBUG MODE------------------------------------------------------------------------------------------------------------------DEBUG d
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
 			set "debug=True"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------EXTLIB e
+	REM -Enable for extra special characters-----------------------------------------------------------------------------------------EXTLIB e
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
 			rem Backspace
 			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
@@ -109,7 +135,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 				)
 			)
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------3RDPARTY
+	REM -Use to install 3rd party files----------------------------------------------------------------------------------------------3RDPARTY
 	) else if /i "!argumentCommand[%%i]:~0,3!" equ "3rd" (
 			if not exist "%temp%/batch" (
 				echo This script uses 3rd party tools that will be downloaded to: &echo. & echo "%temp%\batch" & echo.
@@ -135,16 +161,16 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
 			set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
 
-	REM -----------------------------------------------------------------------------------------------------------------------------MULTI
+	REM -Enable multithreaded input fetcher------------------------------------------------------------------------------------------MULTI
 	) else if /i "!argumentCommand[%%i]!" equ "multi" (
 			set "controller=True"
 			set "fetchDataFromController=if "^^!controller^^!" equ "True" set "com=" & set /p "com=""
 
-	REM -----------------------------------------------------------------------------------------------------------------------------SPRITE s
+	REM -Get generic sprites---------------------------------------------------------------------------------------------------------SPRITE s
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "s" (
 			call :sprites
 
-	REM -----------------------------------------------------------------------------------------------------------------------------MATH
+	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
 			set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+HALF_PI, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 			REM set "_SIN=a-a*a/1920*a/312500+a*a/1920*a/15625*a/15625*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000"
@@ -168,7 +194,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "min=(((((x-y)>>31)&1)*x)|((~(((x-y)>>31)&1)&1)*y))"
 			set "percentOf=p=x*y/100"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------MISC
+	REM -Get misc functions----------------------------------------------------------------------------------------------------------MISC
 	) else if /i "!argumentCommand[%%i]!" equ "misc" (
 			set "gravity=_G_=1, ?.acceleration+=_G_, ?.velocity+=?.acceleration, ?.acceleration*=0, ?+=?.velocity"
 			set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
@@ -185,7 +211,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
 			set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------SHAPE sh
+	REM -Get shape functions---------------------------------------------------------------------------------------------------------SHAPE sh
 	) else if /i "!argumentCommand[%%i]:~0,2!" equ "sh" (
 			set "SQ(x)=x*x"
 			set "CUBE(x)=x*x*x"
@@ -197,7 +223,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "areaTRA(b1,b2,h)=(b1*b2)*h/2"
 			set "volBOX(l,w,h)=l*w*h"
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------AC
+	REM -Get algorithmic conditional functions---------------------------------------------------------------------------------------AC
 	) else if /i "!argumentCommand[%%i]!" equ "ac" (
 			set "LSS(x,y)=(((x-y)>>31)&1)"
 			set "LEQ(x,y)=((~(y-x)>>31)&1)"
@@ -210,7 +236,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "XOR(b1,b2)=(b1^b2)"
 			set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------TURTLE
+	REM -Get turtle functions--------------------------------------------------------------------------------------------------------TURTLE
 	) else if /i "!argumentCommand[%%i]!" equ "turtle" (
 			set /a "DFX=%~1", "DFY=%~2", "DFA=%~3"
 			set "forward=DFX+=(?+1)*^!cos:x=DFA^!, DFY+=(?+1)*^!sin:x=DFA^!"
@@ -223,7 +249,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "cent=DFX=wid/2, DFY=hei/2"
 			set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=%esc%[^!DFY^!;^!DFX^!H%pixel%""
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------CURSOR c
+	REM -Get cursor functions--------------------------------------------------------------------------------------------------------CURSOR c
 	) else if /i "!argumentCommand[%%i]!" equ "cursor" (
 			set ">=<nul set /p ="
 			set "push=%esc%7"
@@ -243,19 +269,19 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "setDefaultColor=<nul set /p "=%esc%[48;%defaultStyle%;%backgroundColor%m%esc%[38;%defaultStyle%;%textColor%m""
 			call :setStyle
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------GFX
+	REM -Unpack gfx macros-----------------------------------------------------------------------------------------------------------GFX
 	) else if /i "!argumentCommand[%%i]!" equ "gfx" (
 			call :graphicsFunctions
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------UTIL
+	REM -Unpack utility macros-------------------------------------------------------------------------------------------------------UTIL
 	) else if /i "!argumentCommand[%%i]!" equ "util" (
 			call :utilityFunctions
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------CR
+	REM -Get 8x8 character sprites---------------------------------------------------------------------------------------------------8x8
 	) else if /i "!argumentCommand[%%i]!" equ "8x8" (
 			call :characterSprites_8x8
 			
-	REM -----------------------------------------------------------------------------------------------------------------------------CR
+	REM -Get RGB color array---------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
 			set /a "range=!argumentArgument[%%i][1]!"
 			set "totalColorsInRange=0"
@@ -281,7 +307,7 @@ if "%debug%" neq "False" (
 ) else (
 	if not defined wid set /a "wid=width=hei=height"
 	if not defined hei set /a "hei=height=wid=width"
-	call :setfont %defaultFontSize% %defaultFont%
+	call :setfont %defaultFontSize% "%defaultFont%"
 	mode !wid!,!hei!
 )
 goto :eof
@@ -321,29 +347,46 @@ set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!arg
 :_BVector DON'T CALL
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
-	set /a "%%~1.x=^!random^! %% wid + 1"%\n%
-	set /a "%%~1.y=^!random^! %% hei + 1"%\n%
-	set /a "%%~1.td=^!random^! %% 360"%\n%
-	set /a "%%~1.tr=^!random^! %% 62832"%\n%
-	set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
-	set /a "%%~1.i=^!random^! %% 4 + -1"%\n%
-	set /a "%%~1.j=^!random^! %% 4 + -1"%\n%
-	if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
-		set /a "%%~1.i=1"%\n%
+	if "%%~2" equ "KILL" (%\n%
+		set "%%~1.x="%\n%
+		set "%%~1.y="%\n%
+		set "%%~1.i="%\n%
+		set "%%~1.j="%\n%
+		set "%%~1.td="%\n%
+		set "%%~1.tr="%\n%
+		set "%%~1.m="%\n%
+		set "%%~1.rgb="%\n%
+		set "%%~1.fcol="%\n%
+		set "%%~1.vd="%\n%
+		set "%%~1.vr="%\n%
+		set "%%~1.vmw="%\n%
+		set "%%~1.vmh="%\n%
+		set "%%~1.ch="%\n%
+	) else (%\n%
+		set /a "%%~1.x=^!random^! %% wid + 1"%\n%
+		set /a "%%~1.y=^!random^! %% hei + 1"%\n%
+		set /a "%%~1.td=^!random^! %% 360"%\n%
+		set /a "%%~1.tr=^!random^! %% 62832"%\n%
+		set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
+		set /a "%%~1.i=^!random^! %% 4 + -1"%\n%
+		set /a "%%~1.j=^!random^! %% 4 + -1"%\n%
+		if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
+			set /a "%%~1.i=1"%\n%
+		)%\n%
+		set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
+		set "%%~1.rgb=38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
+		set "%%~1.fcol=48;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
+		for %%a in (bvr bvg bvb) do set "%%a="%\n%
+		if "%%~2" neq "" (%\n%
+			set /a "%%~1.vd=%%~2"%\n%
+			set /a "%%~1.vr=%%~1.vd / 2"%\n%
+			set /a "%%~1.vmw=wid - %%~1.vr - 2"%\n%
+			set /a "%%~1.vmh=hei - %%~1.vr - 3"%\n%
+			set /a "%%~1.x=^!random^! %% (wid - %%~1.vr) + %%~1.vr"%\n%
+			set /a "%%~1.y=^!random^! %% (hei - %%~1.vr) + %%~1.vr"%\n%
+		)%\n%
+		if "%%~3" neq "" set "%%~1.ch=%%~3"%\n%
 	)%\n%
-	set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
-	set "%%~1.rgb=38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
-	set "%%~1.fcol=48;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
-	for %%a in (bvr bvg bvb) do set "%%a="%\n%
-	if "%%~2" neq "" (%\n%
-		set /a "%%~1.vd=%%~2"%\n%
-		set /a "%%~1.vr=%%~1.vd / 2"%\n%
-		set /a "%%~1.vmw=wid - %%~1.vr - 2"%\n%
-		set /a "%%~1.vmh=hei - %%~1.vr - 3"%\n%
-		set /a "%%~1.x=^!random^! %% (wid - %%~1.vr) + %%~1.vr"%\n%
-		set /a "%%~1.y=^!random^! %% (hei - %%~1.vr) + %%~1.vr"%\n%
-	)%\n%
-	if "%%~3" neq "" set "%%~1.ch=%%~3"%\n%
 )) else set args=
 
 :_lerpRGB DON'T CALL
