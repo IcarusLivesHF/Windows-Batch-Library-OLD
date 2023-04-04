@@ -1,6 +1,7 @@
+rem PLEASE READ DOCTUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.0.2"
+	set "revision=4.0.3"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision:.=% neq %revisionRequired:.=% (
@@ -16,40 +17,14 @@
 		ren "%~nx0" "Library.bat"
 		ren "-t.bat" "%self%"
 		del /f /q "-t.bat"
-		timeout /t 3 & exit
+		timeout /t 3 /nobreak & exit
 	)
 goto :eof
 :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
 echo Loading Windows Batch Library - Revision: %Revision%...
-rem check for installation of PxPlus_IBM_CGA.ttf-----------------------------------
-set "defaultFontSize=12"
-set "defaultFont=Terminal"
-set "fontInstalled=False"
-for /r "%SYSTEMROOT%\Fonts" %%a in (*.ttf) do (
-	set "current=%%a"
-	set "current=!current:%SYSTEMROOT%\Fonts\=!"
-	if "!fontInstalled!" neq "True" (
-		if "!current!" equ "PxPlus_IBM_CGA.ttf" (
-			set "fontInstalled=True"
-		)
-	)
-)
-if "%fontInstalled%" neq "False" (
-	set "defaultFont=PxPlus IBM CGA"
-) else (
-	rem prompt user to install
-	echo Would you like to install 'PxPlus_IBM_CGA.ttf' to '%systemroot%\Fonts'?& echo.
-	echo You will be prompted to confirm installation.&echo.
-	set /p "continue=Y/N: "
-	if /i "!continue!" equ "Y" (
-		powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf','PxPlus_IBM_CGA.ttf')"
-		reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" /v "PxPlus_IBM_CGA" /t REG_SZ /d PxPlus_IBM_CGA.ttf /f
-		rem user must confirm
-		move /y "PxPlus_IBM_CGA.ttf" "%systemroot%\Fonts"
-	)
-)
-rem -------------------------------------------------------------------------------
+
+set "server.bat_Logo=[38;2;255;212;92m[2C_[B[3D[38;2;245;163;37m>[38;2;255;212;92m([38;5;15m.[38;2;255;212;92m)__[B[5D(___/[0m"
 set "debug=False"
 chcp 437>nul
 set "pixel=Û" & set ".=Û"
@@ -60,13 +35,38 @@ set  "\rgb=%esc%[38;2;^!r^!;^!g^!;^!b^!m"
 set "\fcol=%esc%[48;2;^!r^!;^!g^!;^!b^!m"
 set "cls=%esc%[2J" & set "\c=%esc%[2J"
 set "L.32bit=2147483647"
-rem newLine
+rem \n = CRLF
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
 rem multiline Comment     %rem[%    %]rem%
 set "rem[=rem/||(" & set "]rem=)"
 <nul set /p "=%esc%[?25l"
+
+rem Download link information -------------------------------------------------------------------------------------------------------
+set "discordInviteLink=https://discord.gg/59WG3cyqRQ"
+set "_3rdparty_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip"
+set "font_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf"
+
+rem check for installation of PxPlus_IBM_CGA.ttf-------------------------------------------------------------------------------------
+set "defaultFontSize=12"
+set "defaultFont=Terminal"
+set "fontInstalled=False"
+if exist "%SYSTEMROOT%\Fonts\PxPlus_IBM_CGA.ttf" (
+	set "defaultFont=PxPlus IBM CGA"
+) else (
+	rem prompt user to install
+	echo Would you like to install 'PxPlus_IBM_CGA.ttf' to '%systemroot%\Fonts'?& echo.
+	echo You will be prompted to confirm installation.&echo.
+	set /p "continue=Y/N: "
+	if /i "!continue!" equ "Y" (
+		powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%font_DownloadLink%','PxPlus_IBM_CGA.ttf')"
+		reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" /v "PxPlus_IBM_CGA" /t REG_SZ /d PxPlus_IBM_CGA.ttf /f
+		rem user must confirm
+		move /y "PxPlus_IBM_CGA.ttf" "%systemroot%\Fonts"
+	)
+)
+rem -Parse each argument as a 'command' with up to 2 'arguments'---------------------------------------------------------------------
 
 for %%a in (%*) do (
 	set /a "totalArguemnts+=1"
@@ -77,6 +77,7 @@ for %%a in (%*) do (
 		set "argumentArgument[!totalArguemnts!][2]=%%~k"
 	)
 )
+rem -For each chunk of the library desired to be used--------------------------------------------------------------------------------
 for /l %%i in (1,1,%totalArguemnts%) do (
 
 	REM -Set width of console--------------------------------------------------------------------------------------------------------W
@@ -89,7 +90,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			
 	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
 	) else if /i "!argumentCommand[%%i]!" equ "fs" (
-			set /a "defaultFontSize=!argumentArgument[%%i][1]!"
+			call :setfont !argumentArgument[%%i][1]! "%defaultFont%"
 			
 	REM -Set title-------------------------------------------------------------------------------------------------------------------TITLE t
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
@@ -138,16 +139,25 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	REM -Use to install 3rd party files----------------------------------------------------------------------------------------------3RDPARTY
 	) else if /i "!argumentCommand[%%i]:~0,3!" equ "3rd" (
 			if not exist "%temp%/batch" (
-				echo This script uses 3rd party tools that will be downloaded to: &echo. & echo "%temp%\batch" & echo.
+				for %%a in (
+					"This script uses 3rd party tools that will be downloaded to:" "" "'%temp%\batch'" "" 
+					"The following will be downloaded onto your machine." ""
+					"NirCmd.exe" "Wget.exe" "Curl.exe" "CmdMenuSel.exe" "Mouse.exe" "Inject.exe" "getinput.dll" ""
+				) do echo=%%~a
 				set /p "continue=Would you like to continue? Y/N: "
 				if /i "!continue!" equ "Y" (
-					Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip','batch.zip')" && (
-						move /y batch.zip "%temp%"
-						pushd "%temp%"
-						tar -xf batch.zip
-						popd
-					) || ( goto :eof )
-					goto :eof
+					start %discordInviteLink%
+					echo.& echo Join our discord for access to the download link.
+					echo.& set /p "continue=After you have joined, confirm here by typing Y/N:"
+					if /i "!continue!" equ "Y" (
+						Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%_3rdparty_DownloadLink%','batch.zip')" && (
+							move /y batch.zip "%temp%"
+							pushd "%temp%"
+							tar -xf batch.zip
+							popd
+						) || ( goto :eof )
+						goto :eof
+					)
 				)
 			)
 			set "continue="
@@ -165,10 +175,6 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	) else if /i "!argumentCommand[%%i]!" equ "multi" (
 			set "controller=True"
 			set "fetchDataFromController=if "^^!controller^^!" equ "True" set "com=" & set /p "com=""
-
-	REM -Get generic sprites---------------------------------------------------------------------------------------------------------SPRITE s
-	) else if /i "!argumentCommand[%%i]:~0,1!" equ "s" (
-			call :sprites
 
 	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
@@ -280,7 +286,11 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	REM -Get 8x8 character sprites---------------------------------------------------------------------------------------------------8x8
 	) else if /i "!argumentCommand[%%i]!" equ "8x8" (
 			call :characterSprites_8x8
-			
+	
+	REM -Get generic sprites---------------------------------------------------------------------------------------------------------SPRITE s
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "s" (
+			call :sprites
+
 	REM -Get RGB color array---------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
 			set /a "range=!argumentArgument[%%i][1]!"
@@ -299,17 +309,23 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	set "argumentArgument[%%i][2]="
 )
 
-
 if "%debug%" neq "False" (
 	@echo on
 	call :setfont 16 Consolas
 	mode 180,100
+	prompt !server.bat_logo!
 ) else (
-	if not defined wid set /a "wid=width=hei=height"
-	if not defined hei set /a "hei=height=wid=width"
-	call :setfont %defaultFontSize% "%defaultFont%"
-	mode !wid!,!hei!
+	if defined hei if not defined wid (
+		set /a "wid=width=hei=height"
+	)
+	if defined wid if not defined hei (
+		set /a "hei=height=wid=width"
+	)
+	if defined wid if defined hei (
+		mode !wid!,!hei!
+	)
 )
+
 goto :eof
 
 :___________________________________________________________________________________________
@@ -338,14 +354,14 @@ set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args
 	set "_scrn_=^!_scrn_^!!esc![%%2;%%1H!esc![38;2;%%3;%%4;%%5m%pixel%!esc![0m"%\n%
 )) else set args=
 
-:_translate DON'T CALL
-rem %translate% x Xoffset y Yoffset
-set translate=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set /a "%%~1+=%%~2, %%3+=%%~4"%\n%
+:_offset DON'T CALL
+rem %offset% x Xoffset y Yoffset
+set offset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
+	set /a "%%~1+=%%~2, %%3+=%%~4"2^>nul%\n%
 )) else set args=
 
 :_BVector DON'T CALL
-rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1[]./BV[].
+rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1.BV_ATTRIBUTES
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	if "%%~2" equ "KILL" (%\n%
 		set "%%~1.x="%\n%
@@ -828,19 +844,7 @@ goto :eof
 :buildSketch to avoid illegal characters, decode from base64 to bat file,. open and inspect sketch.bat
 if exist Sketch.bat goto :eof
 for %%i in (
-	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNl"
-	"dCAiKD0oc2V0ICJcPT8iICYgcmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICI/LmJh"
-	"dCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIl5eIVxeXiEuYmF0IiAm"
-	"IHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAi"
-	"ZmFpbGVkTGlicmFyeT1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBu"
-	"b3QgZm91bmQgJiB0aW1lb3V0IC90IDMgJiBleGl0Ig0KDQpzZXQgInJldmlzaW9u"
-	"UmVxdWlyZWQ9NC4wLjAiDQooJSg6Pz1MaWJyYXJ5JSAmJiAoY2FsbCA6cmV2aXNp"
-	"b24pfHwoJWZhaWxlZExpYnJhcnklKSkyPm51bA0KCWNhbGwgOlN0ZExpYiAvdzpO"
-	"IC9oOk4gL2ZzOk4gL3RpdGxlOiJmb29iYXIiIC9yZ2I6ImZvbyI6ImJhciIgL2Rl"
-	"YnVnIC9leHRsaWIgLzNyZHBhcnR5IC9tdWx0aSAvc3ByaXRlIC9tYXRoIC9taXNj"
-	"IC9zaGFwZSAvYWMgL3R1cnRsZSAvY3Vyc29yIC9jcjpOIC9nZnggL3V0aWwNCiUp"
-	"JSAgJiYgKGNscyZnb3RvIDpzZXR1cCkNCjpzZXR1cA0KDQpyZW0gWU9VUiBDT0RF"
-	"IEdPRVMgSEVSRQ0KDQpwYXVzZSAmIGV4aXQ="
+	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0oc2V0ICJcPT8iICYgcmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICI/LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIl5eIVxeXiEuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbGVkTGlicmFyeT1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQpzZXQgInJldmlzaW9uUmVxdWlyZWQ9NC4wLjMiDQooJSg6Pz1MaWJyYXJ5JSAmJiAoY2FsbCA6cmV2aXNpb24pfHwoJWZhaWxlZExpYnJhcnklKSkyPm51bA0KCWNhbGwgOlN0ZExpYiAvcw0KJSklICAmJiAoZ290byA6c2V0dXApDQo6c2V0dXANCg0KcGF1c2UgJiBleGl0IC9i"
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
