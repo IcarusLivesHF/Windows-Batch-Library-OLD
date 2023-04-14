@@ -1,10 +1,10 @@
 rem PLEASE READ DOCTUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.0.4"
+	set "revision=4.0.5"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
-	if %revision:.=% neq %revisionRequired:.=% (
+	if %revision% neq %revisionRequired% (
 		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
 		echo.&echo  Revision: %revisionRequired% of Library.bat required to run this script.
 		set "libraryError=True"
@@ -23,15 +23,29 @@ goto :eof
 :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
 echo Loading Windows Batch Library - Revision: %Revision%...
-
+rem Download link information -------------------------------------------------------------------------------------------------------
+set "discordInviteLink=https://discord.gg/6drWuwp2MG"
+set "_3rdparty_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip"
+set "font_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf"
+set "disable_InstallFont=True"
+set "defaultFontSize=10"
+set "defaultFont=Terminal"
 set "server.bat_Logo=[38;5;220m[2C_[B[3D[38;5;208m>[38;5;220m([38;5;15m.[38;5;220m)__[B[5D(___/[0m"
 set "debug=False"
 set "debugPrompt=False"
 chcp 437>nul
+for /f "tokens=2 delims=: " %%i in ('mode') do (
+	2>nul set /a "0/%%i" && ( 
+		if defined hei (set /a "wid=width=%%i") else (set /a "hei=height=%%i")
+	)
+)
+rem global vars above this line not intended for user use.
+rem ---------------------------------------------------------------------------------
+
+
 set "pixel=Û" & set ".=Û"
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" )
 set "\e=["
-set "\p=echo ["
 set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m"
 set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
 set "cls=[2J" & set "\c=[2J"
@@ -44,16 +58,6 @@ rem multiline Comment     %rem[%    %]rem%
 set "rem[=rem/||(" & set "rem]=)"
 <nul set /p "=[?25l"
 
-rem Download link information -------------------------------------------------------------------------------------------------------
-set "discordInviteLink=https://discord.gg/59WG3cyqRQ"
-set "_3rdparty_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip"
-set "font_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf"
-
-rem check for installation of PxPlus_IBM_CGA.ttf-------------------------------------------------------------------------------------
-set "defaultFontSize=10"
-set "defaultFont=Terminal"
-rem currently disabled until I get line 70 tested.
-set "disable_InstallFont=True"
 if exist "%SYSTEMROOT%\Fonts\PxPlus_IBM_CGA.ttf" (
 	set "defaultFont=PxPlus IBM CGA"
 ) else (
@@ -128,21 +132,28 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
 			rem Backspace
 			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
-			rem BEL (sound)
-			for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x07"') do set "BEL=%%i"
 			rem Carriage Return
 			for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
 			rem Tab 0x09
 			for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
-			rem Heart
-			for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x03"') do set "<3=%%i"
+
+			set "pixel[2]=%ESC%(0a%ESC%(B"
+			set "degreeSymbol=%ESC%(0f%ESC%(B"
+			set "border[NW]=%ESC%(0l%ESC%(B"
+			set "border[NE]=%ESC%(0k%ESC%(B"
+			set "border[SW]=%ESC%(0m%ESC%(B"
+			set "border[SE]=%ESC%(0j%ESC%(B"
+			set "border[H]=%ESC%(0q%ESC%(B"
+			set "border[V]=%ESC%(0x%ESC%(B"
+			set "border[+]=%ESC%(0n%ESC%(B"
+			set "border[HS]=%ESC%(0w%ESC%(B"
+			set "border[HN]=%ESC%(0v%ESC%(B"
+			set "border[VE]=%ESC%(0u%ESC%(B"
+			set "border[VW]=%ESC%(0t%ESC%(B"
 			for %%i in (
 				"pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
-				"pixel[0].DB" "pixel[1].B0" "pixel[2].B1" "pixel[3].B2"
-				"face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade=06"
-				"border[vert].B3" "border[hori].C4" "border[X].C5"
-				"border[hori.N].C1" "border[hori.S].C2" "border[vert.E].C3" "border[vert.W].B4"
-				"corner[SE].D9" "corner[NE].BF" "corner[SW].C0" "corner[NW].DA"
+				"pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
+				"face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03"
 			) do (
 				for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
 					for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
@@ -200,8 +211,8 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "key_W=Up"        & set "key_8=Up"
 			set "key_S=Down"      & set "key_2=Down"
 			set "key_P=Pause"     & Set "Pause=1" & Set "key_ =Pause" & Set "key_{ENTER}=Pause"
-			set "Right=?.x+=movementDistance"     & set "Left= ?.x-=movementDistance"
-			set "Up=   ?.y-=movementDistance"     & set "Down= ?.y+=movementDistance"
+			set "Right=?.x+=movementDistance"     & set "Left=?.x-=movementDistance"
+			set "Up=   ?.y-=movementDistance"     & set "Down=?.y+=movementDistance"
 			call :get_MT_connect
 
 	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
@@ -344,12 +355,6 @@ if "%debug%" neq "False" (
 		prompt !server.bat_logo!
 	)
 ) else (
-	if defined hei if not defined wid (
-		set /a "wid=width=hei=height"
-	)
-	if defined wid if not defined hei (
-		set /a "hei=height=wid=width"
-	)
 	if defined wid if defined hei (
 		mode !wid!,!hei!
 	)
@@ -413,8 +418,8 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 		set /a "%%~1.td=^!random^! %% 360"%\n%
 		set /a "%%~1.tr=^!random^! %% 62832"%\n%
 		set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
-		set /a "%%~1.i=^!random^! %% 4 + -1"%\n%
-		set /a "%%~1.j=^!random^! %% 4 + -1"%\n%
+		set /a "%%~1.i=^!random^! %% 3 + -1"%\n%
+		set /a "%%~1.j=^!random^! %% 3 + -1"%\n%
 		if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
 			set /a "%%~1.i=1"%\n%
 		)%\n%
@@ -511,6 +516,7 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 			set "$line=^!$line^![%%y;^!xa^!HU"%\n%
 		)%\n%
 	)%\n%
+	set "$line=^!$line^![0m"%\n%
 )) else set args=
 
 :_bezier DON'T CALL
@@ -524,25 +530,26 @@ set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!
 	)%\n%
 )) else set args=
 
-:_RGBezier DON'T CALL
-rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
+:_RGBezier DON'T CALL    -     WORKS WITH /cr
+rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4
 set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
-	set "$bezier=" ^& set "c=0"%\n%
+	set "$rgbezier=" ^& set "c=0"%\n%
 	set /a "px[0]=%%~1","py[0]=%%~2", "px[1]=%%~3","py[1]=%%~4", "px[2]=%%~5","py[2]=%%~6", "px[3]=%%~7","py[3]=%%~8"%\n%
-	for /l %%m in (1,1,%%~9) do (%\n%
+	for /l %%m in (1,1,^^!totalColorsInRange^^!) do (%\n%
 		set /a "vx[1]=(px[0]+c*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+c*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+c*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+c*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+c*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+c*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+c*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+c*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+c*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+c*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+c*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+c*(vy[5]-vy[4])*10)/1000+vy[4]","c+=1"%\n%
-		set "$bezier=^!$bezier^!^!color[%%m]^![^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
+		set "$rgbezier=^!$rgbezier^!^!color[%%m]^![^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
 	)%\n%
 )) else set args=
 
 :_arc DON'T CALL
 rem arc x y size DEGREES(0-360) arcRotationDegrees(0-360) lineThinness color
 set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
-	if "%%~7" equ "" ( set "hue=30" ) else ( set "hue=%%~7")%\n%
+	set "$arc=[38;5;15m"%\n%
     for /l %%e in (%%~4,%%~6,%%~5) do (%\n%
-		set /a "_x=%%~3 * ^!cos:x=%%~e^! + %%~1", "_y=%%~3 * ^!sin:x=%%~e^! + %%~2"%\n%
-		^!plot^! ^^!_x^^! ^^!_y^^! ^^!hue^^! %pixel%%\n%
+		set /a "_x=%%~3 * ^!cos:x=%%e^! + %%~1", "_y=%%~3 * ^!sin:x=%%e^! + %%~2"%\n%
+		set "$arc=^!$arc^![^!_y^!;^!_x^!H%pixel%"%\n%
 	)%\n%
+	set "$arc=^!$arc^![0m"%\n%
 )) else set args=
 
 :_plot_HSL_RGB DON'T CALL
@@ -830,8 +837,9 @@ goto :eof
 
 :sprites
 rem 4x4------------------------------------------------------------------------------------------------------------------------------------------------------------------
-set "ball[0]=[1C   [1B[4D     [1B[5D     [1B[5D     [1B[4D   [1D[2A[0m"
-set "ball[1]=[1CÛÛÛ[1B[4DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[4DÛÛÛ[1D[2A[0m"
+set "icarusLogo=[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[2C[38;2;79;63;79mÛÛÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[2C[38;2;79;63;79mÛÛÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[4C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[4C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[5C[38;2;79;63;79mÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[5C[38;2;79;63;79mÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛ[10C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛ[10C[38;2;79;63;79mÛÛ[B[24D[23C[38;2;79;63;79mÛ[B[24D[23C[38;2;79;63;79mÛ[B[24D[20C[38;2;63;255;255m,,[C[38;2;79;63;79mÛ[B[24D[20C[38;2;63;255;255m,,[C[38;2;79;63;79mÛ[B[24D[38;2;79;63;79mÛÛ[8C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛ[8C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛ[4C[38;2;63;255;255m,,,,,,[5C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛ[4C[38;2;63;255;255m,,,,,,[5C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛÛ[4C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,[3C[B[24D[38;2;79;63;79mÛÛÛÛÛÛ[4C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,[3C[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛ[5C[9C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛ[5C[9C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛ[8C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛ[8C[38;2;79;63;79mÛÛÛÛÛ[0m"
+set "ball[0]=[1C   [1B[4D     [1B[5D     [1B[5D     [1B[4D   [3D[2A[0m"
+set "ball[1]=[1CÛÛÛ[1B[4DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[4DÛÛÛ[3D[2A[0m"
 set "dot=[38;5;15mÚÄ¿[B[3D³[38;2;COLORmÛ[38;5;15m³[B[3DÀÄÙ[D[A[0m"
 goto :eof
 :characterSprites_8x8
