@@ -1,32 +1,6 @@
-    Revision 4.0.0                  + added     - removed     * fixed     # changed     / moved
+    Revision 4.0.3                  + added     - removed     * fixed     # changed     / moved
 ------------------------------------------------------------------------------------------------------------------------------------------
-    Change Log:
-
-        + Redesigned the library where its entirely controlled by :stdlib. As always, you can use the
-            arguments in any order you want. If you realize later you need one, you don't need to remember
-            any particular order. You only need to remember which /tags do what.
-        + L.32bit
-        + rem[
-        + rem+
-        + sort[fwd]
-        + sort[rev]
-        + filter[fwd]
-        + filter[rev]
-        + /extlib provides several new special characters
-
-        # No longer accepts older revisions. Revision must now be same as requiredRevision.
-        # %sin% - optimized
-        # %cos% - optimized
-        # %countLoops% renamed to %frames%
-
-        / %loop% to /util
-        / %throttle% to /util
-        / %frames% to /util
-        
-        * fixed a bug where sin and cos weren't expanding properly from /math
-        * fixed a bug where backgroundColor and textColor needed to be expanded in /rgb
-        * fixed a bug where range needed to be expanded in /cr
-
+	
 ------------------------------------------------------------------------------------------------------------------------------------------
 
     The Window Batch Library is a collection of pre-written batch scripts that can be used 
@@ -71,13 +45,14 @@ pause & exit
         %.%            - Û character
         %esc%          - esc character  Example: echo %esc%[5;5HHello World
         %\e%           - esc[           Example: echo %\e%5;5HHello World
-        %\p%           - 'echo %esc%['  Example: %/p%5;5HHello World
         %cls%          - echo or <nul set /p "=" to clear screen NOT the same as CLS
         %\c%           - same as %cls%                           NOT the same as CLS
         %\rgb%         - sets the color code from %R% %G% %B% to TEXT color if defined.
         %\fcol%        - sets the color code from %R% %G% %B% to BACKGROUND color if defined.
         %\n%           - new line
         %L.32bit%      - 2147483647 CONSTANT - 32bit limit
+		%hei%/%height% - default height of console
+		%wid%/%width%  - default width of console
         Hides cursor
 
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,6 +102,7 @@ pause & exit
                 e.3. mouseC
             f. %clearMouse% to set e.1-3. = 0
 
+------------------------------------------------------------------------------------------------------------------------------------------
     /debug /d      - turns on debug mode, echo is ON, font is larger, font set to consolas
         for readability, and a larger console size to see all the code in one spot. 
         I find this argument useful when debugging new macros for the library.
@@ -253,6 +229,8 @@ pause & exit
         Currently only provides:
             %ball[0]%          - Ball sprite made from " " color using background colors
             %ball[1]%          - Ball sprite made from "Û" color using text colors
+			%dot%              - DOT sprite made from border characters, and a colorable 'Û' inside.
+                usage:         - %dot:COLOR=R;G;B%
 
 ------------------------------------------------------------------------------------------------------------------------------------------
     /multi <no arguments>
