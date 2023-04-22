@@ -1,7 +1,7 @@
 rem PLEASE READ DOCTUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.0.5"
+	set "revision=4.0.6"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
 	if %revision% neq %revisionRequired% (
@@ -23,41 +23,34 @@ goto :eof
 :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
 echo Loading Windows Batch Library - Revision: %Revision%...
+
 rem Download link information -------------------------------------------------------------------------------------------------------
 set "discordInviteLink=https://discord.gg/6drWuwp2MG"
+
 set "_3rdparty_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip"
+
 set "font_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf"
+
 set "disable_InstallFont=True"
+
 set "defaultFontSize=10"
+
 set "defaultFont=Terminal"
-set "server.bat_Logo=[38;5;220m[2C_[B[3D[38;5;208m>[38;5;220m([38;5;15m.[38;5;220m)__[B[5D(___/[0m"
+
 set "debug=False"
+
 set "debugPrompt=False"
-chcp 437>nul
-for /f "tokens=2 delims=: " %%i in ('mode') do (
-	2>nul set /a "0/%%i" && ( 
-		if defined hei (set /a "wid=width=%%i") else (set /a "hei=height=%%i")
-	)
-)
-rem global vars above this line not intended for user use.
-rem ---------------------------------------------------------------------------------
 
+<nul set /p "=[?25l"
 
-set "pixel=Û" & set ".=Û"
-(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" )
-set "\e=["
-set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m"
-set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
-set "cls=[2J" & set "\c=[2J"
-set "L.32bit=2147483647"
-rem \n = CRLF
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
-rem multiline Comment     %rem[%    %]rem%
-set "rem[=rem/||(" & set "rem]=)"
-<nul set /p "=[?25l"
 
+chcp 437>nul
+set "server.bat_Logo=[38;5;220m[2C_[B[3D[38;5;208m>[38;5;220m([38;5;15m.[38;5;220m)__[B[5D(___/[0m"
+
+rem DISABLED BY DEFAULT - SEE: %disable_InstallFont% above -^
 if exist "%SYSTEMROOT%\Fonts\PxPlus_IBM_CGA.ttf" (
 	set "defaultFont=PxPlus IBM CGA"
 ) else (
@@ -80,6 +73,22 @@ if exist "%SYSTEMROOT%\Fonts\PxPlus_IBM_CGA.ttf" (
 		)
 	)
 )
+rem global vars above this line not intended for user use.
+rem ---------------------------------------------------------------------------------------------------------------------------------
+
+for /f "tokens=2 delims=: " %%i in ('mode') do ( 2>nul set /a "0/%%i" && ( 
+	if defined hei (set /a "wid=width=%%i") else (set /a "hei=height=%%i")
+))
+(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" )
+set "pixel=Û" & set ".=Û"
+set "\e=["
+set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m"
+set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
+set "cls=[2J" & set "\c=[2J"
+set "L.32bit=2147483647"
+rem multiline Comment     %rem[%    %]rem%
+set "rem[=rem/||(" & set "rem]=)"
+
 rem -Parse each argument as a 'command' with up to 2 'arguments'---------------------------------------------------------------------
 
 for %%a in (%*) do (
@@ -150,14 +159,11 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "border[HN]=%ESC%(0v%ESC%(B"
 			set "border[VE]=%ESC%(0u%ESC%(B"
 			set "border[VW]=%ESC%(0t%ESC%(B"
-			for %%i in (
-				"pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
-				"pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
-				"face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03"
-			) do (
-				for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
-					for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
-				)
+			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
+					   "pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
+					   "face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03"
+			) do for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
+				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
 			)
 			
 	REM -Use to install 3rd party files----------------------------------------------------------------------------------------------3RDPARTY
@@ -348,12 +354,12 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 )
 
 if "%debug%" neq "False" (
-	@echo on
 	call :setfont 16 Consolas
 	mode 180,100
 	if "%debugPrompt%" neq "False" (
 		prompt !server.bat_logo!
 	)
+	@echo on
 ) else (
 	if defined wid if defined hei (
 		mode !wid!,!hei!
