@@ -1,4 +1,4 @@
-    Revision 4.0.3                  + added     - removed     * fixed     # changed     / moved
+    Revision 4.1.0
 ------------------------------------------------------------------------------------------------------------------------------------------
 	
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,32 +27,30 @@
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------
-@echo off & setlocal enableDelayedExpansion & set "(=(set "\=?" & ren "%~nx0" -t.bat & ren "?.bat" "%~nx0"" & set ")=ren "%~nx0" "^^!\^^!.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0" & set "failedLibrary=ren -t.bat "%~nx0" &echo Library not found & timeout /t 3 & exit"
+@echo off & setlocal enableDelayedExpansion & set "(=(ren "%~nx0" -t.bat & ren "Library.bat" "%~nx0"" & set ")=ren "%~nx0" "Library.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0" & set "failLib=ren -t.bat "%~nx0" &echo Library not found & timeout /t 3 /nobreak & exit"
 
-set "revisionRequired=X.X.X"
-(%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
-    call :stdlib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /8x8 /gfx /util
-%)%  && (cls&goto :setup)
+%(% && (call :revision 4.1.0)||(%failLib%)
+	call :stdlib /w:N /h:N /fs:N /title:"foobar" /debug /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util
+%)%
 
-:setup
-
-pause & exit
+pause
 ------------------------------------------------------------------------------------------------------------------------------------------
     CALL :STDLIB <arguments CAN BE IN ANY ORDER YOU WANT>
     
     STDLIB provides the following variables for you to use.
-        %pixel%        - Û character
-        %.%            - Û character
-        %esc%          - esc character  Example: echo %esc%[5;5HHello World
-        %\e%           - esc[           Example: echo %\e%5;5HHello World
-        %cls%          - echo or <nul set /p "=" to clear screen NOT the same as CLS
-        %\c%           - same as %cls%                           NOT the same as CLS
-        %\rgb%         - sets the color code from %R% %G% %B% to TEXT color if defined.
-        %\fcol%        - sets the color code from %R% %G% %B% to BACKGROUND color if defined.
-        %\n%           - new line
-        %L.32bit%      - 2147483647 CONSTANT - 32bit limit
-		%hei%/%height% - default height of console
-		%wid%/%width%  - default width of console
+        %pixel%                - Û character
+        %.%                    - Û character
+        %esc%                  - esc character  Example: echo %esc%[5;5HHello World
+        %\e%                   - esc    Example: echo %\e%[5;5HHello World
+        %cls%                  - echo or <nul set /p "=" to clear screen NOT the same as CLS
+        %\c%                   - same as %cls%                           NOT the same as CLS
+        %\rgb%                 - sets the color code from %R% %G% %B% to TEXT color if defined.
+        %\fcol%                - sets the color code from %R% %G% %B% to BACKGROUND color if defined.
+        %\n%                   - new line
+        %limit.32bit%          - 2147483647 CONSTANT - 32bit limit
+		%limit.veriablelength% - 8191 - CONSTANT
+		%hei%/%height%         - default height of console
+		%wid%/%width%          - default width of console
         Hides cursor
 
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,38 +67,6 @@ pause & exit
 
 ------------------------------------------------------------------------------------------------------------------------------------------
     /extlib /e     - provides the backspace(BS), BEL, CR, and TAB characters as variables
-
-------------------------------------------------------------------------------------------------------------------------------------------
-    /rgb           - must surroud your color codes in quotes ""
-
-------------------------------------------------------------------------------------------------------------------------------------------
-    /3rdparty /3rd - IF %temp%/batch does not exist on current machine,
-        puts the following tools insides the folder
-
-            a. curl.exe
-            b. nircmd.exe
-            c. wget.exe
-            d. inject.exe ( tool used to inject getinput.dll into cmd )
-            e. getinput.dll ( non-blocking input tool for mouse postion, clicks, and keypresses )
-            f. mouse.exe
-
-        /3rdparty also provides the current variables as macros for however you want to use them
-
-                USE AS COMMANDS
-
-            a. %curl% <CURL SYNTAX>
-            b. %nircmd% <NIRCMD SYNTAX>
-            c. %wget% <WGET SYNTAX>
-            d. %import_getInput.dll% - the moment this is called, you can use
-                d.1. mouseXpos
-                d.2. mouseYpos
-                d.3. keypressed
-                d.4. click <rtns 1-2 or nothing>
-            e. %getMouseXY% - use mouse.exe to capture the following
-                e.1. mouseX
-                e.2. mouseY
-                e.3. mouseC
-            f. %clearMouse% to set e.1-3. = 0
 
 ------------------------------------------------------------------------------------------------------------------------------------------
     /debug /d      - turns on debug mode, echo is ON, font is larger, font set to consolas
@@ -124,9 +90,6 @@ pause & exit
         %capit%                - stops colorizing, underlines, or all string attributes by vt100
         %moveXY%               - sets cursor to postition x,y if defined.
         %home%                 - sets cursor to 0,0
-        %setDefaultColor%      - no need to echo. Will set console color to initial set during library load.
-        %setStyle%             - 1 arguement. RGB or BIT. RGB(2) will expect "r;g;b" as a color code where as BIT(5)
-            will expect 0-255 as a color code.
 
 ------------------------------------------------------------------------------------------------------------------------------------------
     /MATH <no arguments> - Provides the following variables to be used in set /a using substitution. EX: set /a "dx=10 * %SIN:x=ANGLE%"
@@ -206,38 +169,6 @@ pause & exit
         %OR(b1,b2)%            - provide b1, b2       - ||
         %XOR(b1,b2)%           - provide b1, b2       - ^
         %TERN(bool,v1,v2)%     - provide bool, v1, v2 - ?:
-
-------------------------------------------------------------------------------------------------------------------------------------------
-    /turtle X Y THETA/ANGLE - Provides the following variables to be used in set /a using substitution. EX: %SIN:x=90%
-
-        Current position is x=%~1, y=%~2, facingDirection(0-360)=%~3
-
-        %forward%              - upon execution, sub ? for 1-n    EX: %forward:?=1%
-        %turnLeft%             - upon execution, sub ? for 0-360  EX: %turnLeft:?=1%
-        %turnRight%            - upon execution, sub ? for 0-360  EX: %turnRight:?=1%
-        %TF_push%              - save turtle position
-        %TF_pop%               - return to saved turtle position
-        %draw%                 - %draw:?=VARIABLE% will write dfx dfy dfa to VARIABLE - NOT MATH
-        %home%                 - sends turtle home
-        %cent%                 - sends turtle to middle screen
-        %penDown%              - draw while the turtle moves  EX: %pendown:#=1%  - NOT MATH
-
-        Default turtle display variable in penDown is turtleGraphics. %turtleGraphics%
-
-------------------------------------------------------------------------------------------------------------------------------------------
-    /sprites /s <no arguments>
-        Currently only provides:
-            %ball[0]%          - Ball sprite made from " " color using background colors
-            %ball[1]%          - Ball sprite made from "Û" color using text colors
-			%dot%              - DOT sprite made from border characters, and a colorable 'Û' inside.
-                usage:         - %dot:COLOR=R;G;B%
-
-------------------------------------------------------------------------------------------------------------------------------------------
-    /multi <no arguments>
-        Provides the following macro:
-            %fetchDataFromController%
-
-        Sets %controller% = True
 
 ------------------------------------------------------------------------------------------------------------------------------------------
     /cr <1-255> - Provides array of colors sorted in RGB in color[]
@@ -336,15 +267,6 @@ pause & exit
     %clamp%               - x min max                                                               <rtnVar> youNameIt
         clamp x between MIN and MAX
 
-    %map%                 - min max X                                                               <rtnVar> youNameIt
-        map X to the range of min max
-
-    %fncross%             - x1 y1 x2                                                                <rtnVar> youNameIt
-
-    %intersect%           - x1 y1 x2 y2 x3 y3 x4 y4 <rtnVar> <rtnVar> - CROSS VECTOR PRODUCT algorithm
-
-    %HSL_line%            - x1 y1 x2 y2 0-360 0-10000 0-10000                                       <rtn> _scrn_
-        draw line using plot_HSL_RGB
 ------------------------------------------------------------------------------------------------------------------------------------------
     /util <no arguments> Provides functions for gfx work
     
@@ -396,8 +318,3 @@ pause & exit
         This is to protect the creators work from being tampered with. USE AT YOUR OWN RISK!!!
 
 ------------------------------------------------------------------------------------------------------------------------------------------
-    /8x8 <no arguments> Provides user with character sprites
-        Currently only provides:
-            Letters A-Z(uppercase only) Example: echo %chr[-A]%
-            Numbers 0-9                 Example: echo %chr[4]%
-            Tile[grass][0-3]            Example: echo %tile[grass][0]% - May be removed. Too much data.
