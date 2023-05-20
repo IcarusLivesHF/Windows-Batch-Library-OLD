@@ -1,10 +1,7 @@
-@echo off & setlocal enableDelayedExpansion & set "(=(set "\=?" & ren "%~nx0" -t.bat & ren "?.bat" "%~nx0"" & set ")=ren "%~nx0" "^^!\^^!.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0" & set "failedLibrary=ren -t.bat "%~nx0" &echo Library not found & timeout /t 3 & exit"
+@echo off & setlocal enableDelayedExpansion & set "(=(ren "%~nx0" -t.bat & ren "Library.bat" "%~nx0"" & set ")=ren "%~nx0" "Library.bat" & ren -t.bat "%~nx0")" & set "self=%~nx0" & set "failLib=ren -t.bat "%~nx0" &echo Library not found & timeout /t 3 /nobreak & exit"
 
-set "revisionRequired=4.0.0"
-(%(:?=Library% && (call :revision)||(%failedLibrary%))2>nul
-	call :StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
-%)%  && (cls&goto :setup)
-:setup
+%(% && (call :revision 4.1.0)||(%failLib%)
+	call :stdlib
+%)%
 
-rem YOUR CODE GOES HERE
-pause & exit
+pause
