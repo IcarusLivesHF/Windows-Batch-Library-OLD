@@ -1,12 +1,12 @@
-rem PLEASE READ DOCTUMENTATION IN MY GITHUB!
+rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.0.7"
+	set "revision=4.1.0"
 	set "libraryError=False"
 	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
-	if %revision% neq %revisionRequired% (
+	if "%revision%" neq "%~1" (
 		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
-		echo.&echo  Revision: %revisionRequired% of Library.bat required to run this script.
+		echo.&echo  Revision: %~1 of Library.bat required to run this script.
 		set "libraryError=True"
 	)
 	if "%winversion%" neq "10.0" (
@@ -20,28 +20,21 @@ rem PLEASE READ DOCTUMENTATION IN MY GITHUB!
 		timeout /t 3 /nobreak & exit
 	)
 goto :eof
-:StdLib /w:N /h:N /fs:N /title:"foobar" /rgb:"foo":"bar" /debug /extlib /3rdparty /multi /sprite /math /misc /shape /ac /turtle /cursor /cr:N /gfx /util
+:StdLib /w:N /h:N /fs:N /title:"foobar" /debug /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
-echo Loading Windows Batch Library - Revision: %Revision%...
+echo Loading Windows Batch Library - Revision: %Revision%...[B[G[38;5;9mPlease do not exit at this time..[0m
 
-rem Download link information -------------------------------------------------------------------------------------------------------
-set "discordInviteLink=https://discord.gg/59WG3cyqRQ"
+set "defaultFontSize=8"
 
-set "_3rdparty_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1091917125876191252/batch.zip"
+set "defaultFont=terminal"
 
-set "font_DownloadLink=https://cdn.discordapp.com/attachments/1091917125637120060/1092136167224389792/PxPlus_IBM_CGA.ttf"
-
-set "disable_InstallFont=True"
-
-set "defaultFontSize=10"
-
-set "defaultFont=Terminal"
+set "libraryDefaultFont_ON=False"
 
 set "debug=False"
 
 set "debugPrompt=False"
 
-<nul set /p "=[?25l"
+<nul set /p "=[?25l">con
 
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
@@ -50,43 +43,24 @@ set "debugPrompt=False"
 chcp 437>nul
 set "server.bat_Logo=[38;5;220m[2C_[B[3D[38;5;208m>[38;5;220m([38;5;15m.[38;5;220m)__[B[5D(___/[0m"
 
-rem DISABLED BY DEFAULT - SEE: %disable_InstallFont% above -^
-if exist "%SYSTEMROOT%\Fonts\PxPlus_IBM_CGA.ttf" (
-	set "defaultFont=PxPlus IBM CGA"
-) else (
-	if "!disable_InstallFont!" neq "True" (
-		rem prompt user to install
-		echo Would you like to install 'PxPlus_IBM_CGA.ttf' to '%systemroot%\Fonts'?& echo.
-		echo You will be prompted to confirm installation.&echo.
-		set /p "continue=Y/N: "
-		if /i "!continue!" equ "Y" (
-			start %discordInviteLink%
-			echo.& echo Join our discord for access to the download link.
-			echo.& set /p "continue=After you have joined, confirm here by typing Y/N:"
-			if /i "!continue!" equ "Y" (
-				(Net session >nul 2>&1)|| ren "%~nx0" "Library.bat" & ren "-t.bat" "%self%" & del /f /q "-t.bat" & (PowerShell start """%self%""" -verb RunAs & Exit /B)
-				powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%font_DownloadLink%','PxPlus_IBM_CGA.ttf')"
-				reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" /v "PxPlus_IBM_CGA" /t REG_SZ /d PxPlus_IBM_CGA.ttf /f
-				rem user must confirm
-				move /y "PxPlus_IBM_CGA.ttf" "%systemroot%\Fonts"
-			)
-		)
-	)
-)
 rem global vars above this line not intended for user use.
 rem ---------------------------------------------------------------------------------------------------------------------------------
-
 for /f "tokens=2 delims=: " %%i in ('mode') do ( 2>nul set /a "0/%%i" && ( 
 	if defined hei (set /a "wid=width=%%i") else (set /a "hei=height=%%i")
 ))
 
-(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" )
-set "pixel=Û" & set ".=Û"
-set "\e=["
-set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m"
-set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
+(for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" ) & set "\e="
+
+set "pixel=Û" & set ".=%pixel%"
+
+set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m" & set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
+
 set "cls=[2J" & set "\c=[2J"
-set "L.32bit=2147483647"
+
+set "limit.32bit=2147483647"
+
+set "limit.variableLength=8191"
+
 rem multiline Comment     %rem[%    %]rem%
 set "rem[=rem/||(" & set "rem]=)"
 
@@ -120,17 +94,6 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
 			title !argumentArgument[%%i][1]!
 			
-	REM -Set color-------------------------------------------------------------------------------------------------------------------RGB
-	) else if /i "!argumentCommand[%%i]!" equ "rgb" (
-			set "backgroundColor=!argumentArgument[%%i][1]!"
-			set "textColor=!argumentArgument[%%i][2]!"
-			if "!textColor:;=!" neq "!textColor!" (
-				set "defaultStyle=2" 
-			) else (
-				set "defaultStyle=5"
-			)
-			<nul set /p "=[48;!defaultStyle!;!backgroundColor!m[38;!defaultStyle!;!textColor!m"
-			
 	REM -DEBUG MODE------------------------------------------------------------------------------------------------------------------DEBUG d
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
 			set "debug=True"
@@ -162,65 +125,10 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "border[VW]=%ESC%(0t%ESC%(B"
 			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
 					   "pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
-					   "face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03"
+					   "face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03" "degree.F8"
 			) do for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
 				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
 			)
-			
-	REM -Use to install 3rd party files----------------------------------------------------------------------------------------------3RDPARTY
-	) else if /i "!argumentCommand[%%i]:~0,3!" equ "3rd" (
-			if not exist "%temp%/batch" (
-				for %%a in (
-					"This script uses 3rd party tools that will be downloaded to:" "" "'%temp%\batch'" "" 
-					"The following will be downloaded onto your machine." ""
-					"NirCmd.exe" "Wget.exe" "Curl.exe" "CmdMenuSel.exe" "Mouse.exe" "Inject.exe" "getinput.dll" ""
-				) do echo=%%~a
-				set /p "continue=Would you like to continue? Y/N: "
-				if /i "!continue!" equ "Y" (
-					start %discordInviteLink%
-					echo.& echo Join our discord for access to the download link.
-					echo.& set /p "continue=After you have joined, confirm here by typing Y/N:"
-					if /i "!continue!" equ "Y" (
-						Powershell.exe -command "(New-Object System.Net.WebClient).DownloadFile('%_3rdparty_DownloadLink%','batch.zip')" && (
-							move /y batch.zip "%temp%"
-							pushd "%temp%"
-							tar -xf batch.zip
-							popd
-						) || ( goto :eof )
-						goto :eof
-					)
-				)
-			)
-			set "continue="
-			rem returns (mouseXpos mouseYpos CONSTANTLY no keypress needed) click keysPressed
-			set "curl=%temp%/batch/curl.exe"
-			set "import_getInput.dll=set /a "rasterx=8,rastery=8" & ("%temp%/batch/inject.exe" "%temp%/batch/getInput.dll")"
-			set "adjustDLLmouse=set /a "mouseY=mouseYpos+1","mouseX=mouseXpos+1""
-			set "NirCmd="%temp%/batch/NirCmd.exe""
-			set "curl="%temp%/batch/curl.exe""
-			set "wget="%temp%/batch/wget.exe""
-			set "getMouseXY=for /f "tokens=1-3" %%W in ('"%temp%\Mouse.exe"') do set /a "mouseC=%%W,mouseX=%%X,mouseY=%%Y""
-			set "clearMouse=set "mouseX=" ^& set "mouseY=" ^& set "mouseC=""
-
-	REM -Multithreaded macros--------------------------------------------------------------------------------------------------------MULTI
-	) else if /i "!argumentCommand[%%i]!" equ "multi" (
-			if "!argumentArgument[%%i][1]!" neq "" ( 
-				set "movementDistance=!argumentArgument[%%i][1]!"
-			) else ( set "movementDistance=1" )
-			set "signalFile=%temp%\%~n0_signal.txt"
-			Del /f /q "%SignalFile:Signal=Stop%" 2> nul 1> nul
-			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
-			for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
-			for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
-			set "QUITKEY=!TAB!"
-			set "key_D=Right"     & set "key_6=Right"
-			set "key_A=Left"      & set "key_4=Left"
-			set "key_W=Up"        & set "key_8=Up"
-			set "key_S=Down"      & set "key_2=Down"
-			set "key_P=Pause"     & Set "Pause=1" & Set "key_ =Pause" & Set "key_{ENTER}=Pause"
-			set "Right=?.x+=movementDistance"     & set "Left=?.x-=movementDistance"
-			set "Up=   ?.y-=movementDistance"     & set "Down=?.y+=movementDistance"
-			call :get_MT_connect
 
 	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
@@ -230,7 +138,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "sinr=(a=(x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), !_SIN!) / 10000"
 			set "cosr=(a=(15708 - x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), !_SIN!) / 10000"
 			set "Sqrt(N)=( x=(N)/(11*1024)+40, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2 )"
-			set "Sign=1 / (x & 1)"
+			set "Sign(x)=(x)>>31 | -(x)>>31 & 1" 
 			set "Abs=(((x)>>31|1)*(x))"
 			set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 			set "avg=(x&y)+(x^y)/2"
@@ -257,8 +165,9 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 			set "fib=?=c=a+b, a=b, b=c"
 			set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
-			set "mouseBound=1/(((~(mouseY-ma)>>31)&1)&((~(mb-mouseY)>>31)&1)&((~(mouseX-mc)>>31)&1)&((~(md-mouseX)>>31)&1))"
+			set "mouseBound=1/(((~(mouse.Y-ma)>>31)&1)&((~(mb-mouse.Y)>>31)&1)&((~(mouse.X-mc)>>31)&1)&((~(md-mouse.X)>>31)&1))"
 			set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
+			set "FNCross=a * d - b * c"
 
 	REM -Get shape functions---------------------------------------------------------------------------------------------------------SHAPE sh
 	) else if /i "!argumentCommand[%%i]:~0,2!" equ "sh" (
@@ -284,20 +193,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "OR(b1,b2)=(b1|b2)"
 			set "XOR(b1,b2)=(b1^b2)"
 			set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
-			
-	REM -Get turtle functions--------------------------------------------------------------------------------------------------------TURTLE
-	) else if /i "!argumentCommand[%%i]!" equ "turtle" (
-			set /a "DFX=%~1", "DFY=%~2", "DFA=%~3"
-			set "forward=DFX+=(?+1)*^!cos:x=DFA^!, DFY+=(?+1)*^!sin:x=DFA^!"
-			set "turnLeft=DFA-=?"
-			set "turnRight=DFA+=?"
-			set "TF_push=sX=DFX, sY=DFY, sA=DFA"
-			set "TF_pop=DFX=sX, DFY=sY, DFA=sA"
-			set "draw=?=^!?^![^!DFY^!;^!DFX^!H%pixel%"
-			set "home=DFX=0, DFY=0, DFA=0"
-			set "cent=DFX=wid/2, DFY=hei/2"
-			set "penDown=for /l %%a in (1,1,#) do set /a "^!forward:?=1^!" ^& set "turtleGraphics=[^!DFY^!;^!DFX^!H%pixel%""
-			
+				
 	REM -Get cursor functions--------------------------------------------------------------------------------------------------------CURSOR c
 	) else if /i "!argumentCommand[%%i]!" equ "cursor" (
 			set ">=<nul set /p ="
@@ -307,17 +203,13 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "cursor[D]=[?B"
 			set "cursor[L]=[?D"
 			set "cursor[R]=[?C"
-			set "colorText=[38;^!style^!;?m"
-			set "colorBack=[48;^!style^!;?m"
 			set "cac=[1J"
 			set "cbc=[0J"
 			set "underLine=[4m"
 			set "capIt=[0m"
 			set "moveXY=[^!y^!;^!x^!H"
 			set "home=[H"
-			set "setDefaultColor=<nul set /p "=[48;%defaultStyle%;%backgroundColor%m[38;%defaultStyle%;%textColor%m""
-			call :setStyle
-			
+
 	REM -Unpack gfx macros-----------------------------------------------------------------------------------------------------------GFX
 	) else if /i "!argumentCommand[%%i]!" equ "gfx" (
 			call :graphicsFunctions
@@ -325,18 +217,10 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	REM -Unpack utility macros-------------------------------------------------------------------------------------------------------UTIL
 	) else if /i "!argumentCommand[%%i]!" equ "util" (
 			call :utilityFunctions
-			
-	REM -Get 8x8 character sprites---------------------------------------------------------------------------------------------------8x8
-	) else if /i "!argumentCommand[%%i]!" equ "8x8" (
-			call :characterSprites_8x8
-	
-	REM -Get generic sprites---------------------------------------------------------------------------------------------------------SPRITE s
-	) else if /i "!argumentCommand[%%i]:~0,1!" equ "s" (
-			call :sprites
 
 	REM -Get RGB color array---------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
-			set /a "range=!argumentArgument[%%i][1]!"
+			set /a "range=argumentArgument[%%i][1]"
 			set "totalColorsInRange=0"
 			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;%%a;0m"
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;%%a;255;0m"
@@ -344,7 +228,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;0;%%a;255m"
 			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;%%a;0;255m"
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;0;%%am"
-			set /a "range=255 / !argumentArgument[%%i][1]!"
+			set /a "range=255 / argumentArgument[%%i][1]"
 	)
 	
 	set "argumentCommand[%%i]="
@@ -354,22 +238,23 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 
 if "%debug%" neq "False" (
 	call :setfont 16 Consolas
-	<nul set /p "=[8;100;180t"
+	mode 180,100
 	if "%debugPrompt%" neq "False" (
 		prompt !server.bat_logo!
 	)
 	@echo on
 ) else (
-	if defined wid if defined hei (
-		<nul set /p "=[8;!hei!;!wid!t"
+	if "%libraryDefaultFont_ON%" neq "False" (
+		call :setfont %defaultFontSize% "%defaultFont%"
 	)
+	mode %wid%,%hei%
 )
-
+cls
 goto :eof
 
 :___________________________________________________________________________________________
 :graphicsFunctions
-set "frames=frameCount=(frameCount + 1) %% L.32bit"
+set "frames=frameCount=(frameCount + 1) %% Limit.32bit"
 set "loop=for /l %%# in () do "
 set "framedLoop=%loop% ( set /a "%frames%""
 set "throttle=for /l %%# in (1,x,1000000) do rem"
@@ -511,14 +396,14 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 		for /l %%x in (^^!xa^^!,^^!stepx^^!,^^!xb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "ya+=stepy", "fraction-=dx"%\n%
 			set /a "fraction+=dy"%\n%
-			set "$line=^!$line^![^!ya^!;%%xHU"%\n%
+			set "$line=^!$line^![^!ya^!;%%xH%pixel%"%\n%
 		)%\n%
 	) else (%\n%
 		set /a "fraction=dx - (dy >> 1)"%\n%
 		for /l %%y in (^^!ya^^!,^^!stepy^^!,^^!yb^^!) do (%\n%
 			if ^^!fraction^^! geq 0 set /a "xa+=stepx", "fraction-=dy"%\n%
 			set /a "fraction+=dx"%\n%
-			set "$line=^!$line^![%%y;^!xa^!HU"%\n%
+			set "$line=^!$line^![%%y;^!xa^!H%pixel%"%\n%
 		)%\n%
 	)%\n%
 	set "$line=^!$line^![0m"%\n%
@@ -580,7 +465,7 @@ set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m" ))))))%\n%
 	)%\n%
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
+	^!rgbpoint^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
 :_plot_HSV_RGB DON'T CALL
@@ -604,7 +489,7 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m"))))))%\n%
 	)%\n%
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!rgbplot^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
+	^!rgbpoint^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
 
 :_clamp DON'T CALL
@@ -620,87 +505,18 @@ set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!"
 	)%\n%
 )) else set args=
 
-:__map DON'T CALL
-rem _map min max X RETURNVAR
-set _map=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	%= Scale, bias and saturate x to 0..100 range =%%\n%
-	set /a "clamped=((%%3) - %%1) * 100 ^/ (%%2 - %%1) + 1"%\n%
-	for /f "tokens=1" %%c in ("^!clamped^!") do ^!clamp^! %%c 0 100 CLAMPED_x %\n%
-	%= Evaluate polynomial =%%\n%
-	set /a "ss=^(3*100 - 2 * CLAMPED_x^) * CLAMPED_x^/100 * CLAMPED_x^/100"%\n%
-	for /f "tokens=1" %%x in ("^!ss^!") do (%\n%
-		if "%%4" neq "" ( set "%%4=%%x" ) else ( echo=%%x)%\n%
-	)%\n%
-)) else set args=
-
-:_FNCross DON'T CALL
-rem FNcross x1 y1 x2 y2 RETURNVAR
-set FNcross=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set /a "%%~5=%%~1*%%~4 - %%~2*%%~3"%\n%
-)) else set args=
-
-:_intersect DON'T CALL
-rem CROSS VECTOR PRODUCT algorithm
-rem intersect x1 y1 x2 y2 x3 y3 x4 y4 RETURNVAR RETURNVAR
-set intersect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-10" %%a in ("^!args^!") do (%\n%
-	%= x1-a y1-b x2-c y2-d x3-e y3-f x4-g y4-h x-i y-j =%%\n%
-	!^FNcross^! %%a %%b %%c %%d FNx%\n%
-	!^FNcross^! %%e %%f %%g %%h FNy%\n%
-	set /a "_t1=%%a-%%c", "_t2=%%c-%%d", "_t3=%%e - %%g", "_t4=%%f-%%h"%\n%
-	for /f "tokens=1-4" %%1 in ("^!_t1^! ^!_t2^! ^!_t3^! ^!_t4^!") do ^!FNcross^! %%1 %%2 %%3 %%4 det%\n%
-	for /f "tokens=1-6" %%1 in ("^!_t1^! ^!_t2^! ^!_t3^! ^!_t4^! ^!FNx^! ^!FNy^!") do (%\n%
-		^!FNcross^! %%5 %%1 %%6 %%3 _x1%\n%
-		set /a "%%i=_x1 / det"%\n%
-		^!FNcross^! %%5 %%1 %%6 %%3 _y1%\n%
-		set /a "%%j=_y1 / det"%\n%
-	)%\n%
-)) else set args=
-
-:_HSLline DON'T CALL
-rem HSLline x1 y1 x2 y2 0-360 0-10000 0-10000
-set HSLline=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
-	set /a "xa=%%~1", "ya=%%~2", "xb=%%~3", "yb=%%~4", "dx=%%~3 - %%~1", "dy=%%~4 - %%~2"%\n%
-	for /f "tokens=1-2" %%j in ("^!dx^! ^!dy^!") do (%\n%
-		if %%~k lss 0 ( set /a "dy=-%%~k", "stepy=-1" ) else ( set "stepy=1" )%\n%
-		if %%~j lss 0 ( set /a "dx=-%%~j", "stepx=-1" ) else ( set "stepx=1" )%\n%
-		set /a "dx<<=1", "dy<<=1"%\n%
-	)%\n%
-	for /f "tokens=1-8" %%a in ("^!dx^! ^!dy^! ^!xa^! ^!xb^! ^!ya^! ^!yb^! ^!stepx^! ^!stepy^!") do (%\n%
-		if %%~a gtr %%~b (%\n%
-			set /a "fraction=%%~b - (%%~a >> 1)"%\n%
-			for /l %%x in (%%~c,%%~g,%%~d) do (%\n%
-				for /f "tokens=1" %%j in ("^!fraction^!") do if %%~j geq 0 set /a "ya+=%%~h", "fraction-=%%~a"%\n%
-				set /a "fraction+=%%~b"%\n%
-				for /f "tokens=1" %%j in ("^!ya^!") do (%\n%
-					if 0 leq %%x if 0 leq %%~j ^!plot_HSL_RGB^! %%x %%~j %%~5 %%~6 %%~7%\n%
-				)%\n%
-			)%\n%
-		) else (%\n%
-			set /a "fraction=%%~a - (%%~b >> 1)"%\n%
-			for /l %%y in (%%~e,%%~h,%%~f) do (%\n%
-				for /f "tokens=1" %%j in ("^!fraction^!") do if %%~j geq 0 set /a "xa+=%%~g", "fraction-=%%~b"%\n%
-				set /a "fraction+=%%~a"%\n%
-				for /f "tokens=1" %%j in ("^!xa^!") do (%\n%
-					if 0 leq %%~j if 0 leq %%y ^!plot_HSL_RGB^! %%~j %%y %%~5 %%~6 %%~7%\n%
-				)%\n%
-			)%\n%
-		)%\n%
-	)%\n%
-)) else set args=
-
 goto :eof
 
 :___________________________________________________________________________________________
 :utilityFunctions
-rem %sort[fwd]:#=stingArray%                               thanks lowsun for these #
+rem %sort[fwd]:#=stingArray%
 SET "sort[fwd]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT"
-rem %sort[rev]:#=stingArray%                                                       #
+rem %sort[rev]:#=stingArray%
 SET "sort[rev]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT /R"
-rem %filter[fwd]:#=stingArray%                                                     #
+rem %filter[fwd]:#=stingArray%
 SET "filter[fwd]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ"
-rem %filter[rev]:#=stingArray%                                                     #
+rem %filter[rev]:#=stingArray%
 SET "filter[rev]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ /R"
-rem -------------------------------------------------------------------------------#
 
 :_hexToRGB DON'T CALL
 rem %hexToRGB% 00a2ed
@@ -709,7 +525,7 @@ set hexToRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args
 )) else set args=
 
 :_getLen DON'T CALL
-rem %getlen% "string" <rtn> $length
+rem %getlen% "string" <rtn> $length / 
 set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	set "$_str=%%~1#"%\n%
 	set "$length=0"%\n%
@@ -811,7 +627,7 @@ set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") 
 :_License DO NOT use unless you are DONE editing your code.
 rem %license% "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
 set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
-	for /f "tokens=*" %%x in ("^!self^!") do set /a "x=%%~zx"%\n%
+	set /a "x=%%~z0"%\n%
 	for /f "tokens=1,2 delims=:" %%a in ('findstr /n ":::" "%~F0"') do (%\n%
         if "%%b" equ %%1 set /a "i+=1", "x+=i+%%a"%\n%
 	)%\n%
@@ -821,81 +637,11 @@ set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^
 )) else set args=
 goto :eof
 
-:get_MT_connect
-rem use to pipe controller data into engine
-rem %MT_connect% labelController labelEngine
-set MT_connect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	"%~F0" %%~1 ^>"%signalFile%" ^| "%~F0" %%~2 ^<"%signalFile%"%\n%
-)) else set args=
-goto :eof
-
-:setStyle
-rem %setStyle% rgb or %setStyle% bit
-set setStyle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
-	if /i "%%~1" equ "rgb" (%\n%
-		set "style=2"%\n%
-	) else if /i "%%~1" equ "bit" (%\n%
-		set "style=5"%\n%
-	)%\n%
-)) else set args=
-goto :eof
-
-:sprites
-rem 4x4------------------------------------------------------------------------------------------------------------------------------------------------------------------
-set "icarusLogo=[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[2C[38;2;79;63;79mÛÛÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[2C[38;2;79;63;79mÛÛÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[4C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[4C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[5C[38;2;79;63;79mÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ[5C[38;2;79;63;79mÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛ[10C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛÛ[10C[38;2;79;63;79mÛÛ[B[24D[23C[38;2;79;63;79mÛ[B[24D[23C[38;2;79;63;79mÛ[B[24D[20C[38;2;63;255;255m,,[C[38;2;79;63;79mÛ[B[24D[20C[38;2;63;255;255m,,[C[38;2;79;63;79mÛ[B[24D[38;2;79;63;79mÛÛ[8C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛ[8C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛ[4C[38;2;63;255;255m,,,,,,[5C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛ[4C[38;2;63;255;255m,,,,,,[5C[38;2;63;255;255m,,[2C[B[24D[38;2;79;63;79mÛÛÛÛÛÛ[4C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,[3C[B[24D[38;2;79;63;79mÛÛÛÛÛÛ[4C[38;2;63;255;255m,,,,[6C[38;2;63;255;255m,[3C[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛ[5C[9C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛ[5C[9C[38;2;79;63;79mÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛ[8C[38;2;79;63;79mÛÛÛÛÛ[B[24D[38;2;79;63;79mÛÛÛÛÛÛÛÛÛÛÛ[8C[38;2;79;63;79mÛÛÛÛÛ[0m"
-set "ball[0]=[1C   [1B[4D     [1B[5D     [1B[5D     [1B[4D   [3D[2A[0m"
-set "ball[1]=[1CÛÛÛ[1B[4DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[5DÛÛÛÛÛ[1B[4DÛÛÛ[3D[2A[0m"
-set "dot=[38;5;15mÐºÐ¤ÐŸ[B[3DÐ“[38;2;COLORmÛ[38;5;15mÐ“[B[3DÐ Ð¤Ð¹[D[A[0m"
-goto :eof
-:characterSprites_8x8
-set "chr[-A]=[3CÛÛ[3C[B[8D[2CÛ[2CÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-B]=ÛÛÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[3CÛ[2C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
-set "chr[-C]=[2CÛÛÛÛ[CÛ[B[8D[CÛ[4CÛÛ[B[8DÛ[6CÛ[B[8DÛ[6C[C[B[8DÛ[6C[C[B[8DÛ[6CÛ[B[8D[CÛ[4CÛÛ[B[8D[2CÛÛÛÛ[CÛ[7A[0m"
-set "chr[-D]=ÛÛÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[4CÛ[C[B[8DÛÛÛÛÛÛ[2C[7A[0m"
-set "chr[-E]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[6C[B[8D[CÛÛÛ[4C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "chr[-F]=ÛÛÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[2CÛ[3C[B[8D[CÛÛÛÛ[3C[B[8D[CÛ[2CÛ[3C[B[8D[CÛ[6C[B[8DÛÛÛ[5C[7A[0m"
-set "chr[-G]=[2CÛÛÛÛÛÛ[B[8D[CÛ[5CÛ[B[8DÛ[6C[C[B[8DÛ[2CÛÛÛÛÛ[B[8DÛ[2CÛ[3CÛ[B[8DÛ[6CÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
-set "chr[-H]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-I]=ÛÛÛÛÛÛÛ[C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8D[3CÛ[4C[B[8DÛÛÛÛÛÛÛ[C[7A[0m"
-set "chr[-J]=[2CÛÛÛÛÛÛ[B[8D[5CÛ[2C[B[8D[5CÛ[2C[B[8D[5CÛ[2C[B[8DÛÛ[3CÛ[2C[B[8DÛ[4CÛ[2C[B[8DÛ[4CÛ[2C[B[8D[CÛÛÛÛ[3C[7A[0m"
-set "chr[-K]=ÛÛÛ[CÛÛÛÛ[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[2CÛ[3C[B[8D[CÛÛÛ[4C[B[8D[CÛ[2CÛ[3C[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-L]=ÛÛÛ[5C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "chr[-M]=ÛÛ[3CÛÛÛ[B[8D[CÛÛ[CÛ[CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-N]=ÛÛ[3CÛÛÛ[B[8D[CÛÛ[3CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[2CÛ[CÛ[C[B[8D[CÛ[3CÛÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-O]=[2CÛÛÛÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
-set "chr[-P]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[6C[B[8D[CÛ[6C[B[8DÛÛÛ[5C[7A[0m"
-set "chr[-Q]=[CÛÛÛÛÛÛ[C[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[6CÛ[B[8DÛ[2CÛ[3CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[3CÛ[4C[7A[0m"
-set "chr[-R]=ÛÛÛÛÛÛÛ[C[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛ[5CÛ[B[8D[CÛÛÛÛÛÛ[C[B[8D[CÛ[3CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-S]=[CÛÛÛÛÛ[CÛ[B[8DÛ[5CÛÛ[B[8DÛ[6CÛ[B[8D[CÛÛÛÛÛ[2C[B[8D[6CÛ[C[B[8DÛ[6CÛ[B[8DÛÛ[5CÛ[B[8DÛ[CÛÛÛÛÛ[C[7A[0m"
-set "chr[-T]=ÛÛÛÛÛÛÛÛ[B[8DÛ[3CÛ[2CÛ[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[3CÛÛÛ[2C[7A[0m"
-set "chr[-U]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[2CÛÛÛÛ[2C[7A[0m"
-set "chr[-V]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[3CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛ[CÛ[2C[B[8D[4CÛ[3C[7A[0m"
-set "chr[-W]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[4CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[CÛ[CÛ[2CÛ[C[B[8D[2CÛ[CÛÛ[2C[7A[0m"
-set "chr[-X]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛÛ[3C[B[8D[2CÛ[2CÛ[2C[B[8D[2CÛ[2CÛ[2C[B[8D[CÛ[4CÛ[C[B[8DÛÛÛ[2CÛÛÛ[7A[0m"
-set "chr[-Y]=ÛÛÛ[2CÛÛÛ[B[8D[CÛ[4CÛ[C[B[8D[2CÛ[2CÛ[2C[B[8D[3CÛ[CÛ[2C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[4CÛ[3C[B[8D[3CÛÛÛ[2C[7A[0m"
-set "chr[-Z]=ÛÛÛÛÛÛÛÛ[B[8DÛ[5CÛ[C[B[8DÛ[4CÛ[2C[B[8D[4CÛ[3C[B[8D[3CÛ[4C[B[8D[2CÛ[4CÛ[B[8D[CÛ[5CÛ[B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "chr[0]=[2CÛÛÛÛ[2C[1B[8D[CÛ[4CÛ[C[1B[8DÛ[4CÛ[CÛ[1B[8DÛ[3CÛ[2CÛ[1B[8DÛ[2CÛ[3CÛ[1B[8DÛ[CÛ[4CÛ[1B[8D[CÛ[4CÛ[C[1B[8D[2CÛÛÛÛ[2C[7A[0m"
-set "chr[1]=[2CÛÛ[4C[1B[8D[CÛ[CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "chr[2]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8D[6C[CÛ[1B[8D[5CÛÛ[C[1B[8D[3CÛÛ[3C[1B[8D[CÛÛ[4CÛ[1B[8DÛ[6CÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "chr[3]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[4CÛÛÛ[C[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
-set "chr[4]=[5CÛÛ[C[1B[8D[4CÛ[CÛ[C[1B[8D[3CÛ[2CÛ[C[1B[8D[2CÛ[3CÛ[C[1B[8D[CÛ[4CÛ[C[1B[8DÛÛÛÛÛÛÛÛ[1B[8D[6CÛ[C[1B[8D[5CÛÛÛ[7A[0m"
-set "chr[5]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[6CÛ[1B[8DÛ[6C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
-set "chr[6]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6C[C[1B[8DÛÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
-set "chr[7]=ÛÛÛÛÛÛÛÛ[1B[8DÛ[6CÛ[1B[8D[6CÛ[C[1B[8D[5CÛ[2C[1B[8D[4CÛ[3C[1B[8D[3CÛ[4C[1B[8D[3CÛ[4C[1B[8D[2CÛÛÛ[3C[7A[0m"
-set "chr[8]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
-set "chr[9]=[CÛÛÛÛÛÛ[C[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛÛ[1B[8D[6C[CÛ[1B[8DÛ[6CÛ[1B[8D[CÛÛÛÛÛÛ[C[7A[0m"
-set "chr[_]=[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D[6C[2C[1B[8D        [7A[0m"
-set "chr[.]=ÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[1B[8DÛÛÛÛÛÛÛÛ[7A[0m"
-set "tile[grass][0]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[B[8D[38;2;165;85;62mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;124;38;77mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;110;125;164mÛ[38;2;165;85;62mÛÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛÛÛÛ[7A[0m"
-set "tile[grass][1]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;8;222;36mÛÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛÛ[38;2;8;222;36mÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[38;2;254;168;0mÛ[38;2;0;139;94mÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛ[38;2;110;125;164mÛ[38;2;165;85;62mÛÛÛ[38;2;249;206;164mÛ[38;2;165;85;62mÛ[7A[0m"
-set "tile[grass][2]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛÛÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[B[8D[38;2;0;139;94mÛÛ[38;2;165;85;62mÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛÛÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛÛÛ[38;2;94;85;80mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛ[B[8D[38;2;165;85;62mÛÛÛÛÛÛÛÛ[7A[0m"
-set "tile[grass][3]=[38;2;8;222;36mÛÛÛÛÛÛÛÛ[B[8D[38;2;8;222;36mÛÛÛÛÛ[38;2;0;139;94mÛÛ[38;2;8;222;36mÛ[B[8D[38;2;0;139;94mÛÛ[38;2;8;222;36mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛ[38;2;0;139;94mÛ[B[8D[38;2;165;85;62mÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛÛ[38;2;0;139;94mÛ[38;2;8;222;36mÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛÛ[B[8D[38;2;165;85;62mÛÛÛ[38;2;0;139;94mÛ[38;2;165;85;62mÛÛ[38;2;124;38;77mÛ[38;2;165;85;62mÛ[B[8D[38;2;165;85;62mÛ[38;2;254;168;0mÛ[38;2;165;85;62mÛÛÛÛÛÛ[B[8D[38;2;165;85;62mÛÛÛÛ[38;2;255;118;167mÛ[38;2;165;85;62mÛÛÛ[7A[0m"
-goto :eof
 
 :buildSketch to avoid illegal characters, decode from base64 to bat file,. open and inspect sketch.bat
 if exist Sketch.bat goto :eof
 for %%i in (
-	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0oc2V0ICJcPT8iICYgcmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICI/LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIl5eIVxeXiEuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbGVkTGlicmFyeT1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQpzZXQgInJldmlzaW9uUmVxdWlyZWQ9NC4wLjMiDQooJSg6Pz1MaWJyYXJ5JSAmJiAoY2FsbCA6cmV2aXNpb24pfHwoJWZhaWxlZExpYnJhcnklKSkyPm51bA0KCWNhbGwgOlN0ZExpYiAvcw0KJSklICAmJiAoZ290byA6c2V0dXApDQo6c2V0dXANCg0KcGF1c2UgJiBleGl0IC9i"
+	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbExpYj1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUgJiYgKGNhbGwgOnJldmlzaW9uIDQuMS4wKXx8KCVmYWlsTGliJSkNCgljYWxsIDpzdGRsaWINCiUpJQ0KDQpwYXVzZQ=="
 ) do echo %%~i>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
