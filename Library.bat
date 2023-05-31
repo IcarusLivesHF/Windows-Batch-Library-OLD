@@ -1,9 +1,9 @@
 rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.1.0"
+	set "revision=4.1.1"
 	set "libraryError=False"
-	for /f "tokens=4-5 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j"
+	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
 	if "%revision%" neq "%~1" (
 		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
 		echo.&echo  Revision: %~1 of Library.bat required to run this script.
@@ -11,6 +11,10 @@ rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 	)
 	if "%winversion%" neq "10.0" (
 		echo %~n0 is not supported on this version of Windows: %winVERSION%"
+		set "libraryError=True"
+	)
+	if %winbuild% lss 10589 (
+		echo %~n0 is not supported on this build of Windows: %winbuild%"
 		set "libraryError=True"
 	)
 	if "%libraryError%" equ "True" (
@@ -22,7 +26,7 @@ rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 goto :eof
 :StdLib /w:N /h:N /fs:N /title:"foobar" /debug /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util
 title Powered by: Windows Batch Library - Revision: %Revision%
-echo Loading Windows Batch Library - Revision: %Revision%...[B[G[38;5;9mPlease do not exit at this time..[0m
+REM echo Loading Windows Batch Library - Revision: %Revision%...[B[G[38;5;9mPlease do not exit at this time..[0m
 
 set "defaultFontSize=8"
 
@@ -57,9 +61,17 @@ set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m" & set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
 
 set "cls=[2J" & set "\c=[2J"
 
-set "limit.32bit=2147483647"
+set "list.hex=0 1 2 3 4 5 6 7 8 9 A B C D E F"
 
-set "limit.variableLength=8191"
+set "limit.4bit=0xF"
+set "limit.8bit=0xFF"
+set "limit.12bit=0xFFF"
+set "limit.13bit=0x1FFF"
+set "limit.16bit=0xFFFF"
+set "limit.20bit=0xFFFFF"
+set "limit.24bit=0xFFFFFF"
+set "limit.28bit=0xFFFFFFF"
+set "limit.31bit=0x7FFFFFFF"
 
 rem multiline Comment     %rem[%    %]rem%
 set "rem[=rem/||(" & set "rem]=)"
@@ -101,6 +113,20 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 				set "debugPrompt=True"
 			)
 			
+	REM -install mouse---------------------------------------------------------------------------------------------------------------mouse
+	) else if /i "!argumentCommand[%%i]!" equ "mouse" (
+			if not exist "%temp%\mouse.exe" (
+				echo Will be installed to: %temp%& echo.
+				set /p "consentToInstall=Would you like to install mouse.exe? Y/N: "
+				if /i "!consentToInstall!" equ "y" (
+					pushd %temp%
+					echo=TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAECAAAAAAAAAAAAAAAAAOAADwMLAQYAAAAAAAAAAAAAAAAAQBEAAAAQAAAAIAAAAABAAAAQAAAAAgAABAAAAAAAAAAEAAAAAAAAAFAhAAAAAgAAAAAAAAMAAAAAABAAABAAAAAAEAAAEAAAAAAAABAAAAAAAAAAAAAAACAgAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcIAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC50ZXh0AAAAABAAAAAQAAAAAgAAAAIAAAAAAAAAAAAAAAAAACAAAGAuZGF0YQAAAFABAAAAIAAAUgEAAAAEAAAAAAAAAAAAAAAAAABAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVieWB7AgAAACQjUX6UOgsAAAAg8QED79F/lAPv0X8UA+2RfpQuAAgQABQ6IgBAACDxBC4AAAAAOkAAAAAycNVieWB7CQAAACQuPb///9Q6GwBAACJRfy4AAAAAIlF3I1F+FCLRfxQ6FwBAACLRfiDyBCD4L+D4N9Qi0X8UOhOAQAAi0XchcAPhAUAAADpnAAAAI1F9FC4AQAAAFCNReBQi0X8UOgvAQAAD7dF4IP4Ag+FcwAAAItF6IP4AbgAAAAAD5TAiUXchcAPhA8AAACLRQi5AQAAAIgI6SMAAACLReiD+AK4AAAAAA+UwIlF3IXAD4QKAAAAi0UIuQIAAACICItF3IXAD4QdAAAAi0UIg8ACD79N5GaJCItFCIPAAoPAAg+/TeZmiQjpVP///4tF+FCLRfxQ6JUAAADJwwAAAFWJ5YHsFAAAAJC4AAAAAIlF7LgAAAMAULgAAAEAUOh9AAAAg8QIuAEAAABQ6HcAAACDxASNRexQuAAAAABQjUX0UI1F+FCNRfxQ6GEAAACDxBSLRfRQi0X4UItF/FDoXf7//4PEDIlF8ItF8FDoRgAAAIPEBMnDAP8lXCBAAAAA/yV0IEAAAAD/JXggQAAAAP8lfCBAAAAA/yWAIEAAAAD/JWAgQAAAAP8lZCBAAAAA/yVoIEAAAAD/JWwgQAAAACVkICVkICVkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiCAAAAAAAAAAAAAAtCAAAFwgAACgIAAAAAAAAAAAAAD9IAAAdCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvyAAAMggAADVIAAA5iAAAPYgAAAAAAAACiEAABkhAAAqIQAAOyEAAAAAAAC/IAAAyCAAANUgAADmIAAA9iAAAAAAAAAKIQAAGSEAACohAAA7IQAAAAAAAG1zdmNydC5kbGwAAABwcmludGYAAABfY29udHJvbGZwAAAAX19zZXRfYXBwX3R5cGUAAABfX2dldG1haW5hcmdzAAAAZXhpdABrZXJuZWwzMi5kbGwAAABHZXRTdGRIYW5kbGUAAABHZXRDb25zb2xlTW9kZQAAAFNldENvbnNvbGVNb2RlAAAAUmVhZENvbnNvbGVJbnB1dEEAAAAA>mouse.txt
+					(certutil -decode mouse.txt mouse.exe) || ( echo You may need to run as ADMIN & pause )
+					(del /f /q mouse.txt >nul ) & popd
+				) else echo mouse.exe not installed. You will not be able to click anything. & pause
+			)
+			set "getMouse=for /f "tokens=1-3" %%W in ('%temp%\Mouse.exe') do set /a "mouse.C=%%W,mouse.X=%%X,mouse.Y=%%Y""
+
 	REM -Enable for extra special characters-----------------------------------------------------------------------------------------EXTLIB e
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
 			rem Backspace
@@ -121,8 +147,8 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "border[+]=%ESC%(0n%ESC%(B"
 			set "border[HS]=%ESC%(0w%ESC%(B"
 			set "border[HN]=%ESC%(0v%ESC%(B"
-			set "border[VE]=%ESC%(0u%ESC%(B"
-			set "border[VW]=%ESC%(0t%ESC%(B"
+			set "border[VW]=%ESC%(0u%ESC%(B"
+			set "border[VE]=%ESC%(0t%ESC%(B"
 			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
 					   "pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
 					   "face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03" "degree.F8"
@@ -141,15 +167,15 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "Sign(x)=(x)>>31 | -(x)>>31 & 1" 
 			set "Abs=(((x)>>31|1)*(x))"
 			set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
-			set "avg=(x&y)+(x^y)/2"
 			set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
 			set "lerp=?=(a+c*(b-a)*10)/1000+a"
-			set "swap=t=x, x=y, y=t"
 			set "swap=x^=y, y^=x, x^=y"
 			set "getState=a*8+b*4+c*2+d*1"
-			set "max=(((((y-x)>>31)&1)*x)|((~(((y-x)>>31)&1)&1)*y))"
-			set "min=(((((x-y)>>31)&1)*x)|((~(((x-y)>>31)&1)&1)*y))"
+			set "max=(x - ((((x - y) >> 31) & 1) * (x - y)))"
+			set "min=(y - ((((x - y) >> 31) & 1) * (y - x)))"
 			set "percentOf=p=x*y/100"
+			set "clamp=(low - ((((low - (x - ((((high - x) >> 31) & 1) * (x - high)))) >> 31) & 1) * (low - (x - ((((high - x) >> 31) & 1) * (x - high))))))"
+
 			
 	REM -Get misc functions----------------------------------------------------------------------------------------------------------MISC
 	) else if /i "!argumentCommand[%%i]!" equ "misc" (
@@ -157,15 +183,13 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
 			set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
 			set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
-			set "ifOdd=1/(x&1)"
-			set "ifEven=1/(1+x&1)"
 			set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
 			set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
 			set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
 			set "rndBetween=(^!random^! %% (x*2+1) + -x)"
 			set "fib=?=c=a+b, a=b, b=c"
 			set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
-			set "mouseBound=1/(((~(mouse.Y-ma)>>31)&1)&((~(mb-mouse.Y)>>31)&1)&((~(mouse.X-mc)>>31)&1)&((~(md-mouse.X)>>31)&1))"
+			set "boundingBox=1/(((~(y-a)>>31)&1)&((~(b-y)>>31)&1)&((~(x-c)>>31)&1)&((~(d-x)>>31)&1))"
 			set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 			set "FNCross=a * d - b * c"
 
@@ -218,6 +242,10 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	) else if /i "!argumentCommand[%%i]!" equ "util" (
 			call :utilityFunctions
 
+	REM -Unpack utility macros-------------------------------------------------------------------------------------------------------BUTTON
+	) else if /i "!argumentCommand[%%i]!" equ "buttons" (
+			call :buttons
+
 	REM -Get RGB color array---------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
 			set /a "range=argumentArgument[%%i][1]"
@@ -261,47 +289,28 @@ set "throttle=for /l %%# in (1,x,1000000) do rem"
 set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 
 :_point DON'T CALL
-rem %point% x y <rtn> _scrn_
+rem %point% x y <rtn> screen
 set point=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	set "_scrn_=^!_scrn_^![%%2;%%1H%pixel%[0m"%\n%
+	set "screen=^!screen^![%%2;%%1H%pixel%[0m"%\n%
 )) else set args=
 
 :_plot DON'T CALL
-rem %plot% x y 0-255 CHAR <rtn> _scrn_
+rem %plot% x y 0-255 CHAR <rtn> screen
 set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "_scrn_=^!_scrn_^![%%2;%%1H[38;5;%%3m%%~4[0m"%\n%
+	set "screen=^!screen^![%%2;%%1H[38;5;%%3m%%~4[0m"%\n%
 )) else set args=
 
 :_RGBpoint DON'T CALL
 rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
 set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set "_scrn_=^!_scrn_^![%%2;%%1H[38;2;%%3;%%4;%%5m%pixel%[0m"%\n%
-)) else set args=
-
-:_offset DON'T CALL
-rem %offset% x Xoffset y Yoffset
-set offset=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set /a "%%~1+=%%~2, %%3+=%%~4"2^>nul%\n%
+	set "screen=^!screen^![%%2;%%1H[38;2;%%3;%%4;%%5m%pixel%[0m"%\n%
 )) else set args=
 
 :_BVector DON'T CALL
 rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1.BV_ATTRIBUTES
 set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
-	if "%%~2" equ "KILL" (%\n%
-		set "%%~1.x="%\n%
-		set "%%~1.y="%\n%
-		set "%%~1.i="%\n%
-		set "%%~1.j="%\n%
-		set "%%~1.td="%\n%
-		set "%%~1.tr="%\n%
-		set "%%~1.m="%\n%
-		set "%%~1.rgb="%\n%
-		set "%%~1.fcol="%\n%
-		set "%%~1.vd="%\n%
-		set "%%~1.vr="%\n%
-		set "%%~1.vmw="%\n%
-		set "%%~1.vmh="%\n%
-		set "%%~1.ch="%\n%
+	if /i "%%~2" equ "end" (%\n%
+		for %%i in (x y i j td tr m rgb fcol vd vr vmw vmh ch) do set "%%~1.%%i="%\n%
 	) else (%\n%
 		set /a "%%~1.x=^!random^! %% wid + 1"%\n%
 		set /a "%%~1.y=^!random^! %% hei + 1"%\n%
@@ -332,9 +341,7 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 :_lerpRGB DON'T CALL
 rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
 set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
-	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!"%\n%
-	set /a "a=g[%%~1], b=g[%%~2], c=%%~3, $g=^!lerp^!"%\n%
-	set /a "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
+	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!", "a=g[%%~1], b=g[%%~2], c=%%~3, $g=^!lerp^!", "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
 
 :_getDistance DON'T CALL
@@ -491,30 +498,23 @@ set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!
 	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
 	^!rgbpoint^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
 )) else set args=
-
-:_clamp DON'T CALL
-rem clamp x min max RETURNVAR
-set clamp=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set /a "xx=%%~1", "yy=%%2", "zz=%%3"%\n%
-	for /f "tokens=1-3" %%x in ("^!xx^! ^!yy^! ^!zz^!") do (%\n%
-			   if %%x lss %%y ( set /a "xx=%%y"%\n%
-		) else if %%x gtr %%z ( set /a "xx=%%z" )%\n%
-	)%\n%
-	for /f "tokens=1" %%x in ("^!xx^!") do (%\n%
-		if "%%4" neq "" ( set /a "%%4=%%x" ) else ( echo=%%x)%\n%
-	)%\n%
-)) else set args=
-
 goto :eof
 
 :___________________________________________________________________________________________
 :utilityFunctions
+:_sortFWD DON'T CALL
 rem %sort[fwd]:#=stingArray%
 SET "sort[fwd]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT"
+
+:_sortREV DON'T CALL
 rem %sort[rev]:#=stingArray%
 SET "sort[rev]=(FOR %%S in (%%#%%) DO @ECHO %%S) ^| SORT /R"
+
+:_filterFWD DON'T CALL
 rem %filter[fwd]:#=stingArray%
 SET "filter[fwd]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ"
+
+:_filterREV DON'T CALL
 rem %filter[rev]:#=stingArray%
 SET "filter[rev]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ /R"
 
@@ -524,17 +524,34 @@ set hexToRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args
 	set /a "R=0x%%~1", "G=0x%%~2", "B=0x%%~3"%\n%
 )) else set args=
 
-:_getLen DON'T CALL
-rem %getlen% "string" <rtn> $length / 
-set getLen=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
-	set "$_str=%%~1#"%\n%
-	set "$length=0"%\n%
-	for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (%\n%
-		if "^!$_str:~%%P,1^!" NEQ "" (%\n%
-			set /a "$length+=%%P"%\n%
-			set "$_str=^!$_str:~%%P^!"%\n%
+:_hexToBase2 DONT' CALL
+rem %hexToBase2% 1B out <rtnVar>
+set hexToBase2=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	for /l %%i in (7,-1,0) do (%\n%
+		set /a "i=((0x%%1 >> %%i) & 1)"%\n%
+		set "%%~2=^!%%~2^!^!i^!"%\n%
+	)%\n%
+)) else set args=
+
+:_hexToBase4 DONT' CALL
+rem %hexToBase4% 1B out <rtnVar>
+set hexToBase4=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+	for /l %%b in (7,-1,0) do (%\n%
+		set /a "bit=(0x%%~1 >> %%b) & 1"%\n%
+		set "bin=^!bin^!^!bit^!"%\n%
+		if "^!bin:~1,1^!" neq "" (%\n%
+			set /a "bit=^!bin:~0,1^! * 2 + ^!bin:~1,1^! * 1"%\n%
+			set "%%~2=^!%%~2^!^!bit^!"%\n%
+			set "bin="%\n%
 		)%\n%
 	)%\n%
+	set "bin="%\n%
+)) else set args=
+
+:_getLen DON'T CALL
+rem %getlen% "string" <rtn> $length / 
+set getlen=for %%# in (1 2) do if %%#==2 ( for %%1 in (^^!args^^!) do (%\n%
+	set "str=X%%~1" ^& set "length=0" ^& for /l %%b in (10,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
 )) else set args=
 
 :_pad DON'T CALL
@@ -562,7 +579,7 @@ set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 )) else set args=
 
 :_decodeB64 DON'T CALL
-rem %decode:?=!base64!%
+rem %decode:?=!base64!% <rtn> plainText.txt
 set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
 	echo %%~1^>inFile.txt%\n%
 	certutil -decode "inFile.txt" "outFile.txt"^>nul%\n%
@@ -577,18 +594,16 @@ set decode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 rem %string_properties "string" <rtn> $_len, $_rev $_upp $_low
 set string_properties=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
 	for %%i in ($_len $_rev $_upp $_low) do set "%%i="%\n%
-    set "$_str=%%~1" ^& set "$_strC=%%~1" ^& set "$_upp=^!$_strC:~1^!" ^& set "$_low=^!$_strC:~1^!"%\n%
-    for %%P in (64 32 16 8 4 2 1) do if "^!$_str:~%%P,1^!" NEQ "" set /a "$_len+=%%P" ^& set "$_str=^!$_str:~%%P^!"%\n%
-    set "$_str=^!$_strC:~1^!"%\n%
-    for /l %%a in (^^!$_len^^!,-1,0) do set "$_rev=^!$_rev^!^!$_str:~%%~a,1^!"%\n%
-    for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do set "$_upp=^!$_upp:%%i=%%i^!"%\n%
-    for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "$_low=^!$_low:%%i=%%i^!"%\n%
+    set "$_str=%%~1" ^& set "$_str=^!$_str:~1,-1^!" ^& set "string.upp=^!$_str:~1^!" ^& set "string.low=^!$_str:~1^!"%\n%
+	for /l %%b in (10,-1,0) do set /a "string.len|=1<<%%b" ^& for %%c in (^^!string.len^^!) do if "^!$_str:~%%c,1^!" equ "" set /a "string.len&=~1<<%%b"%\n%
+    for /l %%a in (^^!string.len^^!,-1,1) do set "string.rev=^!string.rev^!^!$_str:~%%~a,1^!"%\n%
+    for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do set "string.upp=^!string.upp:%%i=%%i^!"%\n%
+    for %%i in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "string.low=^!string.low:%%i=%%i^!"%\n%
 )) else set args=
 
-rem I take no credit for this gem of a name, but the function does as the name suggests.
-:_F.A.R.T - Find And Replace Tool DON'T CALL
-rem %fart:?=FILE NAME.EXT% "String":Line#
-set fart=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
+:_lineInject DON'T CALL
+rem %lineInject:?=FILE NAME.EXT% "String":Line#
+set lineInject=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
 	set "linesInFile=0"%\n%
 	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
 		set /a "linesInFile+=1"%\n%
@@ -627,7 +642,7 @@ set UNZIP=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") 
 :_License DO NOT use unless you are DONE editing your code.
 rem %license% "mySignature" NOTE: You MUST add at least 1 signature to your script ":::mySignature" without the quotes
 set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^!args^!") do (%\n%
-	set /a "x=%%~z0"%\n%
+	for /f "usebackq" %%i in ('%self%') do set /a "x=%%~zi"%\n%
 	for /f "tokens=1,2 delims=:" %%a in ('findstr /n ":::" "%~F0"') do (%\n%
         if "%%b" equ %%1 set /a "i+=1", "x+=i+%%a"%\n%
 	)%\n%
@@ -637,12 +652,66 @@ set License=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" %%1 in ("^
 )) else set args=
 goto :eof
 
+:___________________________________________________________________________________________
+:buttons
+:_makeButton DON'T CALL
+rem %makeButton% x y ID clickID 'string' <- MUST USE SINGLE QUOTE
+set makeButton=for %%# in (1 2) do if %%#==2 ( for %%i in ("^!args^!") do  for /f "tokens=1,2 delims='" %%1 in ("%%~i") do  for /f "tokens=1-4" %%w in ("%%~1") do (%\n%
+	set /a "length=0" ^& set "bar=" ^& set "str=X%%~2"%\n%
+	set "button.list=^!button.list^!%%~y "%\n%
+	for /l %%b in (6,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
+	set /a "back=length + 2"%\n%
+	for /l %%i in (1,1,^^!length^^!) do set "bar=^!bar^!Ä"%\n%
+	set "button[%%~y].sprite=[%%~x;%%~wHÚ^!bar^!¿[^!back^!D[B³%%~2³[^!back^!D[BÀ^!bar^!Ù[0m"%\n%
+	set "button.display=^!button.display^!^!button[%%~y].sprite^!"%\n%
+	set /a "button[%%~y].xmin=%%~w - 1","button[%%~y].xmax=%%~w + length","button[%%~y].ymin=%%~x - 1","button[%%~y].ymax=%%~x + 1"%\n%
+	set "button[%%~y].clicked=if ^^^!mouse.c^^^! equ %%~z if ^^^!mouse.Y^^^! geq ^!button[%%~y].ymin^! if ^^^!mouse.Y^^^! leq ^!button[%%~y].Ymax^! if ^^^!mouse.X^^^! geq ^!button[%%~y].Xmin^! if ^^^!mouse.X^^^! leq ^!button[%%~y].Xmax^!"%\n%
+)) else set args=
 
+:_killButton DON'T CALL
+REM %killButton% 1 4 5 2 3 6 - to kill any or all buttons
+set killButton=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!") do (%\n%
+	for %%i in (%%~1) do (%\n%
+		for %%j in ("^!button[%%i].sprite^!") do set "button.display=^!button.display:%%~j=^!"%\n%
+		set "button[%%i].clicked="%\n%
+		set "button[%%i].xmin="%\n%
+		set "button[%%i].xmax="%\n%
+		set "button[%%i].ymin="%\n%
+		set "button[%%i].ymax="%\n%
+		set "button[%%i].sprite="%\n%
+		set "button.list=^!button.list:%%i =^!"%\n%
+	)%\n%
+)) else set args=
+
+:_makeSlider DON'T CALL
+rem %makeSlider% x y length min max sliderColor positionColor clickID
+set "map=c+(d-c)*(v-a)/(b-a)" & rem required for slider
+set makeSlider=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-8" %%1 in ("^!args^!") do (%\n%
+	set "bar=" ^& set "slider.value=0"%\n%
+	for /l %%i in (1,1,%%~3) do set "bar=^!bar^!Ä"%\n%
+	set /a "slider.xmin=%%~1", "slider.xmax=%%~1 + %%~3 - 1", "slider.ymin=%%~2 - 2", "slider.ymax=%%~2", "slider.position=%%~1 + 1", "back=%%~3 + 2"%\n%
+	set "slider.display=[38;5;%%~6m[%%~2;%%~1H[AÚ^!bar^!¿[^!back^!D[B(0t(B^!bar^!(0u(B[^!back^!D[BÀ^!bar^!Ù[0m[38;5;%%~7m[%%~2;^^^!slider.position^^^!HÛ[0m"%\n%
+	set "slider.clicked=if ^^^!mouse.c^^^! equ %%~8 if ^^^!mouse.x^^^! geq %%~1 if ^^^!mouse.x^^^! leq ^!slider.xmax^! if ^^^!mouse.y^^^! geq ^!slider.ymin^! if ^^^!mouse.y^^^! leq ^!slider.ymax^!"%\n%
+	set "move.slider=v=mouse.X, a=slider.Xmin, b=slider.Xmax, c=%%~4, d=%%~5, slider.value=%map%, slider.position=mouse.x + 1"%\n%
+)) else set args=
+
+:_makeInputBar DON'T CALL
+rem %makeInputBar% rtnVar x y length TextColor BackColor clickID
+set makeInputBar=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
+	set "bar=" ^& set "str=x%%~1"%\n%
+	set /a "length=0", "back=%%~4 - 2"%\n%
+	set /a "input.xmin=%%~2", "input.xmax=%%~2 + %%~4", "input.ymin=%%~3 - 1", "input.ymax=%%~3 + 1", "input.position.y=%%~3 + 1", "input.position.x=%%~2 + 1"%\n%
+	for /l %%b in (6,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
+	for /l %%i in (3,1,%%~4) do set "bar=^!bar^!Ä"%\n%
+	set "input.display=[A[38;5;%%~6m[%%~3;%%~2HÚ^!bar^!¿[%%~4D[B³[^!back^!C³[%%~4D[BÀ^!bar^!Ù[0m"%\n%
+	set "input.clicked=if ^^^!mouse.c^^^! equ %%~7 if ^^^!mouse.Y^^^! geq ^!input.Ymin^! if ^^^!mouse.Y^^^! leq ^!input.Ymax^! if ^^^!mouse.X^^^! geq ^!input.Xmin^! if ^^^!mouse.X^^^! leq ^!input.Xmax^! set /p "%%~1=[38;5;%%~5m[^^!input.position.y^^!;^^!input.position.x^^!HInput: ""%\n%
+)) else set args=
+goto :eof
+
+:___________________________________________________________________________________________
 :buildSketch to avoid illegal characters, decode from base64 to bat file,. open and inspect sketch.bat
 if exist Sketch.bat goto :eof
-for %%i in (
-	"QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbExpYj1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUgJiYgKGNhbGwgOnJldmlzaW9uIDQuMS4wKXx8KCVmYWlsTGliJSkNCgljYWxsIDpzdGRsaWINCiUpJQ0KDQpwYXVzZQ=="
-) do echo %%~i>>"encodedSketch.txt"
+echo=QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbExpYj1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUgJiYgKGNhbGwgOnJldmlzaW9uIDQuMS4wKXx8KCVmYWlsTGliJSkNCgljYWxsIDpzdGRsaWINCiUpJQ0KDQpwYXVzZQ==>>"encodedSketch.txt"
 certutil -decode "encodedSketch.txt" "Sketch.bat"
 del /q /f "encodedSketch.txt"
 goto :eof
