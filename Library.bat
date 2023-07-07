@@ -1,7 +1,7 @@
 rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 (call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
 :revision DON'T CALL
-	set "revision=4.1.1"
+	set "revision=4.1.2"
 	set "libraryError=False"
 	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
 	if "%revision%" neq "%~1" (
@@ -24,13 +24,12 @@ rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 		timeout /t 3 /nobreak & exit
 	)
 goto :eof
-:StdLib /w:N /h:N /fs:N /title:"foobar" /debug /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util
-title Powered by: Windows Batch Library - Revision: %Revision%
-REM echo Loading Windows Batch Library - Revision: %Revision%...[B[G[38;5;9mPlease do not exit at this time..[0m
+:StdLib /w:N /h:N /fs:N /title:"foobar" /debug /mouse /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util /buttons
+title Please do not exit at this time...
 
 set "defaultFontSize=8"
 
-set "defaultFont=terminal"
+set "defaultFont=Terminal"
 
 set "libraryDefaultFont_ON=False"
 
@@ -61,7 +60,7 @@ set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m" & set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
 
 set "cls=[2J" & set "\c=[2J"
 
-set "list.hex=0 1 2 3 4 5 6 7 8 9 A B C D E F"
+set "list.hex=0123456789ABCDEF"
 
 set "limit.4bit=0xF"
 set "limit.8bit=0xFF"
@@ -71,7 +70,7 @@ set "limit.16bit=0xFFFF"
 set "limit.20bit=0xFFFFF"
 set "limit.24bit=0xFFFFFF"
 set "limit.28bit=0xFFFFFFF"
-set "limit.31bit=0x7FFFFFFF"
+set "limit.32bit=0x7FFFFFFF"
 
 rem multiline Comment     %rem[%    %]rem%
 set "rem[=rem/||(" & set "rem]=)"
@@ -92,22 +91,27 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 
 	REM -Set width of console--------------------------------------------------------------------------------------------------------W
 		   if /i "!argumentCommand[%%i]!" equ "w" (
+:_wid
 			set /a "wid=width=!argumentArgument[%%i][1]!"
 			
 	REM -Set height of console-------------------------------------------------------------------------------------------------------H
 	) else if /i "!argumentCommand[%%i]!" equ "h" (
+:_hei
 			set /a "hei=height=!argumentArgument[%%i][1]!"
 			
 	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
 	) else if /i "!argumentCommand[%%i]!" equ "fs" (
+:_fontSize
 			call :setfont !argumentArgument[%%i][1]! "%defaultFont%"
 			
 	REM -Set title-------------------------------------------------------------------------------------------------------------------TITLE t
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
+:_title
 			title !argumentArgument[%%i][1]!
 			
 	REM -DEBUG MODE------------------------------------------------------------------------------------------------------------------DEBUG d
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
+:_debug
 			set "debug=True"
 			if /i "!argumentArgument[%%i][1]:~0,1!" equ "p" (
 				set "debugPrompt=True"
@@ -115,6 +119,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			
 	REM -install mouse---------------------------------------------------------------------------------------------------------------mouse
 	) else if /i "!argumentCommand[%%i]!" equ "mouse" (
+:_mouse
 			if not exist "%temp%\mouse.exe" (
 				echo Will be installed to: %temp%& echo.
 				set /p "consentToInstall=Would you like to install mouse.exe? Y/N: "
@@ -129,42 +134,35 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 
 	REM -Enable for extra special characters-----------------------------------------------------------------------------------------EXTLIB e
 	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
+:_extlib
 			rem Backspace
 			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
 			rem Carriage Return
 			for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
 			rem Tab 0x09
 			for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
-
-			set "pixel[2]=%ESC%(0a%ESC%(B"
-			set "degreeSymbol=%ESC%(0f%ESC%(B"
-			set "border[NW]=%ESC%(0l%ESC%(B"
-			set "border[NE]=%ESC%(0k%ESC%(B"
-			set "border[SW]=%ESC%(0m%ESC%(B"
-			set "border[SE]=%ESC%(0j%ESC%(B"
-			set "border[H]=%ESC%(0q%ESC%(B"
-			set "border[V]=%ESC%(0x%ESC%(B"
-			set "border[+]=%ESC%(0n%ESC%(B"
-			set "border[HS]=%ESC%(0w%ESC%(B"
-			set "border[HN]=%ESC%(0v%ESC%(B"
-			set "border[VW]=%ESC%(0u%ESC%(B"
-			set "border[VE]=%ESC%(0t%ESC%(B"
+			
 			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
-					   "pixel[0].DB" "pixel[1].B0" "pixel[3].B2"
-					   "face[0].01" "face[1].02" "musicNote.0E" "diamond.04" "club.05" "spade.06" "BEL.07" "<3.03" "degree.F8"
+					    "pixel[0].DB"   "pixel[1].B0"   "pixel[2].B1"   "pixel[3].B2"
+					    "face[0].01"    "face[1].02"    "musicNote.0E"  "degree.F8"     "BEL.07"
+						"diamond.04"    "club.05"       "spade.06"      "<3.03"
+					    "border[V].B3"  "border[H].C4"  "border[+].C5"  "border[HN].C1"
+						"border[HS].C2" "border[VE].C3" "border[VW].B4" "border[SE].D9"
+						"border[NE].BF" "corner[SW].C0" "border[NW].DA"
 			) do for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
 				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
 			)
 
 	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
+:_math
 			set /a "PI=(35500000/113+5)/10, HALF_PI=(35500000/113/2+5)/10, TWO_PI=2*PI, PI32=PI+HALF_PI, neg_PI=PI * -1, neg_HALF_PI=HALF_PI *-1"
 			set "sin=(a=((x*31416/180)%%62832)+(((x*31416/180)%%62832)>>31&62832), b=(a-15708^a-47124)>>31,a=(-a&b)+(a&~b)+(31416&b)+(-62832&(47123-a>>31)),a-a*a/1875*a/320000+a*a/1875*a/15625*a/16000*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000) / 10000"
 			set "cos=(a=((15708-x*31416/180)%%62832)+(((15708-x*31416/180)%%62832)>>31&62832), b=(a-15708^a-47124)>>31,a=(-a&b)+(a&~b)+(31416&b)+(-62832&(47123-a>>31)),a-a*a/1875*a/320000+a*a/1875*a/15625*a/16000*a/2560000-a*a/1875*a/15360*a/15625*a/15625*a/16000*a/44800000) / 10000"
 			set "sinr=(a=(x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), !_SIN!) / 10000"
 			set "cosr=(a=(15708 - x)%%62832, c=(a>>31|1)*a, a-=(((c-47125)>>31)+1)*((a>>31|1)*62832)  +  (-((c-47125)>>31))*( (((c-15709)>>31)+1)*(-(a>>31|1)*31416+2*a)  ), !_SIN!) / 10000"
 			set "Sqrt(N)=( x=(N)/(11*1024)+40, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2, x=((N)/x+x)/2 )"
-			set "Sign(x)=(x)>>31 | -(x)>>31 & 1" 
+			set "Sign(x)=(x)>>31 | -(x)>>31 & 1"
 			set "Abs=(((x)>>31|1)*(x))"
 			set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 			set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
@@ -174,27 +172,29 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "max=(x - ((((x - y) >> 31) & 1) * (x - y)))"
 			set "min=(y - ((((x - y) >> 31) & 1) * (y - x)))"
 			set "percentOf=p=x*y/100"
-			set "clamp=(low - ((((low - (x - ((((high - x) >> 31) & 1) * (x - high)))) >> 31) & 1) * (low - (x - ((((high - x) >> 31) & 1) * (x - high))))))"
-
+			set "clamp= (leq=((low-x)>>31)+1)*low  +  (geq=((x-high)>>31)+1)*high  +  ^^^!(leq+geq)*x "
 			
 	REM -Get misc functions----------------------------------------------------------------------------------------------------------MISC
 	) else if /i "!argumentCommand[%%i]!" equ "misc" (
+:_misc
 			set "gravity=_G_=1, ?.acceleration+=_G_, ?.velocity+=?.acceleration, ?.acceleration*=0, ?+=?.velocity"
-			set "chance=1/((((^!random^!%%100)-x)>>31)&1)"
-			set "smoothStep=(3*100 - 2 * x) * x/100 * x/100"
+			set "chance=1/((((^!random^! %% 100) - x) >> 31) & 1)"
+			set "smoothStep=(3 * 100 - 2 * x) * x / 100 * x / 100"
 			set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
 			set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
 			set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
 			set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
-			set "rndBetween=(^!random^! %% (x*2+1) + -x)"
+			set "rndBetween=(^!random^! %% (x * 2 + 1) - x)"
 			set "fib=?=c=a+b, a=b, b=c"
 			set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
 			set "boundingBox=1/(((~(y-a)>>31)&1)&((~(b-y)>>31)&1)&((~(x-c)>>31)&1)&((~(d-x)>>31)&1))"
 			set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
-			set "FNCross=a * d - b * c"
+			set "FNCross=(a * d - b * c)"
+			set "rnd.sign=(((^!random^! >> 14) & 1) * 2 - 1)"
 
 	REM -Get shape functions---------------------------------------------------------------------------------------------------------SHAPE sh
 	) else if /i "!argumentCommand[%%i]:~0,2!" equ "sh" (
+:_shape
 			set "SQ(x)=x*x"
 			set "CUBE(x)=x*x*x"
 			set "pmSQ(x)=x+x+x+x"
@@ -207,6 +207,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			
 	REM -Get algorithmic conditional functions---------------------------------------------------------------------------------------AC
 	) else if /i "!argumentCommand[%%i]!" equ "ac" (
+:_algorithmic_conditions
 			set "LSS(x,y)=(((x-y)>>31)&1)"
 			set "LEQ(x,y)=((~(y-x)>>31)&1)"
 			set "GTR(x,y)=(((y-x)>>31)&1)"
@@ -218,8 +219,9 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "XOR(b1,b2)=(b1^b2)"
 			set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
 				
-	REM -Get cursor functions--------------------------------------------------------------------------------------------------------CURSOR c
+	REM -Get cursor functions--------------------------------------------------------------------------------------------------------CURSOR
 	) else if /i "!argumentCommand[%%i]!" equ "cursor" (
+:_cursor
 			set ">=<nul set /p ="
 			set "push=7"
 			set "pop=8"
@@ -236,18 +238,22 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 
 	REM -Unpack gfx macros-----------------------------------------------------------------------------------------------------------GFX
 	) else if /i "!argumentCommand[%%i]!" equ "gfx" (
+:_gfx
 			call :graphicsFunctions
 			
 	REM -Unpack utility macros-------------------------------------------------------------------------------------------------------UTIL
 	) else if /i "!argumentCommand[%%i]!" equ "util" (
+:_util
 			call :utilityFunctions
 
 	REM -Unpack utility macros-------------------------------------------------------------------------------------------------------BUTTON
 	) else if /i "!argumentCommand[%%i]!" equ "buttons" (
+:_buttons
 			call :buttons
 
 	REM -Get RGB color array---------------------------------------------------------------------------------------------------------CR
 	) else if /i "!argumentCommand[%%i]!" equ "cr" (
+:_colorRange
 			set /a "range=argumentArgument[%%i][1]"
 			set "totalColorsInRange=0"
 			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;%%a;0m"
@@ -278,6 +284,7 @@ if "%debug%" neq "False" (
 	mode %wid%,%hei%
 )
 cls
+title %Revision%
 goto :eof
 
 :___________________________________________________________________________________________
@@ -317,8 +324,8 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 		set /a "%%~1.td=^!random^! %% 360"%\n%
 		set /a "%%~1.tr=^!random^! %% 62832"%\n%
 		set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
-		set /a "%%~1.i=^!random^! %% 3 + -1"%\n%
-		set /a "%%~1.j=^!random^! %% 3 + -1"%\n%
+		set /a "%%~1.i=(((^!random^! >> 14) & 1) * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
+		set /a "%%~1.j=(((^!random^! >> 14) & 1) * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
 		if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
 			set /a "%%~1.i=1"%\n%
 		)%\n%
@@ -419,22 +426,20 @@ set line=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!")
 :_bezier DON'T CALL
 rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4 length
 set bezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
-	set "$bezier=" ^& set "c=0"%\n%
-	set /a "px[0]=%%~1","py[0]=%%~2", "px[1]=%%~3","py[1]=%%~4", "px[2]=%%~5","py[2]=%%~6", "px[3]=%%~7","py[3]=%%~8"%\n%
-	for /l %%# in (1,1,%%~9) do (%\n%
-		set /a "vx[1]=(px[0]+c*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+c*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+c*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+c*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+c*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+c*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+c*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+c*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+c*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+c*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+c*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+c*(vy[5]-vy[4])*10)/1000+vy[4]","c+=1"%\n%
-		set "$bezier=^!$bezier^![^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
+	set "$bezier="%\n%
+	for /l %%B in (1,1,50) do (%\n%
+		set /a "vx=(((((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B * 2)*(((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1))+(%%B * 2)*(((((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3)+(%%B * 2)*(((%%~5+(%%B * 2)*(%%~7-%%~5)*10)/1000+%%~5)-((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3))*10)/1000+((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3))-((((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B * 2)*(((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1)))*10)/1000+((((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B * 2)*(((%%~3+(%%B * 2)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B * 2)*(%%~3-%%~1)*10)/1000+%%~1))","vy=(((((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B * 2)*(((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2))+(%%B * 2)*(((((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4)+(%%B * 2)*(((%%~6+(%%B * 2)*(%%~8-%%~6)*10)/1000+%%~6)-((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4))*10)/1000+((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4))-((((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B * 2)*(((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2)))*10)/1000+((((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B * 2)*(((%%~4+(%%B * 2)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B * 2)*(%%~4-%%~2)*10)/1000+%%~2))"%\n%
+		set "$bezier=^!$bezier^![^!vy^!;^!vx^!H%pixel%"%\n%
 	)%\n%
 )) else set args=
 
 :_RGBezier DON'T CALL    -     WORKS WITH /cr
-rem %bezier% x1 y1 x2 y2 x3 y3 x4 y4
+rem %rgbezier% x1 y1 x2 y2 x3 y3 x4 y4
 set RGBezier=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-9" %%1 in ("^!args^!") do (%\n%
-	set "$rgbezier=" ^& set "c=0"%\n%
-	set /a "px[0]=%%~1","py[0]=%%~2", "px[1]=%%~3","py[1]=%%~4", "px[2]=%%~5","py[2]=%%~6", "px[3]=%%~7","py[3]=%%~8"%\n%
-	for /l %%m in (1,1,^^!totalColorsInRange^^!) do (%\n%
-		set /a "vx[1]=(px[0]+c*(px[1]-px[0])*10)/1000+px[0]","vy[1]=(py[0]+c*(py[1]-py[0])*10)/1000+py[0]","vx[2]=(px[1]+c*(px[2]-px[1])*10)/1000+px[1]","vy[2]=(py[1]+c*(py[2]-py[1])*10)/1000+py[1]","vx[3]=(px[2]+c*(px[3]-px[2])*10)/1000+px[2]","vy[3]=(py[2]+c*(py[3]-py[2])*10)/1000+py[2]","vx[4]=(vx[1]+c*(vx[2]-vx[1])*10)/1000+vx[1]","vy[4]=(vy[1]+c*(vy[2]-vy[1])*10)/1000+vy[1]","vx[5]=(vx[2]+c*(vx[3]-vx[2])*10)/1000+vx[2]","vy[5]=(vy[2]+c*(vy[3]-vy[2])*10)/1000+vy[2]","vx[6]=(vx[4]+c*(vx[5]-vx[4])*10)/1000+vx[4]","vy[6]=(vy[4]+c*(vy[5]-vy[4])*10)/1000+vy[4]","c+=1"%\n%
-		set "$rgbezier=^!$rgbezier^!^!color[%%m]^![^!vy[6]^!;^!vx[6]^!H%pixel%"%\n%
+	set "$rgbezier="%\n%
+	for /l %%B in (1,1,^^!totalColorsInRange^^!) do (%\n%
+		set /a "vx=(((((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B)*(((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1))+(%%B)*(((((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3)+(%%B)*(((%%~5+(%%B)*(%%~7-%%~5)*10)/1000+%%~5)-((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3))*10)/1000+((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3))-((((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B)*(((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1)))*10)/1000+((((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1)+(%%B)*(((%%~3+(%%B)*(%%~5-%%~3)*10)/1000+%%~3)-((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1))*10)/1000+((%%~1+(%%B)*(%%~3-%%~1)*10)/1000+%%~1))","vy=(((((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B)*(((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2))+(%%B)*(((((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4)+(%%B)*(((%%~6+(%%B)*(%%~8-%%~6)*10)/1000+%%~6)-((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4))*10)/1000+((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4))-((((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B)*(((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2)))*10)/1000+((((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2)+(%%B)*(((%%~4+(%%B)*(%%~6-%%~4)*10)/1000+%%~4)-((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2))*10)/1000+((%%~2+(%%B)*(%%~4-%%~2)*10)/1000+%%~2))"%\n%
+		set "$rgbezier=^!$rgbezier^!^!color[%%B]^![^!vy^!;^!vx^!H%pixel%"%\n%
 	)%\n%
 )) else set args=
 
@@ -449,55 +454,12 @@ set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") 
 	set "$arc=^!$arc^![0m"%\n%
 )) else set args=
 
-:_plot_HSL_RGB DON'T CALL
-rem plot_HSL_RGB x y 0-360 0-10000 0-10000
-set plot_HSL_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set /a "H=%%3", "S=%%4", "L=%%5"%\n%
-	if %%3 geq 360 set /a "H=360"%\n%
-	if %%3 leq 0   set /a "H=0"%\n%
-	set /a "va=2*L-10000"%\n%
-	for /f "tokens=1" %%a in ("^!va^!") do if %%a lss 0 set /a "va=-va"%\n%
-	set /a "C=(10000-va)*S/10000"%\n%
-	set /a "h1=H*10000/60"%\n%
-	set /a "mm=(h1 %% 20000) - 10000"%\n%
-	for /f "tokens=1" %%a in ("^!mm^!")  do if %%a lss 0 set /a "mm=-mm"%\n%
-	set /a "X=C *(10000 - mm)/10000"%\n%
-	set /a "m=L - C/2"%\n%
-	for /f "tokens=1" %%a in ("^!H^!") do (%\n%
-		if %%a lss 60  ( set /a "R=C+m", "G=X+m", "B=0+m" ) else (%\n%
-		if %%a lss 120 ( set /a "R=X+m", "G=C+m", "B=0+m" ) else (%\n%
-		if %%a lss 180 ( set /a "R=0+m", "G=C+m", "B=X+m" ) else (%\n%
-		if %%a lss 240 ( set /a "R=0+m", "G=X+m", "B=C+m" ) else (%\n%
-		if %%a lss 300 ( set /a "R=X+m", "G=0+m", "B=C+m" ) else (%\n%
-		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m" ))))))%\n%
-	)%\n%
-	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!rgbpoint^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
+:_HSL.RGB DON'T CALL
+set "HSL(n)=k=(n*100+(%%1 %% 3600)/3) %% 1200, x=k-300, y=900-k, x=y-((y-x)&((x-y)>>31)), x=100-((100-x)&((x-100)>>31)), max=x-((x+100)&((x+100)>>31))"
+set HSL.RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
+	set /a "%HSL(n):n=0%", "r=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000","%HSL(n):n=8%", "g=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000", "%HSL(n):n=4%", "b=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000"%\n%
 )) else set args=
-
-:_plot_HSV_RGB DON'T CALL
-rem plot_HSV_RGB x y 0-360 0-10000 0-10000
-set plot_HSV_RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set /a "H=%%3", "S=%%4", "V=%%5"%\n%
-	if %%3 geq 360 set /a "H=360"%\n%
-	if %%3 leq 0   set /a "H=0"%\n%
-	set /a "h1=h*10000/60"%\n%
-	set /a "mm=(h1 %% 20000) - 10000"%\n%
-	for /f "tokens=1" %%a in ("^!mm^!") do if %%a lss 0 set /a "mm=-mm"%\n%
-	set /a "C=(V * S) / 10000"%\n%
-	set /a "X=C *(10000 - mm) / 10000"%\n%
-	set /a "m=V - C"%\n%
-	for /f "tokens=1" %%a in ("^!H^!") do (%\n%
-		if %%a lss 60  ( set /a "R=C+m", "G=X+m", "B=0+m") else (%\n%
-		if %%a lss 120 ( set /a "R=X+m", "G=C+m", "B=0+m") else (%\n%
-		if %%a lss 180 ( set /a "R=0+m", "G=C+m", "B=X+m") else (%\n%
-		if %%a lss 240 ( set /a "R=0+m", "G=X+m", "B=C+m") else (%\n%
-		if %%a lss 300 ( set /a "R=X+m", "G=0+m", "B=C+m") else (%\n%
-		if %%a lss 360 ( set /a "R=C+m", "G=0+m", "B=X+m"))))))%\n%
-	)%\n%
-	set /a "R=R*255/10000", "G=G*255/10000", "B=B*255/10000"%\n%
-	^!rgbpoint^! %%1 %%2 ^^!R^^! ^^!G^^! ^^!B^^!%\n%
-)) else set args=
+set "hsl(n)="
 goto :eof
 
 :___________________________________________________________________________________________
@@ -518,24 +480,34 @@ SET "filter[fwd]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ"
 rem %filter[rev]:#=stingArray%
 SET "filter[rev]=(FOR %%F in (%%#%%) DO @ECHO %%F) ^| SORT /UNIQ /R"
 
-:_hexToRGB DON'T CALL
-rem %hexToRGB% 00a2ed
-set hexToRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args:~1,2^! ^!args:~3,2^! ^!args:~5,2^!") do (%\n%
+:_hex.RGB DON'T CALL
+rem %hexToRGB% 1b9dee
+set hex.RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args:~1,2^! ^!args:~3,2^! ^!args:~5,2^!") do (%\n%
 	set /a "R=0x%%~1", "G=0x%%~2", "B=0x%%~3"%\n%
 )) else set args=
 
-:_hexToBase2 DONT' CALL
+:_hex.RND.RGB DON'T CALL
+rem %hex.rnd.rgb% <rtn> r g b
+set hex.RND.RGB=( set "hex="%\n%
+	for /l %%i in (1,1,6) do (%\n%
+		set /a "r=^!random^! %% 16"%\n%
+		for %%r in (^^!r^^!) do set "hex=^!hex^!^!list.hex:~%%r,1^!"%\n%
+	)%\n%
+	set /a "R=0x^!hex:~0,2^!", "G=0x^!hex:~2,2^!", "B=0x^!hex:~4,2^!"%\n%
+)
+
+:_hex.Base2 DONT' CALL
 rem %hexToBase2% 1B out <rtnVar>
-set hexToBase2=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+set hex.Base2=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	for /l %%i in (7,-1,0) do (%\n%
 		set /a "i=((0x%%1 >> %%i) & 1)"%\n%
 		set "%%~2=^!%%~2^!^!i^!"%\n%
 	)%\n%
 )) else set args=
 
-:_hexToBase4 DONT' CALL
+:_hex.Base4 DONT' CALL
 rem %hexToBase4% 1B out <rtnVar>
-set hexToBase4=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
+set hex.Base4=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
 	for /l %%b in (7,-1,0) do (%\n%
 		set /a "bit=(0x%%~1 >> %%b) & 1"%\n%
 		set "bin=^!bin^!^!bit^!"%\n%
@@ -735,7 +707,7 @@ goto :eof
 ::  Set the console font size to 14 and the font name to Lucida Console:
 ::    %setfont% 14 Lucida Console
 setlocal DisableDelayedExpansion
-set setfont=for /l %%# in (1 1 2) do if %%#==2 (^
+set setfont=for %%# in (1 2) do if %%#==2 (^
 %=% for /f "tokens=1,2*" %%- in ("? ^^!arg^^!") do endlocal^&powershell.exe -nop -ep Bypass -c ^"Add-Type '^
 %===% using System;^
 %===% using System.Runtime.InteropServices;^
