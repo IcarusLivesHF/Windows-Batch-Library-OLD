@@ -1,31 +1,19 @@
 rem PLEASE READ DOCUMENTATION IN MY GITHUB!
-(call :buildSketch) & (exit) & rem Double click the library to build a new sketch.
-:revision DON'T CALL
-	set "revision=4.1.2"
-	set "libraryError=False"
-	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
-	if "%revision%" neq "%~1" (
-		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
-		echo.&echo  Revision: %~1 of Library.bat required to run this script.
-		set "libraryError=True"
-	)
-	if "%winversion%" neq "10.0" (
-		echo %~n0 is not supported on this version of Windows: %winVERSION%"
-		set "libraryError=True"
-	)
-	if %winbuild% lss 10589 (
-		echo %~n0 is not supported on this build of Windows: %winbuild%"
-		set "libraryError=True"
-	)
-	if "%libraryError%" equ "True" (
-		ren "%~nx0" "Library.bat"
-		ren "-t.bat" "%self%"
-		del /f /q "-t.bat"
-		timeout /t 3 /nobreak & exit
-	)
-goto :eof
-:StdLib /w:N /h:N /fs:N /title:"foobar" /debug /mouse /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util /buttons
+(
+	rem Double click the library to build a new sketch.
+	REM to avoid illegal characters, decode from base64 to bat file,. open and inspect sketch.bat
+	if exist Sketch.bat goto :eof
+	echo=QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiXz1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUmJihjYWxsIDpyZXZpc2lvbiA0LjEuMyl8fCglXyUpDQoJY2FsbCA6c3RkbGliIC9zaXplOjgwDQolKSUNCg0KDQpwYXVzZSAmIGV4aXQNCg==>>"encodedSketch.txt"
+	(certutil -decode "encodedSketch.txt" "Sketch.bat") & del /q /f "encodedSketch.txt"
+	goto :eof
+)
+exit
+
+:StdLib /size:wid:hei /fs:N /title:"foobar" /debug:p /mouse /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util /buttons
 title Please do not exit at this time...
+
+rem multiline Comment     %rem[%    %]rem%
+set "rem[=rem/||(" & set "rem]=)"
 
 set "defaultFontSize=8"
 
@@ -58,7 +46,7 @@ set "pixel=Û" & set ".=%pixel%"
 
 set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m" & set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
 
-set "cls=[2J" & set "\c=[2J"
+set "cls=[2J" & set "\c=[2J[H"
 
 set "list.hex=0123456789ABCDEF"
 
@@ -71,9 +59,6 @@ set "limit.20bit=0xFFFFF"
 set "limit.24bit=0xFFFFFF"
 set "limit.28bit=0xFFFFFFF"
 set "limit.32bit=0x7FFFFFFF"
-
-rem multiline Comment     %rem[%    %]rem%
-set "rem[=rem/||(" & set "rem]=)"
 
 rem -Parse each argument as a 'command' with up to 2 'arguments'---------------------------------------------------------------------
 
@@ -89,15 +74,12 @@ for %%a in (%*) do (
 rem -For each chunk of the library desired to be used--------------------------------------------------------------------------------
 for /l %%i in (1,1,%totalArguemnts%) do (
 
-	REM -Set width of console--------------------------------------------------------------------------------------------------------W
-		   if /i "!argumentCommand[%%i]!" equ "w" (
-:_wid
+
+	REM -Set size of console---------------------------------------------------------------------------------------------------------Size
+		   if /i "!argumentCommand[%%i]!" equ "size" (
+:_size
 			set /a "wid=width=!argumentArgument[%%i][1]!"
-			
-	REM -Set height of console-------------------------------------------------------------------------------------------------------H
-	) else if /i "!argumentCommand[%%i]!" equ "h" (
-:_hei
-			set /a "hei=height=!argumentArgument[%%i][1]!"
+			set /a "hei=height=!argumentArgument[%%i][2]!" || set /a "hei=height=!argumentArgument[%%i][1]!"
 			
 	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
 	) else if /i "!argumentCommand[%%i]!" equ "fs" (
@@ -166,13 +148,15 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "Abs=(((x)>>31|1)*(x))"
 			set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
 			set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
-			set "lerp=?=(a+c*(b-a)*10)/1000+a"
+			set "lerp=?=((a) + (c) * ((b) - (a)) * 10) / 1000 + (a)"
 			set "swap=x^=y, y^=x, x^=y"
-			set "getState=a*8+b*4+c*2+d*1"
+			set "getState=(a) * 8 + (b) * 4 + (c) * 2 + (d) * 1"
 			set "max=(x - ((((x - y) >> 31) & 1) * (x - y)))"
 			set "min=(y - ((((x - y) >> 31) & 1) * (y - x)))"
 			set "percentOf=p=x*y/100"
-			set "clamp= (leq=((low-x)>>31)+1)*low  +  (geq=((x-high)>>31)+1)*high  +  ^^^!(leq+geq)*x "
+			set "clamp= (leq=((low-(x))>>31)+1)*low  +  (geq=(((x)-high)>>31)+1)*high  +  ^^^!(leq+geq)*(x) "
+			set "rnd.rng=(^!random^! %% (x * 2 + 1) - x)"
+			set "rnd.sign=^!random^!%% 2 * 2 - 1"
 			
 	REM -Get misc functions----------------------------------------------------------------------------------------------------------MISC
 	) else if /i "!argumentCommand[%%i]!" equ "misc" (
@@ -181,16 +165,12 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "chance=1/((((^!random^! %% 100) - x) >> 31) & 1)"
 			set "smoothStep=(3 * 100 - 2 * x) * x / 100 * x / 100"
 			set "bitColor=C=((r)*6/256)*36+((g)*6/256)*6+((b)*6/256)+16"
-			set "RCX=1/((((x-wid)>>31)&1)^(((0-x)>>31)&1))"
-			set "RCY=1/((((x-hei)>>31)&1)^(((0-x)>>31)&1))"
 			set "edgeCase=1/(((x-0)>>31)&1)|((~(x-wid)>>31)&1)|(((y-0)>>31)&1)|((~(y-=hei)>>31)&1)"
-			set "rndBetween=(^!random^! %% (x * 2 + 1) - x)"
+			set "boundingBox=1/(((~(y-a)>>31)&1)&((~(b-y)>>31)&1)&((~(x-c)>>31)&1)&((~(d-x)>>31)&1))"
 			set "fib=?=c=a+b, a=b, b=c"
 			set "rndRGB=r=^!random^! %% 255, g=^!random^! %% 255, b=^!random^! %% 255"
-			set "boundingBox=1/(((~(y-a)>>31)&1)&((~(b-y)>>31)&1)&((~(x-c)>>31)&1)&((~(d-x)>>31)&1))"
 			set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 			set "FNCross=(a * d - b * c)"
-			set "rnd.sign=(((^!random^! >> 14) & 1) * 2 - 1)"
 
 	REM -Get shape functions---------------------------------------------------------------------------------------------------------SHAPE sh
 	) else if /i "!argumentCommand[%%i]:~0,2!" equ "sh" (
@@ -232,7 +212,7 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "cac=[1J"
 			set "cbc=[0J"
 			set "underLine=[4m"
-			set "capIt=[0m"
+			set "cap=[0m"
 			set "moveXY=[^!y^!;^!x^!H"
 			set "home=[H"
 
@@ -290,8 +270,7 @@ goto :eof
 :___________________________________________________________________________________________
 :graphicsFunctions
 set "frames=frameCount=(frameCount + 1) %% Limit.32bit"
-set "loop=for /l %%# in () do "
-set "framedLoop=%loop% ( set /a "%frames%""
+set "loop=for /l %%# in () do  ( set /a "%frames%""
 set "throttle=for /l %%# in (1,x,1000000) do rem"
 set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 
@@ -324,8 +303,8 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 		set /a "%%~1.td=^!random^! %% 360"%\n%
 		set /a "%%~1.tr=^!random^! %% 62832"%\n%
 		set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
-		set /a "%%~1.i=(((^!random^! >> 14) & 1) * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
-		set /a "%%~1.j=(((^!random^! >> 14) & 1) * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
+		set /a "%%~1.i=(((^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
+		set /a "%%~1.j=(((^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
 		if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
 			set /a "%%~1.i=1"%\n%
 		)%\n%
@@ -347,6 +326,7 @@ set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 
 :_lerpRGB DON'T CALL
 rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
+if not defined lerp set "lerp=?=((a) + (c) * ((b) - (a)) * 10) / 1000 + (a)"
 set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!", "a=g[%%~1], b=g[%%~2], c=%%~3, $g=^!lerp^!", "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
@@ -460,6 +440,12 @@ set HSL.RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^
 	set /a "%HSL(n):n=0%", "r=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000","%HSL(n):n=8%", "g=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000", "%HSL(n):n=4%", "b=(%%3-(%%2*((10000-%%3)-(((10000-%%3)-%%3)&((%%3-(10000-%%3))>>31)))/10000)*max/100)*255/10000"%\n%
 )) else set args=
 set "hsl(n)="
+
+:_getLen DON'T CALL
+rem %getlen% "string" <rtn> $length
+set getlen=for %%# in (1 2) do if %%#==2 ( for %%1 in (^^!args^^!) do (%\n%
+	set "str=X%%~1" ^& set "length=0" ^& for /l %%b in (10,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
+)) else set args=
 goto :eof
 
 :___________________________________________________________________________________________
@@ -520,12 +506,6 @@ set hex.Base4=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!arg
 	set "bin="%\n%
 )) else set args=
 
-:_getLen DON'T CALL
-rem %getlen% "string" <rtn> $length / 
-set getlen=for %%# in (1 2) do if %%#==2 ( for %%1 in (^^!args^^!) do (%\n%
-	set "str=X%%~1" ^& set "length=0" ^& for /l %%b in (10,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
-)) else set args=
-
 :_pad DON'T CALL
 rem %pad% "string".int <rtn> $padding
 set "$paddingBuffer=                                                                                "
@@ -543,7 +523,7 @@ set encode=for %%# in (1 2) do if %%#==2 ( for /f "tokens=*" %%1 in ("^!args^!")
 	certutil -encode "inFile.txt" "outFile.txt"^>nul%\n%
 	for /f "tokens=* skip=1" %%a in (outFile.txt) do (%\n%
 		if "%%~a" neq "-----END CERTIFICATE-----" (%\n%
-			set "base64=%%a"%\n%
+			set "base64=!base64!%%a"%\n%
 		)%\n%
 	)%\n%
 	del /f /q "outFile.txt"%\n%
@@ -574,7 +554,7 @@ set string_properties=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1 delims=" 
 )) else set args=
 
 :_lineInject DON'T CALL
-rem %lineInject:?=FILE NAME.EXT% "String":Line#
+rem %lineInject:?=FILE NAME.EXT% "String":Line#:s
 set lineInject=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1 in ("?:^!args:~1^!") do (%\n%
 	set "linesInFile=0"%\n%
 	for /f "usebackq tokens=*" %%i in ("%%~1") do (%\n%
@@ -591,7 +571,7 @@ set lineInject=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4 delims=:/" %%1
 
 :_getLatency DON'T CALL
 rem %getLatency% <rtn> %latency%
-set "getLatency=for /f "tokens=2 delims==" %%l in ('ping -n 1 google.com ^| findstr /L "time="') do set "latency=%%l""
+set "getLatency=for /f "tokens=2 delims==" %%l in ('ping -n 1 ? ^| findstr /L "time="') do set "latency=%%l""
 
 :_download DON'T CALL
 rem %download% url file
@@ -681,13 +661,31 @@ set makeInputBar=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!
 goto :eof
 
 :___________________________________________________________________________________________
-:buildSketch to avoid illegal characters, decode from base64 to bat file,. open and inspect sketch.bat
-if exist Sketch.bat goto :eof
-echo=QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiZmFpbExpYj1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUgJiYgKGNhbGwgOnJldmlzaW9uIDQuMS4wKXx8KCVmYWlsTGliJSkNCgljYWxsIDpzdGRsaWINCiUpJQ0KDQpwYXVzZQ==>>"encodedSketch.txt"
-certutil -decode "encodedSketch.txt" "Sketch.bat"
-del /q /f "encodedSketch.txt"
+:revision DON'T CALL
+	set "revision=4.1.3"
+	set "libraryError=False"
+	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
+	if "%revision%" neq "%~1" (
+		echo.&echo  This Revision: %revision% of Library.bat is not supported in this script.
+		echo.&echo  Revision: %~1 of Library.bat required to run this script.
+		set "libraryError=True"
+	)
+	if "%winversion%" neq "10.0" (
+		echo %~n0 is not supported on this version of Windows: %winVERSION%"
+		set "libraryError=True"
+	)
+	if %winbuild% lss 10589 (
+		echo %~n0 is not supported on this build of Windows: %winbuild%"
+		set "libraryError=True"
+	)
+	if "%libraryError%" equ "True" (
+		ren "%~nx0" "Library.bat"
+		ren "-t.bat" "%self%"
+		del /f /q "-t.bat"
+		timeout /t 3 /nobreak & exit
+	)
 goto :eof
-
+:___________________________________________________________________________________________
 :setFont DON'T CALL
 if "%~2" equ "" goto :eof
 call :init_setfont
