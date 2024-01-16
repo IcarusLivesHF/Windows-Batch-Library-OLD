@@ -6,32 +6,20 @@ rem PLEASE READ DOCUMENTATION IN MY GITHUB!
 	echo=QGVjaG8gb2ZmICYgc2V0bG9jYWwgZW5hYmxlRGVsYXllZEV4cGFuc2lvbiAmIHNldCAiKD0ocmVuICIlfm54MCIgLXQuYmF0ICYgcmVuICJMaWJyYXJ5LmJhdCIgIiV+bngwIiIgJiBzZXQgIik9cmVuICIlfm54MCIgIkxpYnJhcnkuYmF0IiAmIHJlbiAtdC5iYXQgIiV+bngwIikiICYgc2V0ICJzZWxmPSV+bngwIiAmIHNldCAiXz1yZW4gLXQuYmF0ICIlfm54MCIgJmVjaG8gTGlicmFyeSBub3QgZm91bmQgJiB0aW1lb3V0IC90IDMgL25vYnJlYWsgJiBleGl0Ig0KDQolKCUmJihjYWxsIDpyZXZpc2lvbiA0LjEuMyl8fCglXyUpDQoJY2FsbCA6c3RkbGliIC9zaXplOjgwDQolKSUNCg0KDQpwYXVzZSAmIGV4aXQNCg==>>"encodedSketch.txt"
 	(certutil -decode "encodedSketch.txt" "Sketch.bat") & del /q /f "encodedSketch.txt"
 	goto :eof
-)
-exit
+) &  exit
 
-:StdLib /size:wid:hei /fs:N /title:"foobar" /debug:p /mouse /extlib /math /misc /shape /ac /cursor /cr:N /gfx /util /buttons
-title Please do not exit at this time...
-
-rem multiline Comment     %rem[%    %]rem%
-set "rem[=rem/||(" & set "rem]=)"
+:StdLib /size:wid:hei /fs:N /debug:p /mouse /extlib /math /misc /shape /ac /cr:N /gfx /util /buttons
+(title Please do not exit at this time...) & chcp 437>nul
 
 set "defaultFontSize=8"
-
 set "defaultFont=Terminal"
 
-set "libraryDefaultFont_ON=False"
-
-set "debug=False"
-
-set "debugPrompt=False"
-
-<nul set /p "=[?25l">con
+for %%i in (libraryDefaultFont_ON debug debugPrompt) do set "%%i=False"
 
 (set \n=^^^
 %= This creates an escaped Line Feed - DO NOT ALTER =%
 )
 
-chcp 437>nul
 set "server.bat_Logo=[38;5;220m[2C_[B[3D[38;5;208m>[38;5;220m([38;5;15m.[38;5;220m)__[B[5D(___/[0m"
 
 rem global vars above this line not intended for user use.
@@ -41,24 +29,22 @@ for /f "tokens=2 delims=: " %%i in ('mode') do ( 2>nul set /a "0/%%i" && (
 ))
 
 (for /f %%a in ('echo prompt $E^| cmd') do set "esc=%%a" ) || ( set "esc=" ) & set "\e="
+<nul set /p "=[?25l">con
 
 set "pixel=Û" & set ".=%pixel%"
 
-set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m" & set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
+set  "\rgb=[38;2;^!r^!;^!g^!;^!b^!m"
+set "\fcol=[48;2;^!r^!;^!g^!;^!b^!m"
 
-set "cls=[2J" & set "\c=[2J[H"
+set "cls=[2J" & set  "\c=[2J[H"
+
+rem multiline Comment     %rem[%    %]rem%
+set "rem[=rem/||(" & set "rem]=)"
 
 set "list.hex=0123456789ABCDEF"
-
-set "limit.4bit=0xF"
-set "limit.8bit=0xFF"
-set "limit.12bit=0xFFF"
-set "limit.13bit=0x1FFF"
-set "limit.16bit=0xFFFF"
-set "limit.20bit=0xFFFFF"
-set "limit.24bit=0xFFFFFF"
-set "limit.28bit=0xFFFFFFF"
 set "limit.32bit=0x7FFFFFFF"
+
+for /l %%i in (1,1,5) do set "barBuffer=!barBuffer!ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ"
 
 rem -Parse each argument as a 'command' with up to 2 'arguments'---------------------------------------------------------------------
 
@@ -74,67 +60,12 @@ for %%a in (%*) do (
 rem -For each chunk of the library desired to be used--------------------------------------------------------------------------------
 for /l %%i in (1,1,%totalArguemnts%) do (
 
-
 	REM -Set size of console---------------------------------------------------------------------------------------------------------Size
 		   if /i "!argumentCommand[%%i]!" equ "size" (
 :_size
-			set /a "wid=width=!argumentArgument[%%i][1]!"
-			set /a "hei=height=!argumentArgument[%%i][2]!" || set /a "hei=height=!argumentArgument[%%i][1]!"
+			2>nul set /a "wid=width=!argumentArgument[%%i][1]!", "hei=height=!argumentArgument[%%i][2]!"
+			if not defined argumentArgument[%%i][2] set /a "hei=height=!argumentArgument[%%i][1]!"
 			
-	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
-	) else if /i "!argumentCommand[%%i]!" equ "fs" (
-:_fontSize
-			call :setfont !argumentArgument[%%i][1]! "%defaultFont%"
-			
-	REM -Set title-------------------------------------------------------------------------------------------------------------------TITLE t
-	) else if /i "!argumentCommand[%%i]:~0,1!" equ "t" (
-:_title
-			title !argumentArgument[%%i][1]!
-			
-	REM -DEBUG MODE------------------------------------------------------------------------------------------------------------------DEBUG d
-	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
-:_debug
-			set "debug=True"
-			if /i "!argumentArgument[%%i][1]:~0,1!" equ "p" (
-				set "debugPrompt=True"
-			)
-			
-	REM -install mouse---------------------------------------------------------------------------------------------------------------mouse
-	) else if /i "!argumentCommand[%%i]!" equ "mouse" (
-:_mouse
-			if not exist "%temp%\mouse.exe" (
-				echo Will be installed to: %temp%& echo.
-				set /p "consentToInstall=Would you like to install mouse.exe? Y/N: "
-				if /i "!consentToInstall!" equ "y" (
-					pushd %temp%
-					echo=TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAECAAAAAAAAAAAAAAAAAOAADwMLAQYAAAAAAAAAAAAAAAAAQBEAAAAQAAAAIAAAAABAAAAQAAAAAgAABAAAAAAAAAAEAAAAAAAAAFAhAAAAAgAAAAAAAAMAAAAAABAAABAAAAAAEAAAEAAAAAAAABAAAAAAAAAAAAAAACAgAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcIAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC50ZXh0AAAAABAAAAAQAAAAAgAAAAIAAAAAAAAAAAAAAAAAACAAAGAuZGF0YQAAAFABAAAAIAAAUgEAAAAEAAAAAAAAAAAAAAAAAABAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVieWB7AgAAACQjUX6UOgsAAAAg8QED79F/lAPv0X8UA+2RfpQuAAgQABQ6IgBAACDxBC4AAAAAOkAAAAAycNVieWB7CQAAACQuPb///9Q6GwBAACJRfy4AAAAAIlF3I1F+FCLRfxQ6FwBAACLRfiDyBCD4L+D4N9Qi0X8UOhOAQAAi0XchcAPhAUAAADpnAAAAI1F9FC4AQAAAFCNReBQi0X8UOgvAQAAD7dF4IP4Ag+FcwAAAItF6IP4AbgAAAAAD5TAiUXchcAPhA8AAACLRQi5AQAAAIgI6SMAAACLReiD+AK4AAAAAA+UwIlF3IXAD4QKAAAAi0UIuQIAAACICItF3IXAD4QdAAAAi0UIg8ACD79N5GaJCItFCIPAAoPAAg+/TeZmiQjpVP///4tF+FCLRfxQ6JUAAADJwwAAAFWJ5YHsFAAAAJC4AAAAAIlF7LgAAAMAULgAAAEAUOh9AAAAg8QIuAEAAABQ6HcAAACDxASNRexQuAAAAABQjUX0UI1F+FCNRfxQ6GEAAACDxBSLRfRQi0X4UItF/FDoXf7//4PEDIlF8ItF8FDoRgAAAIPEBMnDAP8lXCBAAAAA/yV0IEAAAAD/JXggQAAAAP8lfCBAAAAA/yWAIEAAAAD/JWAgQAAAAP8lZCBAAAAA/yVoIEAAAAD/JWwgQAAAACVkICVkICVkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiCAAAAAAAAAAAAAAtCAAAFwgAACgIAAAAAAAAAAAAAD9IAAAdCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvyAAAMggAADVIAAA5iAAAPYgAAAAAAAACiEAABkhAAAqIQAAOyEAAAAAAAC/IAAAyCAAANUgAADmIAAA9iAAAAAAAAAKIQAAGSEAACohAAA7IQAAAAAAAG1zdmNydC5kbGwAAABwcmludGYAAABfY29udHJvbGZwAAAAX19zZXRfYXBwX3R5cGUAAABfX2dldG1haW5hcmdzAAAAZXhpdABrZXJuZWwzMi5kbGwAAABHZXRTdGRIYW5kbGUAAABHZXRDb25zb2xlTW9kZQAAAFNldENvbnNvbGVNb2RlAAAAUmVhZENvbnNvbGVJbnB1dEEAAAAA>mouse.txt
-					(certutil -decode mouse.txt mouse.exe) || ( echo You may need to run as ADMIN & pause )
-					(del /f /q mouse.txt >nul ) & popd
-				) else echo mouse.exe not installed. You will not be able to click anything. & pause
-			)
-			set "getMouse=for /f "tokens=1-3" %%W in ('%temp%\Mouse.exe') do set /a "mouse.C=%%W,mouse.X=%%X,mouse.Y=%%Y""
-
-	REM -Enable for extra special characters-----------------------------------------------------------------------------------------EXTLIB e
-	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
-:_extlib
-			rem Backspace
-			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
-			rem Carriage Return
-			for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
-			rem Tab 0x09
-			for /f "delims=" %%T in ('forfiles /p "%~dp0." /m "%~nx0" /c "cmd /c echo(0x09"') do set "TAB=%%T"
-			
-			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
-					    "pixel[0].DB"   "pixel[1].B0"   "pixel[2].B1"   "pixel[3].B2"
-					    "face[0].01"    "face[1].02"    "musicNote.0E"  "degree.F8"     "BEL.07"
-						"diamond.04"    "club.05"       "spade.06"      "<3.03"
-					    "border[V].B3"  "border[H].C4"  "border[+].C5"  "border[HN].C1"
-						"border[HS].C2" "border[VE].C3" "border[VW].B4" "border[SE].D9"
-						"border[NE].BF" "corner[SW].C0" "border[NW].DA"
-			) do for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
-				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
-			)
-
 	REM -Get math functions----------------------------------------------------------------------------------------------------------MATH
 	) else if /i "!argumentCommand[%%i]!" equ "math" (
 :_math
@@ -147,13 +78,13 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "Sign(x)=(x)>>31 | -(x)>>31 & 1"
 			set "Abs=(((x)>>31|1)*(x))"
 			set "dist(x2,x1,y2,y1)=( @=x2-x1, $=y2-y1, ?=(((@>>31|1)*@-(($>>31|1)*$))>>31)+1, ?*(2*(@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$)) + ^^^!?*((@>>31|1)*@-($>>31|1)*$-((@>>31|1)*@-($>>31|1)*$*2)) )"
-			set "map=(c)+((d)-(c))*((v)-(a))/((b)-(a))"
-			set "lerp=?=((a) + (c) * ((b) - (a)) * 10) / 1000 + (a)"
+			set "map=c + (d - c) * (v - a) / (b - a)"
+			set "lerp=?=(a + c * (b - a) * 10) / 1000 + a"
 			set "swap=x^=y, y^=x, x^=y"
-			set "getState=(a) * 8 + (b) * 4 + (c) * 2 + (d) * 1"
+			set "getState=a * 8 + b * 4 + c * 2 + d * 1"
 			set "max=(x - ((((x - y) >> 31) & 1) * (x - y)))"
 			set "min=(y - ((((x - y) >> 31) & 1) * (y - x)))"
-			set "percentOf=p=x*y/100"
+			set "percentOf=p=x * y / 100"
 			set "clamp= (leq=((low-(x))>>31)+1)*low  +  (geq=(((x)-high)>>31)+1)*high  +  ^^^!(leq+geq)*(x) "
 			set "rnd.rng=(^!random^! %% (x * 2 + 1) - x)"
 			set "rnd.sign=^!random^!%% 2 * 2 - 1"
@@ -198,11 +129,26 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "OR(b1,b2)=(b1|b2)"
 			set "XOR(b1,b2)=(b1^b2)"
 			set "TERN(bool,v1,v2)=((bool*v1)|((~bool&1)*v2))"  &REM ?:
-				
-	REM -Get cursor functions--------------------------------------------------------------------------------------------------------CURSOR
-	) else if /i "!argumentCommand[%%i]!" equ "cursor" (
-:_cursor
-			set ">=<nul set /p ="
+			
+	REM -Enable for extra special characters-----------------------------------------------------------------------------------------EXTLIB e
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "e" (
+:_extlib
+			rem Backspace
+			for /f %%a in ('"prompt $H&for %%b in (1) do rem"') do set "BS=%%a"
+			rem Carriage Return
+			for /f %%A in ('copy /z "%~dpf0" nul') do set "CR=%%A"
+			
+			for %%i in ("pointer[R].10" "pointer[L].11" "pointer[U].1E" "pointer[D].1F"
+					   "pixel[0].DB"   "pixel[1].B0"   "pixel[2].B1"   "pixel[3].B2"   "TAB.09"
+					   "face[0].01"    "face[1].02"    "musicNote.0E"  "degree.F8"     "BEL.07"
+					   "diamond.04"    "club.05"       "spade.06"      "<3.03"
+					   "border[V].B3"  "border[H].C4"  "border[+].C5"  "border[HN].C1"
+					   "border[HS].C2" "border[VE].C3" "border[VW].B4" "border[SE].D9"
+					   "border[NE].BF" "corner[SW].C0" "border[NW].DA"
+			) do for /f "tokens=1,2 delims=." %%a in ("%%~i") do (
+				for /f %%i in ('forfiles /m "%~nx0" /c "cmd /c echo 0x%%~b"') do set "%%~a=%%~i"
+			)
+			
 			set "push=7"
 			set "pop=8"
 			set "cursor[U]=[?A"
@@ -212,9 +158,38 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 			set "cac=[1J"
 			set "cbc=[0J"
 			set "underLine=[4m"
-			set "cap=[0m"
+			set "cap=[0m"
 			set "moveXY=[^!y^!;^!x^!H"
 			set "home=[H"
+
+	REM -Set font size---------------------------------------------------------------------------------------------------------------FS
+	) else if /i "!argumentCommand[%%i]!" equ "fs" (
+:_fontSize
+			if not defined argumentArgument[%%i][2] set "argumentArgument[%%i][2]=!argumentArgument[%%i][1]!"
+			call :setfont !argumentArgument[%%i][1]! !argumentArgument[%%i][2]! "%defaultFont%"
+			
+	REM -DEBUG MODE------------------------------------------------------------------------------------------------------------------DEBUG d
+	) else if /i "!argumentCommand[%%i]:~0,1!" equ "d" (
+:_debug
+			set "debug=True"
+			if /i "!argumentArgument[%%i][1]:~0,1!" equ "p" (
+				set "debugPrompt=True"
+			)
+			
+	REM -install mouse---------------------------------------------------------------------------------------------------------------mouse
+	) else if /i "!argumentCommand[%%i]!" equ "mouse" (
+:_mouse
+			if not exist "%temp%\mouse.exe" (
+				echo Will be installed to: %temp%& echo.
+				set /p "consentToInstall=Would you like to install mouse.exe? Y/N: "
+				if /i "!consentToInstall!" equ "y" (
+					pushd %temp%
+					echo=TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAECAAAAAAAAAAAAAAAAAOAADwMLAQYAAAAAAAAAAAAAAAAAQBEAAAAQAAAAIAAAAABAAAAQAAAAAgAABAAAAAAAAAAEAAAAAAAAAFAhAAAAAgAAAAAAAAMAAAAAABAAABAAAAAAEAAAEAAAAAAAABAAAAAAAAAAAAAAACAgAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcIAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC50ZXh0AAAAABAAAAAQAAAAAgAAAAIAAAAAAAAAAAAAAAAAACAAAGAuZGF0YQAAAFABAAAAIAAAUgEAAAAEAAAAAAAAAAAAAAAAAABAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVieWB7AgAAACQjUX6UOgsAAAAg8QED79F/lAPv0X8UA+2RfpQuAAgQABQ6IgBAACDxBC4AAAAAOkAAAAAycNVieWB7CQAAACQuPb///9Q6GwBAACJRfy4AAAAAIlF3I1F+FCLRfxQ6FwBAACLRfiDyBCD4L+D4N9Qi0X8UOhOAQAAi0XchcAPhAUAAADpnAAAAI1F9FC4AQAAAFCNReBQi0X8UOgvAQAAD7dF4IP4Ag+FcwAAAItF6IP4AbgAAAAAD5TAiUXchcAPhA8AAACLRQi5AQAAAIgI6SMAAACLReiD+AK4AAAAAA+UwIlF3IXAD4QKAAAAi0UIuQIAAACICItF3IXAD4QdAAAAi0UIg8ACD79N5GaJCItFCIPAAoPAAg+/TeZmiQjpVP///4tF+FCLRfxQ6JUAAADJwwAAAFWJ5YHsFAAAAJC4AAAAAIlF7LgAAAMAULgAAAEAUOh9AAAAg8QIuAEAAABQ6HcAAACDxASNRexQuAAAAABQjUX0UI1F+FCNRfxQ6GEAAACDxBSLRfRQi0X4UItF/FDoXf7//4PEDIlF8ItF8FDoRgAAAIPEBMnDAP8lXCBAAAAA/yV0IEAAAAD/JXggQAAAAP8lfCBAAAAA/yWAIEAAAAD/JWAgQAAAAP8lZCBAAAAA/yVoIEAAAAD/JWwgQAAAACVkICVkICVkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiCAAAAAAAAAAAAAAtCAAAFwgAACgIAAAAAAAAAAAAAD9IAAAdCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvyAAAMggAADVIAAA5iAAAPYgAAAAAAAACiEAABkhAAAqIQAAOyEAAAAAAAC/IAAAyCAAANUgAADmIAAA9iAAAAAAAAAKIQAAGSEAACohAAA7IQAAAAAAAG1zdmNydC5kbGwAAABwcmludGYAAABfY29udHJvbGZwAAAAX19zZXRfYXBwX3R5cGUAAABfX2dldG1haW5hcmdzAAAAZXhpdABrZXJuZWwzMi5kbGwAAABHZXRTdGRIYW5kbGUAAABHZXRDb25zb2xlTW9kZQAAAFNldENvbnNvbGVNb2RlAAAAUmVhZENvbnNvbGVJbnB1dEEAAAAA>mouse.txt
+					(certutil -decode mouse.txt mouse.exe) || ( echo You may need to run as ADMIN & pause )
+					(del /f /q mouse.txt >nul ) & popd
+				) else echo mouse.exe not installed. You will not be able to click anything. & pause
+			)
+			set "getMouse=for /f "tokens=1-3" %%W in ('%temp%\Mouse.exe') do set /a "mouse.C=%%W,mouse.X=%%X,mouse.Y=%%Y""
 
 	REM -Unpack gfx macros-----------------------------------------------------------------------------------------------------------GFX
 	) else if /i "!argumentCommand[%%i]!" equ "gfx" (
@@ -236,11 +211,11 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 :_colorRange
 			set /a "range=argumentArgument[%%i][1]"
 			set "totalColorsInRange=0"
-			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;%%a;0m"
+			for /l %%a in (0,!range!,255)  do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;%%a;0m"
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;%%a;255;0m"
-			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;0;255;%%am"
+			for /l %%a in (0,!range!,255)  do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;0;255;%%am"
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;0;%%a;255m"
-			for /l %%a in (0,!range!,255) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;%%a;0;255m"
+			for /l %%a in (0,!range!,255)  do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;%%a;0;255m"
 			for /l %%a in (255,-!range!,0) do set /a "totalColorsInRange+=1" & set "color[!totalColorsInRange!]=[38;2;255;0;%%am"
 			set /a "range=255 / argumentArgument[%%i][1]"
 	)
@@ -250,16 +225,16 @@ for /l %%i in (1,1,%totalArguemnts%) do (
 	set "argumentArgument[%%i][2]="
 )
 
-if "%debug%" neq "False" (
-	call :setfont 16 Consolas
+if /i "%debug%" neq "False" (
+	call :setfont 16 16 Consolas
 	mode 180,100
-	if "%debugPrompt%" neq "False" (
+	if /i "%debugPrompt%" neq "False" (
 		prompt !server.bat_logo!
 	)
 	@echo on
 ) else (
-	if "%libraryDefaultFont_ON%" neq "False" (
-		call :setfont %defaultFontSize% "%defaultFont%"
+	if /i "%libraryDefaultFont_ON%" neq "False" (
+		call :setfont %defaultFontSize% %defaultFontSize% "%defaultFont%"
 	)
 	mode %wid%,%hei%
 )
@@ -274,59 +249,50 @@ set "loop=for /l %%# in () do  ( set /a "%frames%""
 set "throttle=for /l %%# in (1,x,1000000) do rem"
 set "every=1/(((~(0-(frameCount%%x))>>31)&1)&((~((frameCount%%x)-0)>>31)&1))"
 
-:_point DON'T CALL
-rem %point% x y <rtn> screen
-set point=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-2" %%1 in ("^!args^!") do (%\n%
-	set "screen=^!screen^![%%2;%%1H%pixel%[0m"%\n%
-)) else set args=
-
 :_plot DON'T CALL
-rem %plot% x y 0-255 CHAR <rtn> screen
-set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "screen=^!screen^![%%2;%%1H[38;5;%%3m%%~4[0m"%\n%
+rem %plot% x y 2,5;0-255;0-255;0-255
+set plot=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
+	set "$plot=^!$plot^![38;%%3m[%%2;%%1H%pixel%[0m"%\n%
 )) else set args=
 
-:_RGBpoint DON'T CALL
-rem %RGBpoint% x y 0-255 0-255 0-255 CHAR
-set rgbpoint=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-5" %%1 in ("^!args^!") do (%\n%
-	set "screen=^!screen^![%%2;%%1H[38;2;%%3;%%4;%%5m%pixel%[0m"%\n%
-)) else set args=
-
-:_BVector DON'T CALL
-rem x y theta(0-360) magnitude(rec.=4 max) <rtn> %~1.BV_ATTRIBUTES
-set BVector=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
-	if /i "%%~2" equ "end" (%\n%
-		for %%i in (x y i j td tr m rgb fcol vd vr vmw vmh ch) do set "%%~1.%%i="%\n%
-	) else (%\n%
-		set /a "%%~1.x=^!random^! %% wid + 1"%\n%
-		set /a "%%~1.y=^!random^! %% hei + 1"%\n%
-		set /a "%%~1.td=^!random^! %% 360"%\n%
-		set /a "%%~1.tr=^!random^! %% 62832"%\n%
-		set /a "%%~1.m=^!random^! %% 2 + 2"%\n%
-		set /a "%%~1.i=(((^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
-		set /a "%%~1.j=(((^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
-		if "^!%%~1.i^!" equ "0" if "^!%%~1.j^!" equ "0" (%\n%
-			set /a "%%~1.i=1"%\n%
+:class DON'T CALL
+rem x y CHAR <rtn> %~1[n].BV_ATTRIBUTES
+set class=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
+	if "%%~2" neq "" ( set "classQuantity=%%~2" ) else ( set "classQuantity=0" )%\n%
+	for /l %%j in (0,1,^^!classQuantity^^!) do (%\n%
+		if /i "%%~3" equ "end" (%\n%
+			for %%i in (x y i j deg rad mag rgb fcol vd vr vmw vmh ch) do set "%%~1[%%j].%%i="%\n%
+		) else (%\n%
+			set /a "%%~1[%%j].x=^!random^! %% wid + 1"%\n%
+			set /a "%%~1[%%j].y=^!random^! %% hei + 1"%\n%
+			set /a "%%~1[%%j].deg=^!random^! %% 360"%\n%
+			set /a "%%~1[%%j].rad=^!random^! %% 62832"%\n%
+			set /a "%%~1[%%j].mag=^!random^! %% 2 + 2"%\n%
+			set /a "%%~1[%%j].i=(^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
+			set /a "%%~1[%%j].j=(^!random^! %% 2 * 2 - 1) * (^!random^! %% 3 + 1)"%\n%
+			if "^!%%~1[%%j].i^!" equ "0" if "^!%%~1[%%j].j^!" equ "0" (%\n%
+				set /a "%%~1[%%j].i=1"%\n%
+			)%\n%
+			set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
+			set "%%~1[%%j].rgb=[38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
+			set "%%~1[%%j].fcol=[48;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
+			for %%a in (bvr bvg bvb) do set "%%a="%\n%
+			if "%%~3" neq "" (%\n%
+				set /a "%%~1[%%j].vd=%%~3"%\n%
+				set /a "%%~1[%%j].vr=%%~1[%%j].vd / 2"%\n%
+				set /a "%%~1[%%j].vmw=wid - %%~1[%%j].vd"%\n%
+				set /a "%%~1[%%j].vmh=hei - %%~1[%%j].vd"%\n%
+				set /a "%%~1[%%j].x=^!random^! %% (wid - %%~1[%%j].vr) + %%~1[%%j].vd + 1"%\n%
+				set /a "%%~1[%%j].y=^!random^! %% (hei - %%~1[%%j].vr) + %%~1[%%j].vd + 1"%\n%
+			)%\n%
+			if "%%~4" neq "" set "%%~1[%%j].ch=%%~4"%\n%
 		)%\n%
-		set /a "bvr=^!random^! %% 255","bvg=^!random^! %% 255","bvb=^!random^! %% 255"%\n%
-		set "%%~1.rgb=[38;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
-		set "%%~1.fcol=[48;2;^!bvr^!;^!bvg^!;^!bvb^!m"%\n%
-		for %%a in (bvr bvg bvb) do set "%%a="%\n%
-		if "%%~2" neq "" (%\n%
-			set /a "%%~1.vd=%%~2"%\n%
-			set /a "%%~1.vr=%%~1.vd / 2"%\n%
-			set /a "%%~1.vmw=wid - %%~1.vd"%\n%
-			set /a "%%~1.vmh=hei - %%~1.vd"%\n%
-			set /a "%%~1.x=^!random^! %% (wid - %%~1.vr) + %%~1.vd + 1"%\n%
-			set /a "%%~1.y=^!random^! %% (hei - %%~1.vr) + %%~1.vd + 1"%\n%
-		)%\n%
-		if "%%~3" neq "" set "%%~1.ch=%%~3"%\n%
 	)%\n%
 )) else set args=
 
 :_lerpRGB DON'T CALL
 rem %lerpRGB% rgb1 rgb2 1-100 <rtn> $r $g $b
-if not defined lerp set "lerp=?=((a) + (c) * ((b) - (a)) * 10) / 1000 + (a)"
+if not defined lerp set "lerp=?=(a + c * (b - a) * 10) / 1000 + a"
 set lerpRGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
 	set /a "a=r[%%~1], b=r[%%~2], c=%%~3, $r=^!lerp^!", "a=g[%%~1], b=g[%%~2], c=%%~3, $g=^!lerp^!", "a=b[%%~1], b=b[%%~2], c=%%~3, $b=^!lerp^!"%\n%
 )) else set args=
@@ -357,23 +323,12 @@ set circle=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!
 )) else set args=
 
 :_rect DON'T CALL
-rem %rect% x r length <rtn> $rect
+rem %rect% x y w h <rtn> $rect
 set rect=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
-	set "$rect="%\n%
-	set /a "$x=%%~1", "$y=%%~2", "rectw=%%~3", "recth=%%~4"%\n%
-	for /l %%b in (1,1,^^!rectw^^!) do ( set /a "$x+=2 * ^!cos:x=0^!", "$y+=2 * ^!sin:x=0^!"%\n%
-		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
-	)%\n%
-	for /l %%b in (1,1,^^!recth^^!) do ( set /a "$x+=2 * ^!cos:x=90^!", "$y+=2 * ^!sin:x=90^!"%\n%
-		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
-	)%\n%
-	for /l %%b in (1,1,^^!rectw^^!) do ( set /a "$x+=2 * ^!cos:x=180^!", "$y+=2 * ^!sin:x=180^!"%\n%
-		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
-	)%\n%
-	for /l %%b in (1,1,^^!recth^^!) do ( set /a "$x+=2 * ^!cos:x=270^!", "$y+=2 * ^!sin:x=270^!"%\n%
-		set "$rect=^!$rect^!^!esc^![^!$y^!;^!$x^!H%pixel%"%\n%
-	)%\n%
-	set "$rect=^!$rect^![0m"%\n%
+	set /a "rectW=%%~3 - 2"%\n%
+	set "$rect=[%%~2;%%~1H^!barBuffer:~0,%%~3^![%%~3D[B"%\n%
+	for /l %%i in (1,1,%%~4) do set "$rect=^!$rect^!%pixel%[^!rectW^!C%pixel%[%%~3D[B"%\n%
+	set "$rect=^!$rect^!^!barBuffer:~0,%%~3^![0m"%\n%
 )) else set args=
 
 :_line DON'T CALL
@@ -434,6 +389,23 @@ set arc=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") 
 	set "$arc=^!$arc^![0m"%\n%
 )) else set args=
 
+:_getBar DON'T CALL
+rem %getBar% currentValue maxValue MaxlengthOfBar vtColorScheme(2 or 5) colorCode colorCode colorCode
+set getBar=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!args^!") do (%\n%
+	set "$bar="%\n%
+	set /a "v=%%~1", "a=0", "b=%%~2", "c=0", "d=%%~3","barVal=c+(d-c)*(v-a)/(b-a)","onethird=%%~2 / 3", "twoThird=onethird * 2"%\n%
+	if ^^!%%~1^^! lss ^^!onethird^^! (%\n%
+		set "hue=%%~5"%\n%
+	) else if ^^!%%~1^^! gtr ^^!oneThird^^! if ^^!%%~1^^! lss ^^!twoThird^^! (%\n%
+		set "hue=%%~6"%\n%
+	) else if ^^!%%~1^^! gtr ^^!twoThird^^! (%\n%
+		set "hue=%%~7"%\n%
+	)%\n%
+	for /f "tokens=1,2" %%i in ("^!barVal^! ^!hue^!") do (%\n%
+		set "$bar=^!$bar^!%esc%[38;%%~4;%%~jm^!barBuffer:~0,%%~i^!%esc%[G%esc%[2B%esc%[0m"%\n%
+	)%\n%
+)) else set args=
+
 :_HSL.RGB DON'T CALL
 set "HSL(n)=k=(n*100+(%%1 %% 3600)/3) %% 1200, x=k-300, y=900-k, x=y-((y-x)&((x-y)>>31)), x=100-((100-x)&((x-100)>>31)), max=x-((x+100)&((x+100)>>31))"
 set HSL.RGB=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-3" %%1 in ("^!args^!") do (%\n%
@@ -445,6 +417,52 @@ set "hsl(n)="
 rem %getlen% "string" <rtn> $length
 set getlen=for %%# in (1 2) do if %%#==2 ( for %%1 in (^^!args^^!) do (%\n%
 	set "str=X%%~1" ^& set "length=0" ^& for /l %%b in (10,-1,0) do set /a "length|=1<<%%b" ^& for %%c in (^^!length^^!) do if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
+)) else set args=
+
+:globalMS DON'T CALL
+rem %globalMS% rtnVar
+set globalMS=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
+	for /f "tokens=1-4 delims=:.," %%a in ("^!time: =0^!") do (%\n%
+		set /a "%%~1=((((1%%a-1000)*60+(1%%b-1000))*60+(1%%c-1000))*100)+(1%%d-1000)"%\n%
+	)%\n%
+)) else set args=
+
+:_sevenSegmentDisplay DON'T CALL
+rem %sevenSegmentDisplay% x y value color
+set /a "segbool[0]=0x7E", "segbool[1]=0x30", "segbool[2]=0x6D", "segbool[3]=0x79", "segbool[4]=0x33", "segbool[5]=0x5B", "segbool[6]=0x5F", "segbool[7]=0x70", "segbool[8]=0x7F", "segbool[9]=0x7B"
+set sevenSegmentDisplay=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-4" %%1 in ("^!args^!") do (%\n%
+	set "$sevenSegmentDisplay="%\n%
+	set /a "qx1=%%~1", "qx2=%%~1 + 1", "qx3=%%~1 + 2", "qx4=%%~1 - 1", "qy1=%%~2", "qy2=%%~2 + 1", "qy3=%%~2 + 2", "qy4=%%~2 + 3", "qy5=%%~2 + 4", "qy6=%%~2 + 5", "qy7=%%~2 + 6"%\n%
+	for %%j in ( "6 1 1 2 1" "5 3 2 3 3" "4 3 5 3 6" "3 1 7 2 7" "2 4 5 4 6" "1 4 2 4 3" "0 1 4 2 4" ) do (%\n%
+		for /f "tokens=1-5" %%v in ("%%~j") do (%\n%
+			set /a "a=%%~4 * ((segbool[%%~3] >> %%~v) & 1)"%\n%
+			set "$sevenSegmentDisplay=^!$sevenSegmentDisplay^![38;5;^!a^!m[^!qy%%x^!;^!qx%%w^!HU[^!qy%%z^!;^!qx%%y^!HU"%\n%
+		)%\n%
+	)%\n%
+)) else set args=
+
+:_imgToVar DON'T CALL
+rem %imgToVar% imageName 
+for /l %%i in (1,1,%wid%) do set "spaceBuffer=!spaceBuffer! "
+set imgToVar=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1" %%1 in ("^!args^!") do (%\n%
+	set "%%~1="%\n%
+	for /f "tokens=2 delims=:" %%I in ('findstr /b ":%%~1:" "%~nx0"') do (%\n%
+		set "current=%%~I"%\n%
+		for /l %%i in (^!wid^!,-1,2) do (%\n%
+			for %%j in ("^!spaceBuffer:~0,%%i^!") do (%\n%
+				set "current=^!current:%%~j=[%%iC^!"%\n%
+			)%\n%
+		)%\n%
+		set "str=X%%~I" ^& set "length=0"%\n%
+		for /l %%b in (10,-1,0) do (%\n%
+			set /a "length|=1<<%%b"%\n%
+			for %%c in (^^!length^^!) do (%\n%
+				if "^!str:~%%c,1^!" equ "" set /a "length&=~1<<%%b"%\n%
+			)%\n%
+		)%\n%
+		set "%%~1=^!%%~1^!^!current^![^!length^!D[B"%\n%
+	)%\n%
+	set "%%~1=^!%%~1:~0,-3^![0m"%\n%
 )) else set args=
 goto :eof
 
@@ -661,8 +679,61 @@ set makeInputBar=for %%# in (1 2) do if %%#==2 ( for /f "tokens=1-7" %%1 in ("^!
 goto :eof
 
 :___________________________________________________________________________________________
+:setFont DON'T CALL
+if "%~3" equ "" goto :eof
+call :init_setfont
+%setFont% %~1 %~2 %~3
+goto :eof
+
+:init_setfont DON'T CALL
+:: - BRIEF -
+::  Get or set the console font size and font name.
+:: - SYNTAX -
+::  %setfont% [fontSize [fontName]]
+::    fontSize   Size of the font. (Can be 0 to preserve the size.)
+::    fontName   Name of the font. (Can be omitted to preserve the name.)
+:: - EXAMPLES -
+::  Output the current console font size and font name:
+::    %setfont%
+::  Set the console font size to 14 and the font name to Lucida Console:
+::    %setfont% 14 Lucida Console
+setlocal DisableDelayedExpansion
+set setfont=for %%# in (1 2) do if %%#==2 (^
+%=% for /f "tokens=1-3*" %%- in ("? ^^!arg^^!") do endlocal^&powershell.exe -nop -ep Bypass -c ^"Add-Type '^
+%===% using System;^
+%===% using System.Runtime.InteropServices;^
+%===% [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)] public struct FontInfo{^
+%=====% public int objSize;^
+%=====% public int nFont;^
+%=====% public short fontSizeX;^
+%=====% public short fontSizeY;^
+%=====% public int fontFamily;^
+%=====% public int fontWeight;^
+%=====% [MarshalAs(UnmanagedType.ByValTStr,SizeConst=32)] public string faceName;}^
+%===% public class WApi{^
+%=====% [DllImport(\"kernel32.dll\")] public static extern IntPtr CreateFile(string name,int acc,int share,IntPtr sec,int how,int flags,IntPtr tmplt);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void GetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void SetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
+%=====% [DllImport(\"kernel32.dll\")] public static extern void CloseHandle(IntPtr handle);}';^
+%=% $hOut=[WApi]::CreateFile('CONOUT$',-1073741824,2,[IntPtr]::Zero,3,0,[IntPtr]::Zero);^
+%=% $fInf=New-Object FontInfo;^
+%=% $fInf.objSize=84;^
+%=% [WApi]::GetCurrentConsoleFontEx($hOut,0,[ref]$fInf);^
+%=% If('%%~.'){^
+%===% $fInf.nFont=0; $fInf.fontSizeX=0; $fInf.fontFamily=0; $fInf.fontWeight=0;^
+%===% If([Int16]'%%~.' -gt 0){$fInf.fontSizeX=[Int16]'%%~.'}^
+%===% If([Int16]'%%~/' -gt 0){$fInf.fontSizeY=[Int16]'%%~/'}^
+%===% If('%%~0'){$fInf.faceName='%%~0'}^
+%===% [WApi]::SetCurrentConsoleFontEx($hOut,0,[ref]$fInf);}^
+%=% Else{(''+$fInf.fontSizeY+' '+$fInf.faceName)}^
+%=% [WApi]::CloseHandle($hOut);^") else setlocal EnableDelayedExpansion^&set arg=
+endlocal &set "setfont=%setfont%"
+if !!# neq # set "setfont=%setfont:^^!=!%"
+exit /b
+
+:___________________________________________________________________________________________
 :revision DON'T CALL
-	set "revision=4.1.3"
+	set "revision=4.1.4"
 	set "libraryError=False"
 	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
 	if "%revision%" neq "%~1" (
@@ -685,54 +756,3 @@ goto :eof
 		timeout /t 3 /nobreak & exit
 	)
 goto :eof
-:___________________________________________________________________________________________
-:setFont DON'T CALL
-if "%~2" equ "" goto :eof
-call :init_setfont
-%setFont% %~1 %~2
-goto :eof
-
-:init_setfont DON'T CALL
-:: - BRIEF -
-::  Get or set the console font size and font name.
-:: - SYNTAX -
-::  %setfont% [fontSize [fontName]]
-::    fontSize   Size of the font. (Can be 0 to preserve the size.)
-::    fontName   Name of the font. (Can be omitted to preserve the name.)
-:: - EXAMPLES -
-::  Output the current console font size and font name:
-::    %setfont%
-::  Set the console font size to 14 and the font name to Lucida Console:
-::    %setfont% 14 Lucida Console
-setlocal DisableDelayedExpansion
-set setfont=for %%# in (1 2) do if %%#==2 (^
-%=% for /f "tokens=1,2*" %%- in ("? ^^!arg^^!") do endlocal^&powershell.exe -nop -ep Bypass -c ^"Add-Type '^
-%===% using System;^
-%===% using System.Runtime.InteropServices;^
-%===% [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)] public struct FontInfo{^
-%=====% public int objSize;^
-%=====% public int nFont;^
-%=====% public short fontSizeX;^
-%=====% public short fontSizeY;^
-%=====% public int fontFamily;^
-%=====% public int fontWeight;^
-%=====% [MarshalAs(UnmanagedType.ByValTStr,SizeConst=32)] public string faceName;}^
-%===% public class WApi{^
-%=====% [DllImport(\"kernel32.dll\")] public static extern IntPtr CreateFile(string name,int acc,int share,IntPtr sec,int how,int flags,IntPtr tmplt);^
-%=====% [DllImport(\"kernel32.dll\")] public static extern void GetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
-%=====% [DllImport(\"kernel32.dll\")] public static extern void SetCurrentConsoleFontEx(IntPtr hOut,int maxWnd,ref FontInfo info);^
-%=====% [DllImport(\"kernel32.dll\")] public static extern void CloseHandle(IntPtr handle);}';^
-%=% $hOut=[WApi]::CreateFile('CONOUT$',-1073741824,2,[IntPtr]::Zero,3,0,[IntPtr]::Zero);^
-%=% $fInf=New-Object FontInfo;^
-%=% $fInf.objSize=84;^
-%=% [WApi]::GetCurrentConsoleFontEx($hOut,0,[ref]$fInf);^
-%=% If('%%~.'){^
-%===% $fInf.nFont=0; $fInf.fontSizeX=0; $fInf.fontFamily=0; $fInf.fontWeight=0;^
-%===% If([Int16]'%%~.' -gt 0){$fInf.fontSizeY=[Int16]'%%~.'}^
-%===% If('%%~/'){$fInf.faceName='%%~/'}^
-%===% [WApi]::SetCurrentConsoleFontEx($hOut,0,[ref]$fInf);}^
-%=% Else{(''+$fInf.fontSizeY+' '+$fInf.faceName)}^
-%=% [WApi]::CloseHandle($hOut);^") else setlocal EnableDelayedExpansion^&set arg=
-endlocal &set "setfont=%setfont%"
-if !!# neq # set "setfont=%setfont:^^!=!%"
-exit /b
