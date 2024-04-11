@@ -1642,7 +1642,7 @@ exit /b
 
 :___________________________________________________________________________________________
 :revision DON'T CALL
-	set "revision=4.1.4"
+	set "revision=4.2.0"
 	set "libraryError=False"
 	for /f "tokens=4-6 delims=. " %%i in ('ver') do set "winVERSION=%%i.%%j" & set "winBuild=%%k"
 	if "%revision%" neq "%~1" (
