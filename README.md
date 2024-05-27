@@ -1,3 +1,6 @@
+# This repository of Windows Batch Library as of 5/1/2024 will no longer be maintained.
+NEW Version here: https://github.com/IcarusLivesHF/Batch-Libraries
+
 # Windows-Batch-Library (Windows 10 or later)
 
 Expand the list of commands you use in Batch with Library.bat!
